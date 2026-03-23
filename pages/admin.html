@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+</head>
+<body>
+  <div class="admin-container">
+
+    <div class="sidebar">
+      <h2>Scenté</h2>
+      <p>Admin Panel</p>
+      <nav>
+        <a href="#">Dashboard</a><br>
+        <a href="#">Products</a><br>
+        <a href="#">Orders</a><br>
+        <a href="#">Users</a>
+      </nav>
+    </div>
+
+    <div class="main-content">
+      <h2>Main Content Area</h2>
+
+      <div class="stat-cards">
+        <p>Stat Cards</p>
+        <div class="stat-card">
+          <h3>Total Products</h3>
+          <p>48</p>
+        </div>
+        <div class="stat-card">
+          <h3>Orders</h3>
+          <p>124</p>
+        </div>
+        <div class="stat-card">
+          <h3>Revenue</h3>
+          <p>$3200</p>
+        </div>
+        <div class="stat-card">
+          <h3>Users</h3>
+          <p>310</p>
+        </div>
+      </div>
+
+      <div class="products-table">
+        <p>Products Table</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Edit/Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Chanel No.5</td>
+              <td>Women</td>
+              <td>$120</td>
+              <td>15</td>
+              <td>
+                <a href="#">Edit</a>
+                <a href="#">Delete</a>
+              </td>
+            </tr>
+            <tr>
+              <td>Dior Sauvage</td>
+              <td>Men</td>
+              <td>$95</td>
+              <td>22</td>
+              <td>
+                <a href="#">Edit</a>
+                <a href="#">Delete</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h3>Add New Product</h3>
+        <form>
+          <label>Name:</label>
+          <input type="text" name="name" placeholder="Product name"><br>
+
+          <label>Brand:</label>
+          <input type="text" name="brand" placeholder="Brand name"><br>
+
+          <label>Price:</label>
+          <input type="number" name="price" placeholder="Price"><br>
+
+          <label>Stock:</label>
+          <input type="number" name="stock" placeholder="Stock quantity"><br>
+
+          <label>Category:</label>
+          <input type="text" name="category" placeholder="Category"><br>
+
+          <label>Image URL:</label>
+          <input type="text" name="image" placeholder="Image URL"><br>
+
+          <label>Description:</label>
+          <textarea name="description" placeholder="Product description"></textarea><br>
+
+          <button type="submit">Add Product</button>
+        </form>
+      </div>
+      
+      <div class="orders-table">
+        <p>Orders Table</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>View</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#001</td>
+              <td>Jane Doe</td>
+              <td>2026-03-20</td>
+              <td>$215</td>
+              <td>
+                <select>
+                  <option value="Pending">Pending</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered" selected>Delivered</option>
+                </select>
+              </td>
+              <td><a href="#">View</a></td>
+            </tr>
+            <tr>
+              <td>#002</td>
+              <td>John Smith</td>
+              <td>2026-03-21</td>
+              <td>$88</td>
+              <td>
+                <select>
+                  <option value="Pending">Pending</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered" selected>Delivered</option>
+                </select>
+              </td>
+              <td><a href="#">View</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div> 
+
+  </div>
+  
+</body>
+</html>
