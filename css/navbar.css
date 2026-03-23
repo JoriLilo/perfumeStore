@@ -1,0 +1,472 @@
+/* =====================================================
+   SCENTÉ — Navbar Styles
+   css/navbar.css
+   
+   Link this in every page <head>, after shared.css:
+   <link rel="stylesheet" href="../css/shared.css">
+   <link rel="stylesheet" href="../css/navbar.css">
+   ===================================================== */
+
+
+/* ── Header wrapper ── */
+.scente-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--color-nav-bg);
+}
+
+.scente-header.scrolled {
+  box-shadow: var(--shadow-md);
+}
+
+
+/* ── Top bar (logo | nav | icons) ── */
+.scente-topbar {
+  display: flex;
+  align-items: center;
+  height: 68px;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+
+/* ── Logo ── */
+.scente-logo {
+  flex: 0 0 220px;
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.scente-logo:hover {
+  color: var(--color-text-primary);
+}
+
+
+/* ── Desktop nav links ── */
+.scente-nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  list-style: none;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.scente-nav li {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.scente-nav a {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  transition: color var(--transition-fast);
+  position: relative;
+}
+
+/* Hover / active underline */
+.scente-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transition: transform var(--transition-base);
+}
+
+.scente-nav a:hover,
+.scente-nav a.active {
+  color: var(--color-accent);
+}
+
+.scente-nav a:hover::after,
+.scente-nav a.active::after {
+  transform: scaleX(1);
+}
+
+/* Sale link always rose */
+.scente-nav .nav-sale {
+  color: var(--color-accent);
+}
+
+
+/* ── Dropdown ── */
+.scente-nav li:hover .scente-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.scente-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-accent);
+  min-width: 170px;
+  padding: 10px 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-base),
+              transform var(--transition-base),
+              visibility var(--transition-base);
+  z-index: 300;
+  box-shadow: var(--shadow-md);
+}
+
+.scente-dropdown a {
+  height: auto;
+  display: block;
+  padding: 9px 20px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+}
+
+/* Remove underline animation inside dropdown */
+.scente-dropdown a::after {
+  display: none;
+}
+
+.scente-dropdown a:hover {
+  color: var(--color-accent);
+  background: var(--color-surface);
+}
+
+
+/* ── Desktop icon buttons (right side) ── */
+.scente-icons {
+  flex: 0 0 220px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.scente-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: 17px;
+  cursor: pointer;
+  border-radius: 50%;
+  text-decoration: none;
+  position: relative;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.scente-icon-btn:hover {
+  background: var(--color-surface);
+  color: var(--color-accent);
+}
+
+/* Cart item count badge */
+.scente-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  background: var(--color-accent);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 8px;
+  font-weight: 500;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Dark circle menu pill */
+.scente-menu-pill {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-black);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 4px;
+  transition: background var(--transition-fast);
+}
+
+.scente-menu-pill:hover {
+  background: #333;
+}
+
+
+/* ── Expanding search bar ── */
+.scente-search-bar {
+  max-height: 0;
+  overflow: hidden;
+  background: var(--color-white);
+  border-bottom: 1px solid transparent;
+  transition: max-height 0.28s ease, border-color 0.28s ease;
+}
+
+.scente-search-bar.open {
+  max-height: 56px;
+  border-bottom-color: var(--color-border);
+}
+
+.scente-search-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 40px;
+}
+
+.scente-search-inner i {
+  color: var(--color-text-light);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.scente-search-inner input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--color-text-primary);
+  background: transparent;
+}
+
+.scente-search-inner input::placeholder {
+  color: var(--color-text-light);
+}
+
+.scente-search-inner button {
+  background: none;
+  border: none;
+  color: var(--color-text-light);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.scente-search-inner button:hover {
+  color: var(--color-text-primary);
+}
+
+
+/* ── Announcement bar ── */
+.scente-announcement {
+  background: var(--color-blush);
+  color: var(--color-text-on-blush);
+  text-align: center;
+  padding: 9px 40px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  position: relative;
+}
+
+.scente-announcement .dot {
+  margin: 0 12px;
+  opacity: 0.5;
+}
+
+.scente-announcement a {
+  color: var(--color-text-on-blush);
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.scente-announcement a:hover {
+  color: var(--color-accent-dark);
+}
+
+.scente-ann-close {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-on-blush);
+  font-size: 15px;
+  cursor: pointer;
+  opacity: 0.5;
+  line-height: 1;
+  padding: 0;
+}
+
+.scente-ann-close:hover {
+  opacity: 1;
+}
+
+
+/* ── Mobile hamburger ── */
+.scente-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.scente-mobile-right {
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+
+/* ── Offcanvas mobile drawer ── */
+.scente-offcanvas {
+  width: 290px !important;
+}
+
+.scente-offcanvas .offcanvas-header {
+  border-bottom: 1px solid var(--color-border);
+  padding: 20px 24px;
+}
+
+.scente-offcanvas .offcanvas-title {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.scente-mob-links {
+  list-style: none;
+  padding: 8px 0;
+  margin: 0;
+}
+
+.scente-mob-links li a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
+  text-decoration: none;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.scente-mob-links li a:hover,
+.scente-mob-links li a.active {
+  color: var(--color-accent);
+  background: var(--color-surface);
+}
+
+.scente-mob-sub {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: var(--color-surface);
+}
+
+.scente-mob-sub li a {
+  padding-left: 40px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.scente-mob-footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.scente-mob-footer a {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.scente-mob-footer a:hover {
+  color: var(--color-accent);
+}
+
+
+/* ── Responsive breakpoints ── */
+@media (max-width: 991px) {
+  .scente-nav,
+  .scente-icons {
+    display: none;
+  }
+
+  .scente-hamburger,
+  .scente-mobile-right {
+    display: flex;
+  }
+
+  .scente-topbar {
+    padding: 0 20px;
+    justify-content: space-between;
+  }
+
+  .scente-logo {
+    flex: 0 0 auto;
+    font-size: 22px;
+  }
+
+  .scente-search-inner {
+    padding: 12px 20px;
+  }
+
+  .scente-announcement {
+    padding: 9px 36px 9px 16px;
+    font-size: 10px;
+  }
+}
