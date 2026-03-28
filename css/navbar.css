@@ -47,7 +47,7 @@
 
 /* ── Desktop nav links ── */
 .scente-nav {
-  flex: 1;
+  flex: 4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,7 +67,7 @@
 
 .scente-nav a {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 400;
   letter-spacing: 0.04em;
   color: var(--color-text-primary);
