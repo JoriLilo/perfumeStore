@@ -33,7 +33,7 @@
   margin-bottom: 40px;
 }
 
-.sidebar nav a {
+.sidebar nav .nav-link {
   display: block;
   color: #c49aaa;
   text-decoration: none;
@@ -42,11 +42,19 @@
   margin-bottom: 4px;
   font-size: 13px;
   letter-spacing: 0.5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.sidebar nav a:hover {
+.sidebar nav .nav-link:hover {
   background-color: rgba(240, 196, 212, 0.1);
   color: #f0c4d4;
+}
+
+.sidebar nav .nav-link.active {
+  background-color: rgba(240, 196, 212, 0.15);
+  color: #f0c4d4;
+  font-weight: 600;
+  border-left: 3px solid #c4687e;
 }
 
 /* MAIN CONTENT */
@@ -62,6 +70,13 @@
   color: #2d1b2e;
   letter-spacing: 2px;
   margin-bottom: 24px;
+}
+
+.product {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 /* STAT CARDS */
@@ -142,6 +157,79 @@ tbody tr:hover {
   background-color: #fff5f7;
 }
 
+/* ACTION LINKS (Edit / Delete) */
+.action-link {
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-right: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.action-link.edit {
+  color: #c4687e;
+  background-color: #fdf0f3;
+}
+
+.action-link.edit:hover {
+  background-color: #f5d4db;
+}
+
+.action-link.delete {
+  color: #a0373a;
+  background-color: #fdecea;
+}
+
+.action-link.delete:hover {
+  background-color: #f5c6c8;
+}
+
+/* STATUS BADGES */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-badge.delivered {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+}
+
+.status-badge.pending {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
+.status-badge.shipped {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.btn-add {
+  padding: 10px 18px;
+  background-color: #c4687e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-add:hover {
+  background-color: #b05570;
+}
+
 /* FORM */
 form {
   background-color: white;
@@ -149,7 +237,7 @@ form {
   border-radius: 12px;
   max-width: 500px;
   margin-bottom: 32px;
-  box-shadow: 0 2px 8px rgba(196, 104, 126, 0.08);
+  box-shadow: 0 4px 20px rgba(196, 104, 126, 0.2);
 }
 
 form label {
@@ -163,23 +251,47 @@ form label {
   margin-top: 14px;
 }
 
-form input, form textarea {
+form input,
+form textarea,
+form select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #f0dde2;
   border-radius: 8px;
   font-size: 13px;
   background-color: #fdf6f8;
+  transition: border-color 0.2s ease;
 }
 
-form input:focus, form textarea:focus {
+form input:focus,
+form textarea:focus,
+form select:focus {
   outline: none;
   border-color: #c4687e;
 }
 
-form button {
+/* INPUT ERROR STATE */
+form input.input-error,
+form textarea.input-error,
+form select.input-error {
+  border-color: #e53935;
+}
+
+.error-msg {
+  display: none;
+  font-size: 11px;
+  color: #e53935;
+  margin-top: 4px;
+}
+
+.error-msg.visible {
+  display: block;
+}
+
+/* SUBMIT BUTTON */
+.btn-submit {
   margin-top: 20px;
-  padding: 12px 28px;
+  padding: 10px 18px;
   background-color: #c4687e;
   color: white;
   border: none;
@@ -189,8 +301,79 @@ form button {
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-form button:hover {
+.btn-submit:hover {
   background-color: #b05570;
+}
+
+/* MODAL OVERLAY */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+/* MODAL BOX */
+.modal-box {
+  background-color: white;
+  border-radius: 12px;
+  padding: 30px;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 80px rgba(45, 27, 46, 0.9);
+}
+
+/* CLOSE BUTTON */
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #888888;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+  color: #2d1b2e;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+.stock-danger {
+  color: #e53935;
+  font-weight: 600;
+}
+
+.stock-warning {
+  font-weight: 600;
+  color: #f57f17;
+}
+
+.stock-good {
+  color: #2e7d32;
+  font-weight: 600;
 }
