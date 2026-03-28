@@ -1,11 +1,7 @@
 /* =====================================================
    SCENTÉ — Navbar Styles
    css/navbar.css
-   
-   Link this in every page <head>, after shared.css:
-   <link rel="stylesheet" href="../css/shared.css">
-   <link rel="stylesheet" href="../css/navbar.css">
-   ===================================================== */
+  */
 
 
 /* ── Header wrapper ── */
@@ -51,7 +47,7 @@
 
 /* ── Desktop nav links ── */
 .scente-nav {
-  flex: 1;
+  flex: 4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,7 +67,7 @@
 
 .scente-nav a {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 400;
   letter-spacing: 0.04em;
   color: var(--color-text-primary);
