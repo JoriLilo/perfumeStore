@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/css/shop.css">
+  <meta charset="UTF-8">
+  <title>Shop</title>
+
+</head>
+
+<body>
+    
+    <div id="navbar"></div>
+
+  <div class="container">
+
+  <!-- SIDEBAR -->
+    <div class="sidebar">
+
+
+<h4>Category</h4>
+<label><input type="checkbox"> Perfume</label><br>
+<label><input type="checkbox"> Cologne</label><br>
+
+<h4>Price</h4>
+<input type="number" placeholder="Min" min="1"><br>
+<input type="number" placeholder="Max" min="1"><br>
+
+<h4>Gender</h4>
+<label><input type="radio" name="gender"> Men</label><br>
+<label><input type="radio" name="gender"> Women</label>
+</div>
+
+  
+  <div class="main">
+   <div class="top-bar">
+
+  <div class="sort-bar">
+    <p>Showing 12 results</p>
+
+    <select>
+      <option>Price ↑</option>
+      <option>Price ↓</option>
+      <option>Newest</option>
+    </select>
+  </div>
+
+  <div class="pagination">
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button>Next</button>
+  </div>
+
+</div>
+
+
+<div class="products">
+
+<div class="card">
+<img src=" https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.40816.2x.avif" alt="Perfume">
+  <h3>Perfume 1</h3>
+  <p>$50</p>
+</div>
+
+  <div class="card">
+    <img src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.6458.2x.avif" alt="Perfume">
+    <h3>Perfume 2</h3>
+    <p>$70</p>
+  </div>
+
+  <div class="card">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Perfume_bottle.jpg" alt="Perfume">
+    <h3>Perfume 3</h3>
+    <p>$60</p>
+  </div>
+
+  <div class="card">
+    <img src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.2366.2x.avif" alt="Perfume">
+    <h3>Perfume 4</h3>
+    <p>$80</p>
+  </div>
+
+  <div class="card">
+    <img src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.2366.2x.avifgi" alt="Perfume">
+    <h3>Perfume 5</h3>
+    <p>$55</p>
+  </div>
+
+  <div class="card">
+        <img src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.15294.2x.avif" alt="Perfume">
+    <h3>Perfume 6</h3>
+    <p>$90</p>
+  </div>
+
+</div>
+  </div>
+
+</div>
+
+  <div id="footer"></div>
+
+  <script>
+fetch('/components/navbar.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('navbar').innerHTML = html;
+  });
+
+fetch('/components/footer.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('footer').innerHTML = html;
+  });
+</script>
+
+</body>
+</html>
