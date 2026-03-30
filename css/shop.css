@@ -1,0 +1,99 @@
+.container {
+  display: flex;
+  gap: 20px;
+}
+
+.sidebar {
+  width: 250px;
+  background:rgba(235, 174, 174, 0.359);
+  padding: 20px;
+  border-radius: 10px;
+ 
+}
+
+.main {
+  flex: 1;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 40px; 
+   margin-bottom: 20px; 
+}
+
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(238, 147, 161, 0.492);
+  padding: 10px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  flex: 1;
+}
+
+
+.sort-bar select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+background-color: white;
+  font-size: 14px;
+   margin-left: auto;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.card {
+  border: none;
+  padding: 15px;
+  text-align: center;
+  background: rgba(197, 152, 158, 0.263);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: rgba(252, 206, 213, 0.392);
+  margin: 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+
+.pagination button:hover {
+  background: black;
+  color: white;
+}
+
+#footer {
+  padding: 20px;
+  height: auto;
+}
+
+#navbar  {
+  padding: 10px;
+}
