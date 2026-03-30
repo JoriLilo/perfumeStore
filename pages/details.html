@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Detail — SCENTÉ</title>
+  <link rel="stylesheet" href="../css/shared.css">
+  <style>
+    /* ── PAGE-SPECIFIC STYLES ── */
+
+    /* Breadcrumb */
+    .breadcrumb {
+      padding: var(--space-md) 0;
+      border-bottom: var(--border-width) solid var(--color-border);
+    }
+    .breadcrumb__list {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .breadcrumb__item {
+      font-size: var(--text-xs);
+      letter-spacing: 0.08em;
+      color: var(--color-text-secondary);
+    }
+    .breadcrumb__item a:hover { color: var(--color-accent); }
+    .breadcrumb__sep { color: var(--color-border-strong); font-size: var(--text-xs); }
+    .breadcrumb__item--active { color: var(--color-text-primary); font-weight: 500; }
+
+    /* Product layout */
+    .product-detail {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3xl);
+      padding: var(--space-2xl) 0;
+    }
+
+    /* LEFT: Images */
+    .gallery__main {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      background: var(--color-surface);
+      overflow: hidden;
+      position: relative;
+    }
+    .gallery__main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--transition-slow);
+    }
+    .gallery__main:hover img { transform: scale(1.04); }
+
+    .gallery__thumbs {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+    .gallery__thumb {
+      width: 80px;
+      height: 80px;
+      background: var(--color-surface);
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .gallery__thumb.active,
+    .gallery__thumb:hover { border-color: var(--color-accent); }
+
+    .img-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--color-warm-200) 0%, var(--color-warm-300) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-placeholder span {
+      font-size: var(--text-xs);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-light);
+    }
+    .thumb-placeholder { width: 100%; height: 100%; background: var(--color-warm-200); }
+    .thumb-placeholder--2 { background: var(--color-warm-300); }
+    .thumb-placeholder--3 { background: var(--color-warm-400); opacity: 0.5; }
+
+    /* RIGHT: Product Info */
+    .product-info {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      padding-top: var(--space-sm);
+    }
+    .product-info__brand {
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+    }
+    .product-info__name {
+      font-family: var(--font-heading);
+      font-size: var(--text-3xl);
+      font-weight: 400;
+      line-height: 1.1;
+    }
+    .product-info__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .product-info__price {
+      font-family: var(--font-heading);
+      font-size: var(--text-2xl);
+      font-weight: 400;
+    }
+    .product-info__volume {
+      font-size: var(--text-xs);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      border: var(--border-width) solid var(--color-border);
+      padding: 4px 12px;
+    }
+    .product-info__rating {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .product-info__rating-count {
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+    }
+    .product-info__description {
+      font-size: var(--text-base);
+      line-height: 1.8;
+      color: var(--color-text-secondary);
+      font-weight: 300;
+    }
+
+    /* Volume selector */
+    .volume-selector__label {
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      display: block;
+      margin-bottom: var(--space-sm);
+    }
+    .volume-options { display: flex; gap: var(--space-sm); }
+    .volume-option {
+      padding: 8px 18px;
+      font-size: var(--text-xs);
+      font-family: var(--font-body);
+      letter-spacing: 0.1em;
+      border: var(--border-width) solid var(--color-border);
+      background: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .volume-option.active,
+    .volume-option:hover {
+      border-color: var(--color-text-primary);
+      background: var(--color-text-primary);
+      color: var(--color-text-inverse);
+    }
+
+    /* Quantity */
+    .qty-row { display: flex; align-items: center; gap: var(--space-md); }
+    .qty-row__label {
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+    }
+    .qty-control {
+      display: flex;
+      align-items: center;
+      border: var(--border-width) solid var(--color-border);
+    }
+    .qty-control button {
+      width: 38px; height: 38px;
+      background: none; border: none;
+      font-size: 1.1rem;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      font-family: var(--font-body);
+    }
+    .qty-control button:hover { background: var(--color-surface); }
+    .qty-control__num {
+      width: 42px; text-align: center;
+      font-size: var(--text-sm);
+      border-left: var(--border-width) solid var(--color-border);
+      border-right: var(--border-width) solid var(--color-border);
+      height: 38px; line-height: 38px;
+    }
+
+    .product-info__actions { display: flex; flex-direction: column; gap: var(--space-sm); }
+
+    /* Accordion */
+    .product-accordion { border-top: var(--border-width) solid var(--color-border); }
+    .accordion-item { border-bottom: var(--border-width) solid var(--color-border); }
+    .accordion-item__header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--space-md) 0; cursor: pointer;
+      font-size: var(--text-xs); font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      background: none; border: none; width: 100%; text-align: left;
+    }
+    .accordion-item__icon {
+      font-size: 1.2rem; color: var(--color-text-secondary);
+      transition: transform var(--transition-fast);
+    }
+    .accordion-item.open .accordion-item__icon { transform: rotate(45deg); }
+    .accordion-item__body {
+      display: none; padding-bottom: var(--space-md);
+      font-size: var(--text-sm); color: var(--color-text-secondary);
+      line-height: 1.8; font-weight: 300;
+    }
+    .accordion-item.open .accordion-item__body { display: block; }
+
+    /* REVIEWS */
+    .reviews-section {
+      padding: var(--space-section) 0;
+      border-top: var(--border-width) solid var(--color-border);
+    }
+    .reviews-section__header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: var(--space-2xl);
+    }
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-lg);
+      margin-bottom: var(--space-3xl);
+    }
+    .review-card {
+      padding: var(--space-xl);
+      border: var(--border-width) solid var(--color-border);
+      background: var(--color-surface);
+    }
+    .review-card__stars { margin-bottom: var(--space-md); }
+    .review-card__text {
+      font-size: var(--text-sm); line-height: 1.75;
+      color: var(--color-text-secondary); font-weight: 300;
+      margin-bottom: var(--space-lg); font-style: italic;
+    }
+    .review-card__author { display: flex; align-items: center; gap: var(--space-sm); }
+    .review-card__avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--color-accent-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-xs); font-weight: 500;
+      color: var(--color-accent-dark); flex-shrink: 0;
+    }
+    .review-card__name {
+      font-size: var(--text-xs); font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .review-card__date { font-size: var(--text-xs); color: var(--color-text-light); }
+
+    /* Write a Review */
+    .write-review {
+      max-width: 680px;
+      padding: var(--space-2xl);
+      border: var(--border-width) solid var(--color-border);
+      background: var(--color-surface);
+    }
+    .write-review__title {
+      font-family: var(--font-heading); font-size: var(--text-2xl);
+      font-weight: 400; margin-bottom: var(--space-xl);
+    }
+    .form-row-2 {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);
+    }
+    .star-picker { display: flex; gap: 4px; margin-top: 4px; }
+    .star-picker span {
+      font-size: var(--text-xl); color: var(--color-border-strong);
+      cursor: pointer; transition: color var(--transition-fast);
+    }
+    .star-picker span.selected,
+    .star-picker span:hover { color: var(--color-accent); }
+
+    @media (max-width: 900px) {
+      .product-detail { grid-template-columns: 1fr; gap: var(--space-xl); }
+      .reviews-grid { grid-template-columns: 1fr; }
+      .form-row-2 { grid-template-columns: 1fr; }
+      .reviews-section__header { flex-direction: column; align-items: flex-start; gap: var(--space-md); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div class="announcement-bar">
+    FREE SHIPPING on orders over $50 &nbsp;·&nbsp; Use code <strong>SCENTE10</strong> for 10% off your first order
+  </div>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="container navbar__inner">
+      <a href="../index.html" class="navbar__logo">Scenté</a>
+      <nav class="navbar__links">
+        <a href="../index.html">Home</a>
+        <a href="../pages/shop.html">Perfumes</a>
+        <a href="../pages/shop.html">Brands</a>
+        <a href="../pages/shop.html" style="color: var(--color-accent)">Sale</a>
+      </nav>
+      <div class="navbar__actions">
+        <a href="../pages/login.html" class="navbar__action-link">Sign In</a>
+        <a href="../pages/cart.html" class="navbar__action-link">Cart (0)</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <div class="container">
+      <ul class="breadcrumb__list">
+        <li class="breadcrumb__item"><a href="../index.html">Home</a></li>
+        <li class="breadcrumb__sep">›</li>
+        <li class="breadcrumb__item"><a href="../pages/shop.html">Perfumes</a></li>
+        <li class="breadcrumb__sep">›</li>
+        <li class="breadcrumb__item breadcrumb__item--active">Velvet Rose & Oud</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL -->
+  <main>
+    <div class="container">
+      <div class="product-detail">
+
+        <!-- LEFT: Gallery -->
+        <div class="product-gallery">
+          <div class="gallery__main">
+            <div class="img-placeholder"><span>Product Image</span></div>
+          </div>
+          <div class="gallery__thumbs">
+            <div class="gallery__thumb active"><div class="thumb-placeholder"></div></div>
+            <div class="gallery__thumb"><div class="thumb-placeholder thumb-placeholder--2"></div></div>
+            <div class="gallery__thumb"><div class="thumb-placeholder thumb-placeholder--3"></div></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Info -->
+        <div class="product-info">
+          <span class="product-info__brand">Maison de Parfum</span>
+
+          <h1 class="product-info__name">Velvet Rose<br>& Oud</h1>
+
+          <div class="product-info__rating">
+            <div class="stars">
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star">★</span>
+            </div>
+            <span class="product-info__rating-count">4.0 (3 reviews)</span>
+          </div>
+
+          <div class="product-info__meta">
+            <span class="product-info__price">$89.00</span>
+            <span class="product-info__volume">50 ml</span>
+          </div>
+
+          <hr class="divider" style="margin: 0;">
+
+          <p class="product-info__description">
+            A rich, opulent fragrance that opens with fresh bergamot and Bulgarian rose,
+            settling into a warm base of oud, amber, and sandalwood.
+            Long-lasting and deeply sensual — perfect for evening wear.
+          </p>
+
+          <!-- Volume selector -->
+          <div>
+            <span class="volume-selector__label">Size</span>
+            <div class="volume-options">
+              <button class="volume-option">30 ml</button>
+              <button class="volume-option active">50 ml</button>
+              <button class="volume-option">100 ml</button>
+            </div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="qty-row">
+            <span class="qty-row__label">Qty</span>
+            <div class="qty-control">
+              <button onclick="changeQty(-1)">−</button>
+              <span class="qty-control__num" id="qty">1</span>
+              <button onclick="changeQty(1)">+</button>
+            </div>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="product-info__actions">
+            <button class="btn btn--primary btn--full">Add to Cart</button>
+            <button class="btn btn--secondary btn--full">Add to Wishlist</button>
+          </div>
+
+          <!-- Accordion details -->
+          <div class="product-accordion">
+            <div class="accordion-item open">
+              <button class="accordion-item__header" onclick="toggleAccordion(this)">
+                Fragrance Notes <span class="accordion-item__icon">+</span>
+              </button>
+              <div class="accordion-item__body">
+                <strong>Top:</strong> Bergamot, Pink Pepper<br>
+                <strong>Heart:</strong> Bulgarian Rose, Jasmine<br>
+                <strong>Base:</strong> Oud, Amber, Sandalwood, Musk
+              </div>
+            </div>
+            <div class="accordion-item">
+              <button class="accordion-item__header" onclick="toggleAccordion(this)">
+                How to Use <span class="accordion-item__icon">+</span>
+              </button>
+              <div class="accordion-item__body">
+                Apply to pulse points — wrists, neck, and behind the ears. Hold 15–20 cm from skin. Layer over unscented moisturiser for longer lasting fragrance.
+              </div>
+            </div>
+            <div class="accordion-item">
+              <button class="accordion-item__header" onclick="toggleAccordion(this)">
+                Shipping & Returns <span class="accordion-item__icon">+</span>
+              </button>
+              <div class="accordion-item__body">
+                Free standard shipping on orders over $50. Express shipping available at checkout. Returns accepted within 30 days on unopened items.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEWS SECTION -->
+    <section class="reviews-section">
+      <div class="container">
+
+        <div class="reviews-section__header">
+          <div>
+            <span class="label-caps">What our customers say</span>
+            <h2 class="heading-lg" style="margin-top: var(--space-xs)">Customer Reviews</h2>
+          </div>
+          <div style="display:flex; align-items:center; gap: var(--space-sm);">
+            <div class="stars">
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star">★</span>
+            </div>
+            <span class="text-sm text-secondary">4.0 avg · 3 reviews</span>
+          </div>
+        </div>
+
+        <!-- Review Cards -->
+        <div class="reviews-grid">
+
+          <div class="review-card">
+            <div class="review-card__stars">
+              <div class="stars">
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span>
+              </div>
+            </div>
+            <p class="review-card__text">"Absolutely stunning fragrance. The oud base lingers all day and I've received so many compliments. Worth every penny."</p>
+            <div class="review-card__author">
+              <div class="review-card__avatar">SM</div>
+              <div>
+                <p class="review-card__name">Sofia M.</p>
+                <p class="review-card__date">March 2025</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-card__stars">
+              <div class="stars">
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star">★</span>
+              </div>
+            </div>
+            <p class="review-card__text">"Beautiful scent, very elegant. The rose and amber combination is perfect for evenings. Slightly heavy for daytime wear."</p>
+            <div class="review-card__author">
+              <div class="review-card__avatar">AK</div>
+              <div>
+                <p class="review-card__name">Arjan K.</p>
+                <p class="review-card__date">February 2025</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-card__stars">
+              <div class="stars">
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span>
+              </div>
+            </div>
+            <p class="review-card__text">"I gifted this to my sister and she loved it. The packaging is luxurious and the scent lasts for hours. Highly recommend!"</p>
+            <div class="review-card__author">
+              <div class="review-card__avatar">ED</div>
+              <div>
+                <p class="review-card__name">Elena D.</p>
+                <p class="review-card__date">January 2025</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Write a Review Form -->
+        <div class="write-review">
+          <h3 class="write-review__title">Write a Review</h3>
+
+          <div class="form-group">
+            <label class="form-label">Your Rating</label>
+            <div class="star-picker" id="starPicker">
+              <span onclick="setRating(1)">★</span>
+              <span onclick="setRating(2)">★</span>
+              <span onclick="setRating(3)">★</span>
+              <span onclick="setRating(4)">★</span>
+              <span onclick="setRating(5)">★</span>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Your Name</label>
+              <input type="text" class="form-input" placeholder="e.g. Sofia M." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" placeholder="your@email.com" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Your Review</label>
+            <textarea class="form-textarea" placeholder="Share your experience with this fragrance..."></textarea>
+          </div>
+
+          <button class="btn btn--primary">Submit Review</button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div>
+        <h4 class="footer__heading">Scenté</h4>
+        <a href="#" class="footer__link">Our Story</a>
+        <a href="#" class="footer__link">Press</a>
+        <a href="#" class="footer__link">Careers</a>
+      </div>
+      <div>
+        <h4 class="footer__heading">Shop</h4>
+        <a href="#" class="footer__link">Women</a>
+        <a href="#" class="footer__link">Men</a>
+        <a href="#" class="footer__link">Unisex</a>
+        <a href="#" class="footer__link">Sale</a>
+      </div>
+      <div>
+        <h4 class="footer__heading">Help</h4>
+        <a href="#" class="footer__link">Contact Us</a>
+        <a href="#" class="footer__link">FAQs</a>
+        <a href="#" class="footer__link">Shipping & Returns</a>
+      </div>
+      <div>
+        <h4 class="footer__heading">Follow Us</h4>
+        <a href="#" class="footer__link">Instagram</a>
+        <a href="#" class="footer__link">TikTok</a>
+        <a href="#" class="footer__link">Pinterest</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="container">
+        <p class="footer__copy">© 2025 Scenté. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function changeQty(delta) {
+      const el = document.getElementById('qty');
+      let val = parseInt(el.textContent) + delta;
+      if (val < 1) val = 1;
+      el.textContent = val;
+    }
+
+    document.querySelectorAll('.gallery__thumb').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        document.querySelectorAll('.gallery__thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.volume-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.volume-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    function toggleAccordion(btn) {
+      btn.closest('.accordion-item').classList.toggle('open');
+    }
+
+    function setRating(n) {
+      document.querySelectorAll('#starPicker span').forEach((s, i) => {
+        s.classList.toggle('selected', i < n);
+      });
+    }
+  </script>
+
+</body>
+</html>
