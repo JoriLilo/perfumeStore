@@ -30,7 +30,7 @@ h1, h2, h3 {
 
 /* --- Container Layout --- */
 .checkout-container {
-    max-width: 700px; /* Keeps the top-to-bottom flow elegant on desktop */
+    max-width: 700px;
     margin: 0 auto;
     padding: 1rem;
 }
@@ -65,14 +65,14 @@ h1, h2, h3 {
     width: 80px;
     height: 100px;
     margin-right: 1.5rem;
-    overflow: hidden; /* Clips any part of the image that goes outside the box */
-    background-color: var(--bg-color); /* Fallback color while image loads */
+    overflow: hidden; 
+    background-color: var(--bg-color); 
 }
 
 .item-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* This is the secret to making images fit without distorting */
+    object-fit: cover;
     display: block;
 }
 
