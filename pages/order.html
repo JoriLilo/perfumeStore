@@ -7,18 +7,8 @@
 </head>
 <body>
 
-    <!-- SHARED HEADER -->
-    <header>
-        <div class="logo">
-            <a href="index.html">Parfum</a>
-        </div>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="shop.html">Shop</a>
-            <a href="cart.html">Cart</a>
-            <a href="login.html">Login</a>
-        </nav>
-    </header>
+     <!-- Navbar -->
+  <div id="navbar-placeholder"></div>
 
     <!-- MAIN CONTENT -->
     <main>
@@ -70,16 +60,31 @@
         </section>
     </main>
 
-    <!-- SHARED FOOTER -->
-    <footer>
-        <p>&copy; 2025 Parfum. All rights reserved.</p>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="shop.html">Shop</a>
-            <a href="cart.html">Cart</a>
-            <a href="login.html">Login</a>
-        </nav>
-    </footer>
+  <!-- Footer -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  
+
+  <script>
+    /* Load navbar and footer */
+    fetch('/components/navbar.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('navbar-placeholder').innerHTML = html;
+      });
+
+    fetch('/components/footer.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      });
+
+   
+  
+  </script>
 
 </body>
 </html>
