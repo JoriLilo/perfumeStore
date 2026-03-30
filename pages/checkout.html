@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Bag | SCENTÉ</title>
+    <link rel="stylesheet" href="/css/cart_style.css">
+</head>
+<body>
+
+    <main class="checkout-container">
+        
+        <header class="checkout-header">
+            <h1>Your Shopping Bag</h1>
+        </header>
+
+        <section class="bag-items-section">
+            <div class="cart-item">
+                <div class="item-image">
+                    <img src="/images/terroni.avif" alt="Terroni">
+                </div>
+                <div class="item-details">
+                    <h3 class="item-name">Terroni</h3>
+                    <p class="item-meta">Size: 50ml</p>
+                    <p class="item-meta">Qty: 1</p>
+                </div>
+                <div class="item-price">$155.00</div>
+            </div>
+
+            <div class="cart-item">
+                <div class="item-image">
+                    <img src="/images/angels share.avif" alt="Angles Share">
+                </div>
+                <div class="item-details">
+                    <h3 class="item-name">Angels Share</h3>
+                    <p class="item-meta">Size: 50ml</p>
+                    <p class="item-meta">Qty: 1</p>
+                </div>
+                <div class="item-price">$275.00</div>
+            </div>
+        </section>
+
+        <section class="price-summary-section">
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>$430.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span>$15.00</span>
+            </div>
+            <div class="summary-row grand-total">
+                <span>Total</span>
+                <span>$445.00</span>
+            </div>
+        </section>
+
+        <section class="shipping-form-section">
+            <h2>Shipping & Payment Details</h2>
+            <form action="/submit-order" method="POST">
+                
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Jane Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="addressLine1">Address Line 1</label>
+                    <input type="text" id="addressLine1" name="addressLine1" placeholder="123 Fragrance Lane" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="addressLine2">Address Line 2 (Optional)</label>
+                    <input type="text" id="addressLine2" name="addressLine2" placeholder="Apt, Suite, Building">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" placeholder="Paris" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="postalCode">Postal Code</label>
+                        <input type="text" id="postalCode" name="postalCode" placeholder="75008" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country" name="country" required>
+                            <option value="" disabled selected>Select a country</option>
+                            <option value="US">United States</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="FR">France</option>
+                            <option value="IT">Italy</option>
+                            <option value="CA">Canada</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" required>
+                    </div>
+                </div>
+
+                
+                <button type="submit" class="btn-place-order">Place Order</button>
+            </form>
+        </section>
+
+    </main>
+
+</body>
+</html>
