@@ -3,88 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Orders — Parfum</title>
+    <title>Order History — Parfum</title>
+    <link rel="stylesheet" href="../css/shared.css">
+    <link rel="stylesheet" href="../css/orders.css">
 </head>
 <body>
 
-     <!-- Navbar -->
-  <div id="navbar-placeholder"></div>
+    <!-- NAVBAR — loaded via fetch -->
+    <div id="navbar-placeholder"></div>
 
     <!-- MAIN CONTENT -->
-    <main>
-        <h1>My Orders</h1>
+    <main class="container orders-wrapper">
 
-        <!-- Order History -->
-        <section>
-            <h2>Order History</h2>
+        <!-- Page header -->
+        <div class="page-header">
+            <span class="label-caps">My Account</span>
+            <h1 class="heading-lg">Order History</h1>
+        </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order #</th>
-                        <th>Date</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Static example row 1 -->
-                    <tr>
-                        <td>#00123</td>
-                        <td>2025-06-01</td>
-                        <td>$89.99</td>
-                        <td><span class="status-badge">Delivered</span></td>
-                        <td><a href="#">View Details</a></td>
-                    </tr>
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>#00123</td>
+                    <td>2025-06-01</td>
+                    <td>$89.99</td>
+                    <td><span class="status-badge delivered">Delivered</span></td>
+                    <td><a href="#" class="view-link">View Details →</a></td>
+                </tr>
+                <tr>
+                    <td>#00118</td>
+                    <td>2025-05-14</td>
+                    <td>$54.00</td>
+                    <td><span class="status-badge shipped">Shipped</span></td>
+                    <td><a href="#" class="view-link">View Details →</a></td>
+                </tr>
+                <tr>
+                    <td>#00105</td>
+                    <td>2025-04-22</td>
+                    <td>$120.50</td>
+                    <td><span class="status-badge pending">Pending</span></td>
+                    <td><a href="#" class="view-link">View Details →</a></td>
+                </tr>
+            </tbody>
+        </table>
 
-                    <!-- Static example row 2 -->
-                    <tr>
-                        <td>#00118</td>
-                        <td>2025-05-14</td>
-                        <td>$54.00</td>
-                        <td><span class="status-badge">Shipped</span></td>
-                        <td><a href="#">View Details</a></td>
-                    </tr>
-
-                    <!-- Static example row 3 -->
-                    <tr>
-                        <td>#00105</td>
-                        <td>2025-04-22</td>
-                        <td>$120.50</td>
-                        <td><span class="status-badge">Delivered</span></td>
-                        <td><a href="#">View Details</a></td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
     </main>
 
-  <!-- Footer -->
-  <div id="footer-placeholder"></div>
+    <!-- FOOTER — loaded via fetch -->
+    <div id="footer-placeholder"></div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        fetch('../components/navbar.html')
+            .then(res => res.text())
+            .then(html => document.getElementById('navbar-placeholder').innerHTML = html);
 
-  
-
-  <script>
-    /* Load navbar and footer */
-    fetch('/components/navbar.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('navbar-placeholder').innerHTML = html;
-      });
-
-    fetch('/components/footer.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
-
-   
-  
-  </script>
+        fetch('../components/footer.html')
+            .then(res => res.text())
+            .then(html => document.getElementById('footer-placeholder').innerHTML = html);
+    </script>
 
 </body>
 </html>
