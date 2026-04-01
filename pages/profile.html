@@ -4,90 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile — Parfum</title>
+    <link rel="stylesheet" href="../css/shared.css">
+    <link rel="stylesheet" href="../css/profile.css">
 </head>
 <body>
 
-    <!-- Navbar -->
-  <div id="navbar-placeholder"></div>
+    <!-- NAVBAR — loaded via fetch (same pattern as login.html and cart.html) -->
+    <div id="navbar-placeholder"></div>
 
     <!-- MAIN CONTENT -->
-    <main>
-        <h1>My Profile</h1>
+    <main class="container profile-wrapper">
 
-        <!-- Profile Edit Form -->
-        <section>
-            <h2>Edit Profile</h2>
+        <!-- Page header -->
+        <div class="page-header">
+            <span class="label-caps">My Account</span>
+            <h1 class="heading-lg">My Profile</h1>
+        </div>
 
+        <div class="profile-card">
+
+            <!-- Avatar placeholder -->
+            <div class="avatar-placeholder">
+                <span>Avatar</span>
+            </div>
+
+            <!-- Profile Form -->
             <form>
-                <!-- Avatar placeholder -->
-                <div class="avatar-placeholder">
-                    <span>Avatar</span>
-                </div>
 
-                <!-- Name -->
-                <div>
-                    <label for="full-name">Full Name</label>
-                    <input type="text" id="full-name" name="full_name" placeholder="Your full name">
-                </div>
-
-                <!-- Email (readonly) -->
-                <div>
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="your@email.com" readonly>
-                </div>
-
-                <!-- Change Password Section -->
-                <div>
-                    <h3>Change Password</h3>
-
-                    <div>
-                        <label for="old-password">Current Password</label>
-                        <input type="password" id="old-password" name="old_password" placeholder="Current password">
+                <!-- Two-column row: Name + Email side by side on desktop -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="full-name">Full Name</label>
+                        <input class="form-input" type="text" id="full-name" name="full_name" placeholder="Your full name">
                     </div>
 
-                    <div>
-                        <label for="new-password">New Password</label>
-                        <input type="password" id="new-password" name="new_password" placeholder="New password">
-                    </div>
-
-                    <div>
-                        <label for="confirm-password">Confirm New Password</label>
-                        <input type="password" id="confirm-password" name="confirm_password" placeholder="Confirm new password">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input class="form-input" type="email" id="email" name="email" placeholder="your@email.com" readonly>
+                        <span class="form-hint">Email cannot be changed.</span>
                     </div>
                 </div>
 
-                <!-- Save Button -->
-                <div>
-                    <button type="submit">Save Changes</button>
+                <!-- Change Password section -->
+                <div class="password-section">
+                    <p class="password-section__heading">Change Password</p>
+
+                    <div class="form-group">
+                        <label class="form-label" for="old-password">Current Password</label>
+                        <input class="form-input" type="password" id="old-password" name="old_password" placeholder="Current password">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="new-password">New Password</label>
+                        <input class="form-input" type="password" id="new-password" name="new_password" placeholder="New password">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="confirm-password">Confirm New Password</label>
+                        <input class="form-input" type="password" id="confirm-password" name="confirm_password" placeholder="Confirm new password">
+                    </div>
                 </div>
+
+                <!-- Save button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn--primary">Save Changes</button>
+                </div>
+
             </form>
-        </section>
+        </div>
+
     </main>
-<!-- Footer -->
-  <div id="footer-placeholder"></div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FOOTER — loaded via fetch -->
+    <div id="footer-placeholder"></div>
 
-  
+    <script>
+        // Fetch-based shared component loader — same pattern as login.html and cart.html
+        fetch('../components/navbar.html')
+            .then(res => res.text())
+            .then(html => document.getElementById('navbar-placeholder').innerHTML = html);
 
-  <script>
-    /* Load navbar and footer */
-    fetch('/components/navbar.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('navbar-placeholder').innerHTML = html;
-      });
-
-    fetch('/components/footer.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
-
-   
-  
-  </script>
+        fetch('../components/footer.html')
+            .then(res => res.text())
+            .then(html => document.getElementById('footer-placeholder').innerHTML = html);
+    </script>
 
 </body>
 </html>
