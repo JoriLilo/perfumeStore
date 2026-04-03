@@ -17,45 +17,71 @@
 
         <!-- Page header -->
         <div class="page-header">
-            <span class="label-caps">My Account</span>
-            <h1 class="heading-lg">Order History</h1>
+            <div class="page-header-left">
+                <span class="label-caps">My Account</span>
+                <h1 class="heading-lg">Order History</h1>
+            </div>
+            <p class="order-count">3 orders placed</p>
         </div>
 
-        <table class="orders-table">
-            <thead>
-                <tr>
-                    <th>Order #</th>
-                    <th>Date</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>#00123</td>
-                    <td>2025-06-01</td>
-                    <td>$89.99</td>
-                    <td><span class="status-badge delivered">Delivered</span></td>
-                    <td><a href="#" class="view-link">View Details →</a></td>
-                </tr>
-                <tr>
-                    <td>#00118</td>
-                    <td>2025-05-14</td>
-                    <td>$54.00</td>
-                    <td><span class="status-badge shipped">Shipped</span></td>
-                    <td><a href="#" class="view-link">View Details →</a></td>
-                </tr>
-                <tr>
-                    <td>#00105</td>
-                    <td>2025-04-22</td>
-                    <td>$120.50</td>
-                    <td><span class="status-badge pending">Pending</span></td>
-                    <td><a href="#" class="view-link">View Details →</a></td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Orders list — card layout -->
+        <div class="orders-list">
 
+            <!-- Order 1 -->
+            <div class="order-card">
+                <div class="order-card__header">
+                    <span class="order-card__number">Order #00123</span>
+                    <span class="order-card__date">June 1, 2025</span>
+                </div>
+                <div class="order-card__body">
+                    <div>
+                        <p class="order-card__total-label">Order Total</p>
+                        <p class="order-card__total-amount">$89.99</p>
+                    </div>
+                    <div class="order-card__actions">
+                        <span class="status-badge delivered">Delivered</span>
+                        <a href="#" class="view-link">View Details →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order 2 -->
+            <div class="order-card">
+                <div class="order-card__header">
+                    <span class="order-card__number">Order #00118</span>
+                    <span class="order-card__date">May 14, 2025</span>
+                </div>
+                <div class="order-card__body">
+                    <div>
+                        <p class="order-card__total-label">Order Total</p>
+                        <p class="order-card__total-amount">$54.00</p>
+                    </div>
+                    <div class="order-card__actions">
+                        <span class="status-badge shipped">Shipped</span>
+                        <a href="#" class="view-link">View Details →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order 3 -->
+            <div class="order-card">
+                <div class="order-card__header">
+                    <span class="order-card__number">Order #00105</span>
+                    <span class="order-card__date">April 22, 2025</span>
+                </div>
+                <div class="order-card__body">
+                    <div>
+                        <p class="order-card__total-label">Order Total</p>
+                        <p class="order-card__total-amount">$120.50</p>
+                    </div>
+                    <div class="order-card__actions">
+                        <span class="status-badge pending">Pending</span>
+                        <a href="#" class="view-link">View Details →</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </main>
 
     <!-- FOOTER — loaded via fetch -->
