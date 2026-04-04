@@ -1,3 +1,4 @@
+
 .shop-layout {
   display: flex;
   gap: 20px;
@@ -104,6 +105,12 @@
   cursor: pointer;
   opacity: 0;
   transition: 0.3s;
+}
+
+
+/* Sale badge */
+.product-card__badge--sale {
+  background-color: #c0392b;
 }
 
 /* Show button on hover */
