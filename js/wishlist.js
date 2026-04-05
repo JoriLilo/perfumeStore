@@ -1,4 +1,23 @@
-
+// ============================================================
+// js/wishlist.js — Wishlist Page Interactivity
+// SCENTÉ · Week 3
+//
+// Depends on:  js/cart.js   js/toast.js   (load them first)
+//
+// Add to pages/wishlist.html before </body>:
+//   <script src="../js/cart.js"></script>
+//   <script src="../js/toast.js"></script>
+//   <script src="../js/wishlist.js"></script>
+//
+// What this file does:
+//   1. Reads wishlist (array of product IDs) from localStorage "wishlist"
+//   2. Looks up each ID in localStorage "products" to get full product data
+//   3. Renders product cards into the wishlist grid
+//   4. "Add to Cart" button on each card calls addToCart() from cart.js
+//   5. "Remove" button removes the item from the wishlist
+//   6. Shows an empty state message when the wishlist is empty
+//   7. Keeps the cart badge in the navbar up to date
+// ============================================================
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -39,11 +58,17 @@ function renderWishlist() {
   // Build a card for each wishlisted product ID
   grid.innerHTML = "";
 
-  wishlist.forEach(id => {
-    // Find the matching product — compare as strings to be safe
-    const product = products.find(p => String(p.id) === String(id));
+  // wishlistProducts is a fallback store keyed by id —
+  // saved at the moment the heart was clicked on any page
+  const wishlistProducts = JSON.parse(localStorage.getItem("wishlistProducts")) || {};
 
-    if (!product) return; // product was deleted from admin — skip silently
+  wishlist.forEach(id => {
+    // 1. Try localStorage["products"] first (real seeded products)
+    // 2. Fall back to localStorage["wishlistProducts"] (saved at click time)
+    const product = products.find(p => String(p.id) === String(id))
+                 || wishlistProducts[id];
+
+    if (!product) return; // genuinely gone — skip
 
     const card = document.createElement("div");
     card.className = "product-card";
@@ -56,7 +81,7 @@ function renderWishlist() {
       <div class="product-card__image-wrap">
         <img
           class="product-card__img"
-          src="${product.image || 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.9828.2x.avif'}"
+          src="${product.image || 'https://via.placeholder.com/375x500?text=No+Image'}"
           alt="${product.name}"
           onerror="this.src='https://via.placeholder.com/375x500?text=No+Image'"
         >
@@ -100,8 +125,10 @@ function renderWishlist() {
 // Finds the product by ID and calls addToCart() from cart.js.
 
 function handleAddToCart(productId) {
-  const products = JSON.parse(localStorage.getItem("products")) || [];
-  const product  = products.find(p => String(p.id) === String(productId));
+  const products         = JSON.parse(localStorage.getItem("products")) || [];
+  const wishlistProducts = JSON.parse(localStorage.getItem("wishlistProducts")) || {};
+  const product = products.find(p => String(p.id) === String(productId))
+               || wishlistProducts[String(productId)];
 
   if (!product) {
     showToast("Product no longer available.", "error");
