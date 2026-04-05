@@ -5,96 +5,653 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order History — Parfum</title>
     <link rel="stylesheet" href="../css/shared.css">
-    <link rel="stylesheet" href="../css/orders.css">
+
+    <!-- 
+         CSS is embedded here so it LOADS no matter what.
+         Once confirmed working, move the <style> block into css/orders.css
+         and replace this with: <link rel="stylesheet" href="../css/orders.css">
+    -->
+    <style>
+    /* ============================================================
+       ORDERS PAGE — Pink & White Theme (matches Profile page)
+       ============================================================ */
+
+    /* Page background — same light warm tone as profile */
+    .orders-page {
+        min-height: 100vh;
+        background-color: #f9f5f3;
+        padding-bottom: 80px;
+    }
+
+    .orders-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 40px;
+    }
+
+    /* ---- PAGE HEADER ---- */
+    .orders-page-header {
+        padding: 48px 0 28px;
+    }
+
+    .orders-page-header__eyebrow {
+        display: block;
+        font-family: 'Jost', sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #d4808a;
+        margin-bottom: 6px;
+    }
+
+    .orders-page-header__title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 36px;
+        font-weight: 400;
+        color: #1a1a1a;
+        letter-spacing: 0.03em;
+    }
+
+    /* ============================================================
+       MAIN CARD — the big white/cream container (like profile)
+       ============================================================ */
+    .orders-card {
+        background-color: #fdf8f6;
+        border: 1px solid #ece4e0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    /* ---- Tabs bar inside the card — pink gradient header ---- */
+    .orders-card__tabs {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        background: linear-gradient(90deg, #fce4e8, #fadadd, #f8d4d8);
+        border-bottom: 1px solid #f2d0d4;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tabs-left {
+        display: flex;
+        gap: 0;
+    }
+
+    .otab {
+        position: relative;
+        padding: 16px 24px;
+        font-family: 'Jost', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        color: #a85560;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 200ms, background 200ms;
+        border-radius: 0;
+    }
+
+    .otab:hover {
+        background: rgba(255,255,255,0.4);
+        color: #8b4a52;
+    }
+
+    .otab.active {
+        font-weight: 500;
+        color: #8b4a52;
+        background: rgba(255,255,255,0.6);
+    }
+
+    .otab.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 16px;
+        right: 16px;
+        height: 3px;
+        background: #d4808a;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .otab__n {
+        font-size: 11px;
+        color: #c8a0a8;
+        margin-left: 3px;
+    }
+
+    .otab.active .otab__n {
+        color: #a85560;
+    }
+
+    /* Search inside tabs bar */
+    .tabs-search {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.7);
+        border: 1px solid #f2d0d4;
+        border-radius: 999px;
+        padding: 0 16px;
+        height: 36px;
+        backdrop-filter: blur(4px);
+    }
+
+    .tabs-search svg {
+        color: #d4808a;
+        flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+    }
+
+    .tabs-search input {
+        border: none;
+        outline: none;
+        background: none;
+        font-family: 'Jost', sans-serif;
+        font-size: 12px;
+        font-weight: 300;
+        color: #8b4a52;
+        width: 160px;
+    }
+
+    .tabs-search input::placeholder {
+        color: #d4a0a8;
+    }
+
+    /* ============================================================
+       TABLE — pink themed
+       ============================================================ */
+    .otable {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Header row */
+    .otable thead tr {
+        background: #ffffff;
+    }
+
+    .otable thead th {
+        font-family: 'Jost', sans-serif;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #c8a0a8;
+        text-align: left;
+        padding: 16px 24px;
+        border-bottom: 1px solid #f2d0d4;
+    }
+
+    .otable thead th:last-child {
+        text-align: center;
+    }
+
+    /* Body rows */
+    .otable tbody tr {
+        background: #ffffff;
+        transition: background 200ms ease;
+    }
+
+    .otable tbody tr:nth-child(even) {
+        background: #fdf8f6;
+    }
+
+    .otable tbody tr:hover {
+        background: #fff0f2;
+    }
+
+    .otable tbody td {
+        padding: 20px 24px;
+        vertical-align: middle;
+        border-bottom: 1px solid #fce4e8;
+    }
+
+    /* ORDER ID */
+    .c-id {
+        font-family: 'Jost', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: #d4808a;
+    }
+
+    /* PRODUCT CELL */
+    .prod {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .prod__img {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        border: 2px solid #f2d0d4;
+    }
+
+    .prod__img--1 { background: linear-gradient(135deg, #fadadd, #f2d0d4); }
+    .prod__img--2 { background: linear-gradient(135deg, #fce4e8, #fadadd); }
+    .prod__img--3 { background: linear-gradient(135deg, #f2d0d4, #e8b4bf); }
+
+    .prod__name {
+        font-family: 'Jost', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: #1a1a1a;
+    }
+
+    /* DATE */
+    .c-date {
+        font-family: 'Jost', sans-serif;
+        font-size: 13px;
+        font-weight: 300;
+        color: #b8a0a4;
+    }
+
+    /* PAYMENT BADGES */
+    .pay {
+        display: inline-block;
+        padding: 4px 16px;
+        border-radius: 999px;
+        font-family: 'Jost', sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+    }
+
+    .pay--paid {
+        background: #fce4e8;
+        color: #a85560;
+        border: 1px solid #f2d0d4;
+    }
+
+    .pay--cod {
+        background: #fff5f0;
+        color: #c07830;
+        border: 1px solid #f0d8c4;
+    }
+
+    /* STATUS BADGES */
+    .stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 18px;
+        border-radius: 999px;
+        font-family: 'Jost', sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+    }
+
+    .stat::before {
+        content: '';
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+    }
+
+    .stat--delivered {
+        background: #e8f5ec;
+        color: #3a7a5a;
+        border: 1px solid #c8e6d2;
+    }
+    .stat--delivered::before { background: #4a8c6a; }
+
+    .stat--shipped {
+        background: #e0edfb;
+        color: #2a6a9a;
+        border: 1px solid #b8d4ee;
+    }
+    .stat--shipped::before { background: #3b82b8; }
+
+    .stat--pending {
+        background: #fff5e8;
+        color: #9a6020;
+        border: 1px solid #f0d8b0;
+    }
+    .stat--pending::before {
+        background: #c07830;
+        animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    /* TOTAL */
+    .c-total {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 20px;
+        font-weight: 400;
+        color: #8b4a52;
+    }
+
+    /* INVOICE BUTTON */
+    .c-inv {
+        text-align: center;
+    }
+
+    .inv-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        color: #d4808a;
+        background: #fce4e8;
+        border: 1px solid #f2d0d4;
+        text-decoration: none;
+        transition: all 200ms ease;
+    }
+
+    .inv-btn:hover {
+        background: #d4808a;
+        color: #fff;
+        border-color: #d4808a;
+        box-shadow: 0 4px 16px rgba(212,128,138,0.35);
+    }
+
+    /* ============================================================
+       MOBILE CARDS
+       ============================================================ */
+    .mcards {
+        display: none;
+        padding: 16px;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .mc {
+        background: #ffffff;
+        border: 1px solid #f2d0d4;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .mc__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        background: linear-gradient(90deg, #fce4e8, #fadadd);
+        border-bottom: 1px solid #f2d0d4;
+    }
+
+    .mc__id {
+        font-family: 'Jost', sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        color: #d4808a;
+    }
+
+    .mc__product {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #fce4e8;
+    }
+
+    .mc__pname {
+        font-family: 'Jost', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: #1a1a1a;
+        display: block;
+    }
+
+    .mc__date {
+        font-family: 'Jost', sans-serif;
+        font-size: 12px;
+        font-weight: 300;
+        color: #b8a0a4;
+        display: block;
+        margin-top: 2px;
+    }
+
+    .mc__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+    }
+
+    .mc__total {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 20px;
+        font-weight: 400;
+        color: #8b4a52;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 900px) {
+        .orders-container { padding: 0 16px; }
+        .otable-wrap { display: none; }
+        .mcards { display: flex; }
+        .orders-card__tabs { 
+            flex-direction: column; 
+            padding: 12px 16px; 
+            gap: 10px; 
+        }
+        .tabs-left { flex-wrap: wrap; }
+        .tabs-search { width: 100%; }
+        .tabs-search input { width: 100%; }
+    }
+
+    @media (max-width: 600px) {
+        .orders-page-header__title { font-size: 28px; }
+        .otab { padding: 10px 14px; font-size: 12px; }
+        .mc__foot { flex-wrap: wrap; gap: 10px; }
+    }
+    </style>
 </head>
 <body>
 
-    <!-- NAVBAR — loaded via fetch -->
+    <!-- NAVBAR -->
     <div id="navbar-placeholder"></div>
 
-    <!-- MAIN CONTENT -->
-    <main class="container orders-wrapper">
+    <main class="orders-page">
+        <div class="orders-container">
 
-        <!-- Page header -->
-        <div class="page-header">
-            <div class="page-header-left">
-                <span class="label-caps">My Account</span>
-                <h1 class="heading-lg">Order History</h1>
-            </div>
-            <p class="order-count">3 orders placed</p>
-        </div>
-
-        <!-- Orders list — card layout -->
-        <div class="orders-list">
-
-            <!-- Order 1 -->
-            <div class="order-card">
-                <div class="order-card__header">
-                    <span class="order-card__number">Order #00123</span>
-                    <span class="order-card__date">June 1, 2025</span>
-                </div>
-                <div class="order-card__body">
-                    <div>
-                        <p class="order-card__total-label">Order Total</p>
-                        <p class="order-card__total-amount">$89.99</p>
-                    </div>
-                    <div class="order-card__actions">
-                        <span class="status-badge delivered">Delivered</span>
-                        <a href="#" class="view-link">View Details →</a>
-                    </div>
-                </div>
+            <!-- Page header — same style as profile -->
+            <div class="orders-page-header">
+                <span class="orders-page-header__eyebrow">My Account</span>
+                <h1 class="orders-page-header__title">Order History</h1>
             </div>
 
-            <!-- Order 2 -->
-            <div class="order-card">
-                <div class="order-card__header">
-                    <span class="order-card__number">Order #00118</span>
-                    <span class="order-card__date">May 14, 2025</span>
-                </div>
-                <div class="order-card__body">
-                    <div>
-                        <p class="order-card__total-label">Order Total</p>
-                        <p class="order-card__total-amount">$54.00</p>
-                    </div>
-                    <div class="order-card__actions">
-                        <span class="status-badge shipped">Shipped</span>
-                        <a href="#" class="view-link">View Details →</a>
-                    </div>
-                </div>
-            </div>
+            <!-- Main card container (like the profile card) -->
+            <div class="orders-card">
 
-            <!-- Order 3 -->
-            <div class="order-card">
-                <div class="order-card__header">
-                    <span class="order-card__number">Order #00105</span>
-                    <span class="order-card__date">April 22, 2025</span>
-                </div>
-                <div class="order-card__body">
-                    <div>
-                        <p class="order-card__total-label">Order Total</p>
-                        <p class="order-card__total-amount">$120.50</p>
+                <!-- Pink tabs header -->
+                <div class="orders-card__tabs">
+                    <div class="tabs-left">
+                        <button class="otab active" data-filter="all">All Orders <span class="otab__n">(3)</span></button>
+                        <button class="otab" data-filter="delivered">Delivered <span class="otab__n">(1)</span></button>
+                        <button class="otab" data-filter="shipped">Shipped <span class="otab__n">(1)</span></button>
+                        <button class="otab" data-filter="pending">Pending <span class="otab__n">(1)</span></button>
                     </div>
-                    <div class="order-card__actions">
-                        <span class="status-badge pending">Pending</span>
-                        <a href="#" class="view-link">View Details →</a>
+                    <div class="tabs-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <input type="text" placeholder="Search orders..." id="searchInput">
                     </div>
                 </div>
-            </div>
+
+                <!-- Table (desktop) -->
+                <div class="otable-wrap">
+                    <table class="otable">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Product</th>
+                                <th>Date</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Invoice</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-status="delivered">
+                                <td class="c-id">#00123</td>
+                                <td>
+                                    <div class="prod">
+                                        <div class="prod__img prod__img--1"></div>
+                                        <span class="prod__name">Chanel N°5 Eau de Parfum</span>
+                                    </div>
+                                </td>
+                                <td class="c-date">June 1, 2025</td>
+                                <td><span class="pay pay--paid">Paid</span></td>
+                                <td><span class="stat stat--delivered">Delivered</span></td>
+                                <td class="c-total">$89.99</td>
+                                <td class="c-inv">
+                                    <a href="#" class="inv-btn" title="Download Invoice">
+                                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr data-status="shipped">
+                                <td class="c-id">#00118</td>
+                                <td>
+                                    <div class="prod">
+                                        <div class="prod__img prod__img--2"></div>
+                                        <span class="prod__name">Dior Miss Dior Blooming</span>
+                                    </div>
+                                </td>
+                                <td class="c-date">May 14, 2025</td>
+                                <td><span class="pay pay--cod">COD</span></td>
+                                <td><span class="stat stat--shipped">Shipped</span></td>
+                                <td class="c-total">$54.00</td>
+                                <td class="c-inv">
+                                    <a href="#" class="inv-btn" title="Download Invoice">
+                                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr data-status="pending">
+                                <td class="c-id">#00105</td>
+                                <td>
+                                    <div class="prod">
+                                        <div class="prod__img prod__img--3"></div>
+                                        <span class="prod__name">Tom Ford Black Orchid</span>
+                                    </div>
+                                </td>
+                                <td class="c-date">April 22, 2025</td>
+                                <td><span class="pay pay--paid">Paid</span></td>
+                                <td><span class="stat stat--pending">Pending</span></td>
+                                <td class="c-total">$120.50</td>
+                                <td class="c-inv">
+                                    <a href="#" class="inv-btn" title="Download Invoice">
+                                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile cards -->
+                <div class="mcards">
+                    <div class="mc" data-status="delivered">
+                        <div class="mc__head">
+                            <span class="mc__id">#00123</span>
+                            <span class="stat stat--delivered">Delivered</span>
+                        </div>
+                        <div class="mc__product">
+                            <div class="prod__img prod__img--1"></div>
+                            <div>
+                                <span class="mc__pname">Chanel N°5 Eau de Parfum</span>
+                                <span class="mc__date">June 1, 2025</span>
+                            </div>
+                        </div>
+                        <div class="mc__foot">
+                            <span class="pay pay--paid">Paid</span>
+                            <span class="mc__total">$89.99</span>
+                            <a href="#" class="inv-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg></a>
+                        </div>
+                    </div>
+                    <div class="mc" data-status="shipped">
+                        <div class="mc__head">
+                            <span class="mc__id">#00118</span>
+                            <span class="stat stat--shipped">Shipped</span>
+                        </div>
+                        <div class="mc__product">
+                            <div class="prod__img prod__img--2"></div>
+                            <div>
+                                <span class="mc__pname">Dior Miss Dior Blooming</span>
+                                <span class="mc__date">May 14, 2025</span>
+                            </div>
+                        </div>
+                        <div class="mc__foot">
+                            <span class="pay pay--cod">COD</span>
+                            <span class="mc__total">$54.00</span>
+                            <a href="#" class="inv-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg></a>
+                        </div>
+                    </div>
+                    <div class="mc" data-status="pending">
+                        <div class="mc__head">
+                            <span class="mc__id">#00105</span>
+                            <span class="stat stat--pending">Pending</span>
+                        </div>
+                        <div class="mc__product">
+                            <div class="prod__img prod__img--3"></div>
+                            <div>
+                                <span class="mc__pname">Tom Ford Black Orchid</span>
+                                <span class="mc__date">April 22, 2025</span>
+                            </div>
+                        </div>
+                        <div class="mc__foot">
+                            <span class="pay pay--paid">Paid</span>
+                            <span class="mc__total">$120.50</span>
+                            <a href="#" class="inv-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg></a>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /orders-card -->
 
         </div>
     </main>
 
-    <!-- FOOTER — loaded via fetch -->
+    <!-- FOOTER -->
     <div id="footer-placeholder"></div>
 
     <script>
         fetch('../components/navbar.html')
-            .then(res => res.text())
-            .then(html => document.getElementById('navbar-placeholder').innerHTML = html);
-
+            .then(r => r.text())
+            .then(h => document.getElementById('navbar-placeholder').innerHTML = h);
         fetch('../components/footer.html')
-            .then(res => res.text())
-            .then(html => document.getElementById('footer-placeholder').innerHTML = html);
+            .then(r => r.text())
+            .then(h => document.getElementById('footer-placeholder').innerHTML = h);
+
+        // Filters
+        document.querySelectorAll('.otab').forEach(t => {
+            t.addEventListener('click', () => {
+                document.querySelectorAll('.otab').forEach(b => b.classList.remove('active'));
+                t.classList.add('active');
+                const f = t.dataset.filter;
+                document.querySelectorAll('[data-status]').forEach(el => {
+                    el.style.display = (f === 'all' || el.dataset.status === f) ? '' : 'none';
+                });
+            });
+        });
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('[data-status]').forEach(el => {
+                el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
     </script>
 
 </body>
