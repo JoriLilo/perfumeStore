@@ -1,63 +1,89 @@
+// ============================================================
+// js/homepage.js — Homepage Interactivity
+// SCENTÉ · Week 3
+// ============================================================
 
 
-
-// ── 1. Page load ─────────────────────────────────────────
-window.addEventListener('load', () => {
+// ── 1. Safety net — always show the page ─────────────────
+// Body starts at opacity:0 in the CSS for a fade-in effect.
+// We ALWAYS remove that after 400ms maximum, even if something
+// else on the page errors. Nothing should ever cause a blank page.
+function revealPage() {
   document.body.classList.add('loaded');
+}
+window.addEventListener('load', revealPage);
+setTimeout(revealPage, 400); // hard fallback — fires no matter what
+
+
+// ── 2. Load navbar + footer ───────────────────────────────
+// Uses relative paths so it works both on Live Server AND
+// when opening the file directly from disk.
+document.addEventListener('DOMContentLoaded', () => {
+
+  fetch('components/navbar.html')
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById('navbar-placeholder').innerHTML = html;
+      restoreAnnouncementBar();
+      updateCartBadge();
+      // updateNavUser is from auth-guard.js — only call if loaded
+      if (typeof updateNavUser === 'function') updateNavUser();
+    })
+    .catch(() => {
+      // fetch failed (e.g. opened as file:// without a server)
+      // page still works — navbar just won't show
+      console.warn('Navbar component could not be loaded.');
+    });
+
+  fetch('components/footer.html')
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById('footer-placeholder').innerHTML = html;
+    })
+    .catch(() => {
+      console.warn('Footer component could not be loaded.');
+    });
+
+  // Run the rest of the homepage setup
+  renderFeaturedProducts();
+  syncWishlistHearts();
 });
 
 
-// ── 2. Load shared components ─────────────────────────────
-fetch('/components/navbar.html')
-  .then(r => r.text())
-  .then(html => {
-    document.getElementById('navbar-placeholder').innerHTML = html;
-    restoreAnnouncementBar(); // hide bar if user already closed it
-    updateCartBadge();        // cart.js — sync badge number
-    updateNavUser();          // auth-guard.js — show name if logged in
-  });
-
-fetch('/components/footer.html')
-  .then(r => r.text())
-  .then(html => {
-    document.getElementById('footer-placeholder').innerHTML = html;
-  });
-
-
 // ── 3. Announcement bar ───────────────────────────────────
-// Checks sessionStorage to see if the user already dismissed the bar.
 function restoreAnnouncementBar() {
   if (sessionStorage.getItem('ann_closed') === 'true') {
     const bar = document.getElementById('scente-announcement');
     if (bar) bar.style.display = 'none';
   }
 }
+
+// Called by the × button in navbar.html
 function closeAnn() {
   const bar = document.getElementById('scente-announcement');
   if (bar) bar.style.display = 'none';
   sessionStorage.setItem('ann_closed', 'true');
 }
 
+// Called by the search icon in navbar.html
 function toggleSearch() {
   const bar = document.getElementById('scente-search-bar');
   if (!bar) return;
   bar.classList.toggle('open');
   if (bar.classList.contains('open')) {
-    document.getElementById('scente-search-input')?.focus();
+    const input = document.getElementById('scente-search-input');
+    if (input) input.focus();
   }
 }
 
 
 // ── 4. Featured products ──────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-  renderFeaturedProducts();
-  syncWishlistHearts();
-});
-
+// Reads up to 4 products from localStorage.
+// If none exist yet (Sara hasn't seeded), the fallback
+// hardcoded cards in the HTML stay untouched.
 function renderFeaturedProducts() {
   const products = JSON.parse(localStorage.getItem('products')) || [];
-  if (products.length === 0) return;
+  if (products.length === 0) return; // keep fallback cards
 
   const grid = document.getElementById('featured-grid');
   if (!grid) return;
@@ -91,9 +117,9 @@ function renderFeaturedProducts() {
         ${badgeHTML}
         <img
           class="product-card__img"
-          src="${product.image || ' https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.62615.2x.avif'}"
+          src="${product.image || 'https://via.placeholder.com/375x500?text=No+Image'}"
           alt="${product.name}"
-          onerror="this.src=' https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.62615.2x.avif'"
+          onerror="this.src='https://via.placeholder.com/375x500?text=No+Image'"
         >
         <button
           class="product-card__wishlist ${wished ? 'wished' : ''}"
@@ -107,7 +133,7 @@ function renderFeaturedProducts() {
       </div>
       <p class="product-card__brand">${product.brand || ''}</p>
       <h3 class="product-card__name">
-        <a href="/pages/details.html?id=${id}">${product.name}</a>
+        <a href="pages/details.html?id=${id}">${product.name}</a>
       </h3>
       <p class="product-card__price">${priceHTML}</p>
     `;
@@ -124,17 +150,17 @@ function handleAddToCart(index) {
   const product  = products[index];
 
   if (!product) {
-    showToast('Product not found.', 'error');
+    if (typeof showToast === 'function') showToast('Product not found.', 'error');
     return;
   }
 
   if (product.id === undefined) product.id = index;
 
   const volume = (product.volumes && product.volumes[0]) || '50ml';
-  addToCart(product, volume); // cart.js handles toast + badge
+  addToCart(product, volume); // cart.js handles toast + badge update
 }
 
-// For fallback hardcoded cards (no localStorage products yet)
+// For the 4 fallback hardcoded cards
 function addFallbackToCart(name, brand, price, image) {
   const product = {
     id:    'fallback-' + name.replace(/\s+/g, '-').toLowerCase(),
@@ -148,8 +174,6 @@ function addFallbackToCart(name, brand, price, image) {
 
 
 // ── 6. Wishlist toggle ────────────────────────────────────
-// Toggles a product ID in localStorage wishlist key.
-// Updates the heart icon in place without a page reload.
 function toggleWishlistBtn(btn, productId) {
   const id     = String(productId);
   let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
@@ -160,24 +184,57 @@ function toggleWishlistBtn(btn, productId) {
     wishlist = wishlist.filter(w => w !== id);
     icon.className = 'bi bi-heart';
     btn.classList.remove('wished');
-    showToast('Removed from wishlist', 'info');
+    if (typeof showToast === 'function') showToast('Removed from wishlist', 'info');
   } else {
     wishlist.push(id);
     icon.className = 'bi bi-heart-fill';
     btn.classList.add('wished');
-    showToast('Added to wishlist', 'info');
+    if (typeof showToast === 'function') showToast('Added to wishlist', 'info');
+
+    // Save full product data so wishlist.html can display it
+    // even if localStorage["products"] is empty (fallback cards)
+    saveWishlistProduct(id, btn);
   }
 
   localStorage.setItem('wishlist', JSON.stringify(wishlist));
 }
 
-// Restore heart state on fallback cards on page load
+// Saves a minimal product object into localStorage["wishlistProducts"]
+// keyed by product ID so wishlist.js can always find it.
+function saveWishlistProduct(id, btn) {
+  const card = btn.closest('.product-card');
+  if (!card) return;
+
+  // Try to get full product from localStorage first
+  const products = JSON.parse(localStorage.getItem('products')) || [];
+  const existing = products.find(p => String(p.id) === id);
+  if (existing) {
+    // Already in products — no need to duplicate
+    const saved = JSON.parse(localStorage.getItem('wishlistProducts')) || {};
+    saved[id] = existing;
+    localStorage.setItem('wishlistProducts', JSON.stringify(saved));
+    return;
+  }
+
+  // Fallback card — scrape the data from the DOM
+  const name  = card.querySelector('.product-card__name a')?.textContent?.trim() || 'Unknown';
+  const brand = card.querySelector('.product-card__brand')?.textContent?.trim() || '';
+  const priceText = card.querySelector('.product-card__price')?.textContent?.trim() || '0';
+  const price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+  const image = card.querySelector('.product-card__img')?.src || '';
+
+  const saved = JSON.parse(localStorage.getItem('wishlistProducts')) || {};
+  saved[id] = { id, name, brand, price, image };
+  localStorage.setItem('wishlistProducts', JSON.stringify(saved));
+}
+
+// Restore heart fill state on fallback cards on page load
 function syncWishlistHearts() {
   const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 
   document.querySelectorAll('.product-card__wishlist').forEach(btn => {
-    const onclick = btn.getAttribute('onclick') || '';
-    const match   = onclick.match(/'([^']+)'\)$/);
+    const onclickAttr = btn.getAttribute('onclick') || '';
+    const match = onclickAttr.match(/'([^']+)'\)$/);
     if (!match) return;
     const id = match[1];
 
@@ -191,7 +248,6 @@ function syncWishlistHearts() {
 
 
 // ── 7. Newsletter ─────────────────────────────────────────
-// Hides the form and shows a success message on submit.
 function handleNewsletter(e) {
   e.preventDefault();
   document.getElementById('newsletter-form').style.display = 'none';
