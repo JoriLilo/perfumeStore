@@ -2,6 +2,10 @@
    are now inherited from shared.css! 
 */
 
+body {
+    background-color: rgba(253, 248, 246, 0.8) !important;
+}
+
 /* --- Checkout Header --- */
 .checkout-header {
     margin-bottom: var(--space-xl);
