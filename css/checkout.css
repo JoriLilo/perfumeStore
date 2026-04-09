@@ -1,0 +1,234 @@
+/* NOTE: Global resets, variables, typography, forms, and buttons 
+   are now inherited from shared.css! 
+*/
+
+body {
+    background-color: rgba(253, 248, 246, 0.8) !important;
+}
+
+/* --- Checkout Header --- */
+.checkout-header {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-md);
+    border-bottom: var(--border-width) solid var(--color-border);
+}
+
+/* --- Products Section --- */
+.cart-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-lg) 0;
+    border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.item-image {
+    width: 80px;
+    height: 100px;
+    margin-right: var(--space-lg);
+    overflow: hidden; 
+    background-color: var(--color-surface); 
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.item-details {
+    flex-grow: 1;
+}
+
+/* --- Price Summary Section --- */
+.price-summary-section {
+    background-color: var(--color-surface);
+    padding: var(--space-lg);
+    border: var(--border-width) solid var(--color-border);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+}
+
+.summary-row.grand-total {
+    border-top: var(--border-width) solid var(--color-border-strong);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* --- Form Layout --- */
+.form-row {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Custom Place Order Button (Reverting to previous style) --- */
+.btn-place-order {
+    width: 100%;
+    /* This uses the primary color (likely black) from your shared system */
+    background-color: var(--color-primary, #000); 
+    color: #ffffff;
+    border: none;
+    padding: 1.25rem;
+    font-family: var(--font-body); /* Ensures it matches the rest of the form */
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    margin-top: 2rem;
+    transition: opacity var(--transition-base, 0.3s ease);
+    display: block;
+}
+
+.btn-place-order:hover {
+    opacity: 0.8;
+}
+
+/* Ensure it looks good on mobile */
+@media (max-width: 768px) {
+    .btn-place-order {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* --- Custom Place Order Button --- */
+.btn-place-order {
+    width: 100%;
+    background-color: var(--color-black, #1a1a1a); /* Matches your brand black */
+    color: var(--color-white, #ffffff);
+    border: none;
+    padding: 1.25rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    margin-top: 2rem;
+    transition: opacity var(--transition-base, 0.3s ease);
+    display: block;
+}
+
+.btn-place-order:hover {
+    opacity: 0.8;
+}
+
+/* --- Order Confirmation Modal (Popup) --- */
+.checkout-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #1a1a1a; 
+    color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 420px;
+    z-index: 1000;
+    text-align: center;
+    
+    /* Hidden by default */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* This class is added by your JavaScript to show the popup */
+.checkout-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-order-number {
+    color: #aaaaaa;
+    margin-bottom: 15px;
+    font-family: var(--font-body);
+}
+
+.modal-heading {
+    font-family: var(--font-heading);
+    font-size: 2rem; /* Using a standard rem size here if var(--text-2xl) isn't working */
+    margin-bottom: 30px;
+}
+
+.btn-modal-home {
+    display: block;
+    width: 100%;
+    background-color: #333333; 
+    color: #ffffff !important; 
+    padding: 15px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 8px;
+    text-decoration: none;
+
+    transition: none !important;
+    pointer-events: auto;
+}
+
+.btn-modal-home:hover {
+    background-color: #333333 !important; 
+    color: #ffffff !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+}
+
+/* Payment Toggle Styling */
+.payment-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface); /* Uses warm white from shared.css */
+    border: var(--border-width) solid var(--color-border);
+    padding: 10px;
+    margin-bottom: var(--space-lg);
+}
+
+.payment-toggle-item {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.toggle-divider {
+    color: var(--color-border);
+    font-weight: 300;
+    pointer-events: none;
+}
+
+/* The Shadow Effect when selected */
+.payment-toggle-item.active {
+    background: var(--color-white);
+    box-shadow: var(--shadow-md); /* Uses shadow from shared.css */
+    font-weight: 500;
+    color: var(--color-black);
+}
+
+/* Ensure the card fields fade in nicely */
+.card-details-fields {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+}
+
+.d-none {
+    display: none !important;
+}

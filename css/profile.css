@@ -1,0 +1,84 @@
+/* ============================================================
+   profile.css — Profile Page Styles
+   Requires: shared.css loaded first
+   ============================================================ */
+
+/* Page wrapper */
+.profile-wrapper {
+    padding-top: var(--space-2xl);
+    padding-bottom: var(--space-2xl);
+}
+
+/* Page header area */
+.page-header {
+    margin-bottom: var(--space-xl);
+}
+
+/* Profile card container */
+.profile-card {
+    background: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    padding: var(--space-2xl);
+    max-width: 680px;
+}
+
+/* Avatar placeholder */
+.avatar-placeholder {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background-color: var(--color-accent-light);
+    border: 2px solid var(--color-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+}
+
+.avatar-placeholder span {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-on-blush);
+}
+
+/* Two-column form layout for name + email on desktop */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+/* Change Password section — separated with top border */
+.password-section {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-xl);
+    border-top: var(--border-width) solid var(--color-border);
+}
+
+.password-section__heading {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+/* Save button row */
+.form-actions {
+    margin-top: var(--space-xl);
+}
+
+/* Responsive — stack columns on mobile */
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+        padding: var(--space-lg);
+    }
+}

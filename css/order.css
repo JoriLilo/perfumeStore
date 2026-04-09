@@ -1,0 +1,405 @@
+/* ============================================================
+   orders.css — PINK & WHITE THEME
+   Copy of the embedded styles — use this once CSS path is fixed
+   Replace the <style> block in order.html with:
+   <link rel="stylesheet" href="../css/orders.css">
+   ============================================================ */
+
+.orders-page {
+    min-height: 100vh;
+    background-color: #fdf0f2;
+    padding-bottom: 80px;
+}
+
+.page-header {
+    padding-top: 52px;
+    padding-bottom: 32px;
+    border-bottom: 2px solid #f2d0d4;
+    margin-bottom: 0;
+}
+
+.page-header__eyebrow {
+    display: block;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #d4808a;
+    margin-bottom: 6px;
+}
+
+.page-header__title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 38px;
+    font-weight: 400;
+    color: #8b4a52;
+    letter-spacing: 0.03em;
+}
+
+.orders-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid #f2d0d4;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.orders-bar__tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.tab {
+    padding: 10px 22px;
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #c8a0a8;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.tab:hover {
+    color: #a85560;
+    background: #fce4e8;
+}
+
+.tab.active {
+    background: #d4808a;
+    color: #ffffff;
+    border-color: #d4808a;
+    font-weight: 500;
+}
+
+.tab__count {
+    font-weight: 400;
+    opacity: 0.8;
+    margin-left: 2px;
+}
+
+.orders-bar__search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #f2d0d4;
+    border-radius: 999px;
+    padding: 0 20px;
+    height: 42px;
+    width: 260px;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.orders-bar__search svg {
+    color: #d4808a;
+    flex-shrink: 0;
+}
+
+.orders-bar__search input {
+    border: none;
+    outline: none;
+    background: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: #8b4a52;
+    width: 100%;
+}
+
+.orders-bar__search input::placeholder {
+    color: #e0b0b8;
+}
+
+.orders-bar__search:focus-within {
+    border-color: #d4808a;
+    box-shadow: 0 0 0 3px rgba(212, 128, 138, 0.15);
+}
+
+.table-wrap {
+    background: #ffffff;
+    border: 1px solid #f2d0d4;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(212, 128, 138, 0.08);
+}
+
+.otable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.otable thead tr {
+    background: linear-gradient(90deg, #fce4e8, #fadadd);
+}
+
+.otable thead th {
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a85560;
+    text-align: left;
+    padding: 16px 22px;
+    border-bottom: 1px solid #f2d0d4;
+}
+
+.otable thead th:last-child {
+    text-align: center;
+}
+
+.otable tbody tr {
+    transition: background-color 200ms ease;
+}
+
+.otable tbody tr:hover {
+    background-color: #fff5f6;
+}
+
+.otable tbody tr:not(:last-child) td {
+    border-bottom: 1px solid #fce4e8;
+}
+
+.otable td {
+    padding: 18px 22px;
+    vertical-align: middle;
+}
+
+.col-id {
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #d4808a;
+}
+
+.product-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.product-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    border: 1px solid #f2d0d4;
+}
+
+.product-thumb--1 {
+    background: linear-gradient(135deg, #fadadd, #f2d0d4, #e8b4bf);
+}
+.product-thumb--2 {
+    background: linear-gradient(135deg, #fce4e8, #fadadd, #f2d0d4);
+}
+.product-thumb--3 {
+    background: linear-gradient(135deg, #f2d0d4, #e8b4bf, #d4808a);
+}
+
+.product-name {
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #3d1a22;
+    display: block;
+}
+
+.col-date {
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: #c8a0a8;
+}
+
+.pay-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    border-radius: 999px;
+}
+
+.pay-badge--paid {
+    background: #fce4e8;
+    color: #a85560;
+    border: 1px solid #f2d0d4;
+}
+
+.pay-badge--cod {
+    background: #fff0f2;
+    color: #d4808a;
+    border: 1px solid #fadadd;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 16px;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    border-radius: 999px;
+}
+
+.status-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-badge--delivered {
+    background: #fce4e8;
+    color: #8b4a52;
+    border: 1px solid #f2d0d4;
+}
+.status-badge--delivered::before {
+    background: #8b4a52;
+}
+
+.status-badge--shipped {
+    background: #fff0f2;
+    color: #d4808a;
+    border: 1px solid #fadadd;
+}
+.status-badge--shipped::before {
+    background: #d4808a;
+}
+
+.status-badge--pending {
+    background: #fdf0f2;
+    color: #e0a0a8;
+    border: 1px solid #fce4e8;
+}
+.status-badge--pending::before {
+    background: #e0a0a8;
+    animation: blink 1.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.col-total {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #8b4a52;
+}
+
+.col-invoice {
+    text-align: center;
+}
+
+.invoice-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    color: #d4808a;
+    background: #fce4e8;
+    border: 1px solid #f2d0d4;
+    text-decoration: none;
+    transition: all 200ms ease;
+}
+
+.invoice-link:hover {
+    background: #d4808a;
+    color: #ffffff;
+    border-color: #d4808a;
+    box-shadow: 0 4px 16px rgba(212, 128, 138, 0.35);
+}
+
+/* MOBILE CARDS */
+.mobile-cards {
+    display: none;
+}
+
+.mcard {
+    background: #ffffff;
+    border: 1px solid #f2d0d4;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(212, 128, 138, 0.06);
+}
+
+.mcard + .mcard {
+    margin-top: 14px;
+}
+
+.mcard__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: linear-gradient(90deg, #fce4e8, #fadadd);
+    border-bottom: 1px solid #f2d0d4;
+}
+
+.mcard__id {
+    font-family: 'Jost', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #a85560;
+}
+
+.mcard__body {
+    padding: 16px 20px;
+    border-bottom: 1px solid #fce4e8;
+}
+
+.mcard__date {
+    display: block;
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: #c8a0a8;
+    margin-top: 3px;
+}
+
+.mcard__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    gap: 12px;
+}
+
+.mcard__total {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #8b4a52;
+    margin-left: auto;
+    margin-right: 12px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .table-wrap { display: none; }
+    .mobile-cards { display: block; }
+    .orders-bar { flex-direction: column; align-items: stretch; }
+    .orders-bar__search { width: 100%; }
+    .orders-bar__tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+}
+
+@media (max-width: 600px) {
+    .page-header__title { font-size: 28px; }
+    .tab { padding: 8px 16px; font-size: 12px; white-space: nowrap; }
+    .mcard__foot { flex-wrap: wrap; }
+}

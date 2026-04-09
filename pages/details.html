@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Detail — SCENTÉ</title>
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/details.css">
+  <link rel="stylesheet" href="../css/footer.css">
+</head>
+<body>
+
+
+
+  <!-- Navbar -->
+  <div id="navbar-placeholder"></div>
+
+
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <div class="container">
+      <ul class="breadcrumb__list">
+        <li class="breadcrumb__item"><a href="../index.html">Home</a></li>
+        <li class="breadcrumb__sep">›</li>
+        <li class="breadcrumb__item"><a href="../pages/shop.html">Perfumes</a></li>
+        <li class="breadcrumb__sep">›</li>
+        <li class="breadcrumb__item breadcrumb__item--active">Velvet Rose & Oud</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL -->
+  <main>
+    <div class="container">
+      <div class="product-detail">
+
+        <!-- LEFT: Gallery -->
+        <div class="product-gallery">
+          <div class="gallery__main">
+            <div class="img-placeholder"><span>Product Image</span></div>
+          </div>
+          <div class="gallery__thumbs">
+            <div class="gallery__thumb active"><div class="thumb-placeholder"></div></div>
+            <div class="gallery__thumb"><div class="thumb-placeholder thumb-placeholder--2"></div></div>
+            <div class="gallery__thumb"><div class="thumb-placeholder thumb-placeholder--3"></div></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Info -->
+        <div class="product-info">
+          <span class="product-info__brand">Maison de Parfum</span>
+
+          <h1 class="product-info__name">Velvet Rose<br>& Oud</h1>
+
+          <div class="product-info__rating">
+            <div class="stars">
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star">★</span>
+            </div>
+            <span class="product-info__rating-count">4.0 (3 reviews)</span>
+          </div>
+
+          <div class="product-info__meta">
+            <span class="product-info__price">$89.00</span>
+            <span class="product-info__volume">50 ml</span>
+          </div>
+
+          <hr class="divider" style="margin: 0;">
+
+          <p class="product-info__description">
+            A rich, opulent fragrance that opens with fresh bergamot and Bulgarian rose,
+            settling into a warm base of oud, amber, and sandalwood.
+            Long-lasting and deeply sensual — perfect for evening wear.
+          </p>
+
+          <!-- Volume selector -->
+          <div>
+            <span class="volume-selector__label">Size</span>
+            <div class="volume-options">
+              <button class="volume-option">30 ml</button>
+              <button class="volume-option active">50 ml</button>
+              <button class="volume-option">100 ml</button>
+            </div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="qty-row">
+            <span class="qty-row__label">Qty</span>
+            <div class="qty-control">
+              <button onclick="changeQty(-1)">−</button>
+              <span class="qty-control__num" id="qty">1</span>
+              <button onclick="changeQty(1)">+</button>
+            </div>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="product-info__actions">
+            <button class="btn btn--primary btn--full">Add to Cart</button>
+            <button class="btn btn--secondary btn--full">Add to Wishlist</button>
+          </div>
+
+          <!-- Accordion details -->
+          <div class="product-accordion">
+            <div class="accordion-item open">
+              <button class="accordion-item__header" onclick="toggleAccordion(this)">
+                Fragrance Notes <span class="accordion-item__icon">+</span>
+              </button>
+              <div class="accordion-item__body">
+                <strong>Top:</strong> Bergamot, Pink Pepper<br>
+                <strong>Heart:</strong> Bulgarian Rose, Jasmine<br>
+                <strong>Base:</strong> Oud, Amber, Sandalwood, Musk
+              </div>
+            </div>
+            <div class="accordion-item">
+              <button class="accordion-item__header" onclick="toggleAccordion(this)">
+                How to Use <span class="accordion-item__icon">+</span>
+              </button>
+              <div class="accordion-item__body">
+                Apply to pulse points — wrists, neck, and behind the ears. Hold 15–20 cm from skin. Layer over unscented moisturiser for longer lasting fragrance.
+              </div>
+            </div>
+            <div class="accordion-item">
+              <button class="accordion-item__header" onclick="toggleAccordion(this)">
+                Shipping & Returns <span class="accordion-item__icon">+</span>
+              </button>
+              <div class="accordion-item__body">
+                Free standard shipping on orders over $50. Express shipping available at checkout. Returns accepted within 30 days on unopened items.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEWS SECTION -->
+    <section class="reviews-section">
+      <div class="container">
+
+        <div class="reviews-section__header">
+          <div>
+            <span class="label-caps">What our customers say</span>
+            <h2 class="heading-lg" style="margin-top: var(--space-xs)">Customer Reviews</h2>
+          </div>
+          <div style="display:flex; align-items:center; gap: var(--space-sm);">
+            <div class="stars">
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star star--filled">★</span>
+              <span class="star">★</span>
+            </div>
+            <span class="text-sm text-secondary">4.0 avg · 3 reviews</span>
+          </div>
+        </div>
+
+        <!-- Review Cards -->
+        <div class="reviews-grid">
+
+          <div class="review-card">
+            <div class="review-card__stars">
+              <div class="stars">
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span>
+              </div>
+            </div>
+            <p class="review-card__text">"Absolutely stunning fragrance. The oud base lingers all day and I've received so many compliments. Worth every penny."</p>
+            <div class="review-card__author">
+              <div class="review-card__avatar">SM</div>
+              <div>
+                <p class="review-card__name">Sofia M.</p>
+                <p class="review-card__date">March 2025</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-card__stars">
+              <div class="stars">
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star">★</span>
+              </div>
+            </div>
+            <p class="review-card__text">"Beautiful scent, very elegant. The rose and amber combination is perfect for evenings. Slightly heavy for daytime wear."</p>
+            <div class="review-card__author">
+              <div class="review-card__avatar">AK</div>
+              <div>
+                <p class="review-card__name">Arjan K.</p>
+                <p class="review-card__date">February 2025</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-card__stars">
+              <div class="stars">
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span><span class="star star--filled">★</span>
+                <span class="star star--filled">★</span>
+              </div>
+            </div>
+            <p class="review-card__text">"I gifted this to my sister and she loved it. The packaging is luxurious and the scent lasts for hours. Highly recommend!"</p>
+            <div class="review-card__author">
+              <div class="review-card__avatar">ED</div>
+              <div>
+                <p class="review-card__name">Elena D.</p>
+                <p class="review-card__date">January 2025</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Write a Review Form -->
+        <div class="write-review">
+          <h3 class="write-review__title">Write a Review</h3>
+
+          <div class="form-group">
+            <label class="form-label">Your Rating</label>
+            <div class="star-picker" id="starPicker">
+              <span onclick="setRating(1)">★</span>
+              <span onclick="setRating(2)">★</span>
+              <span onclick="setRating(3)">★</span>
+              <span onclick="setRating(4)">★</span>
+              <span onclick="setRating(5)">★</span>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Your Name</label>
+              <input type="text" class="form-input" placeholder="e.g. Sofia M." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" placeholder="your@email.com" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Your Review</label>
+            <textarea class="form-textarea" placeholder="Share your experience with this fragrance..."></textarea>
+          </div>
+
+          <button class="btn btn--primary">Submit Review</button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  
+<!-- Footer -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  
+
+  <script>
+    /* Load navbar and footer */
+    fetch('/components/navbar.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('navbar-placeholder').innerHTML = html;
+      });
+
+    fetch('/components/footer.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      });
+
+   
+  
+  </script>
+
+</body>
+</html>
