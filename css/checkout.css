@@ -185,3 +185,50 @@ body {
     opacity: 1 !important;
     box-shadow: none !important;
 }
+
+/* Payment Toggle Styling */
+.payment-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface); /* Uses warm white from shared.css */
+    border: var(--border-width) solid var(--color-border);
+    padding: 10px;
+    margin-bottom: var(--space-lg);
+}
+
+.payment-toggle-item {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.toggle-divider {
+    color: var(--color-border);
+    font-weight: 300;
+    pointer-events: none;
+}
+
+/* The Shadow Effect when selected */
+.payment-toggle-item.active {
+    background: var(--color-white);
+    box-shadow: var(--shadow-md); /* Uses shadow from shared.css */
+    font-weight: 500;
+    color: var(--color-black);
+}
+
+/* Ensure the card fields fade in nicely */
+.card-details-fields {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+}
+
+.d-none {
+    display: none !important;
+}
