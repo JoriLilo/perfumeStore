@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="/css/shared.css">
     <link rel="stylesheet" href="/css/checkout.css">
     <link rel="stylesheet" href="/css/footer.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/checkout.js"></script>
 </head>
 <body>
 
@@ -111,6 +114,37 @@
                     </div>
                 </div>
 
+                <div class="payment-section mt-xl">
+                    <h2 class="heading-lg mb-lg">Payment Method</h2>
+                    
+                    <div class="payment-toggle-wrapper">
+                        <input type="radio" id="payPost" name="paymentMethod" value="post" checked class="sr-only">
+                        <label for="payPost" class="payment-toggle-item active" id="labelPost">Post</label>
+                        
+                        <span class="toggle-divider">|</span>
+                        
+                        <input type="radio" id="payCard" name="paymentMethod" value="card" class="sr-only">
+                        <label for="payCard" class="payment-toggle-item" id="labelCard">Card</label>
+                    </div>
+
+                    <div id="cardDetailsForm" class="card-details-fields d-none mt-lg">
+                        <div class="form-group">
+                            <label class="form-label">Card Number</label>
+                            <input type="text" name="cardNumber" class="form-input" placeholder="0000 0000 0000 0000">
+                        </div>
+                        <div class="form-row d-grid gap-md">
+                            <div class="form-group">
+                                <label class="form-label">Expiry Date</label>
+                                <input type="text" name="expiry" class="form-input" placeholder="MM/YY">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CVV</label>
+                                <input type="text" name="cvv" class="form-input" placeholder="123">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn-place-order">Place Order</button>
             </form>
         </section>
@@ -120,42 +154,14 @@
     <div class="overlay" id="orderOverlay"></div>
 
     <div class="checkout-modal" id="orderModal">
-        <p class="modal-order-number text-sm">Order number F58635736873085</p>
+        <p id="orderNumberDisplay" class="modal-order-number text-sm">Order number </p>
         
-        <h2 class="modal-heading heading-lg">Thanks for your order!</h2>
+        <h2 class="modal-heading heading-lg">Thank you for your order!</h2>
         
         <a href="/" class="btn btn-modal-home">Go to homepage</a>
     </div>
 
     <div id="footer-placeholder"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.querySelector('form');
-            const modal = document.getElementById('orderModal');
-            const overlay = document.getElementById('orderOverlay');
-
-            // Listen for the Place Order form submission
-            form.addEventListener('submit', function(e) {
-                e.preventDefault(); // Prevents the page from refreshing immediately
-                
-                // Show the modal and the dark overlay
-                modal.classList.add('active');
-                overlay.classList.add('active');
-            });
-        });
-
-        fetch('/components/footer.html')
-        .then(res => res.text())
-        .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-        });
-    </script>
-
-    
     
 </body>
 </html>
