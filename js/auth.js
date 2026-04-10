@@ -156,7 +156,7 @@ if (exists) {
 
     sessionStorage.setItem("session", JSON.stringify(session));
 
-    window.location.href = "../index.html";
+    window.location.href = "../pages/profile.html";
   });
 }
 
