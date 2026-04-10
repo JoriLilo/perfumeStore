@@ -21,56 +21,123 @@
             <h1 class="heading-lg">My Profile</h1>
         </div>
 
-        <div class="profile-card">
+        <div class="profile-layout">
 
-            <!-- Avatar placeholder -->
-            <div class="avatar-placeholder">
-                <span>Avatar</span>
+            <!-- LEFT COLUMN — Profile card -->
+            <div class="profile-card">
+
+                <!-- Avatar placeholder -->
+                <div class="avatar-placeholder">
+                    <span>Avatar</span>
+                </div>
+
+                <!-- Profile Form -->
+                <form>
+
+                    <!-- Two-column row: Name + Email side by side on desktop -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="full-name">Full Name</label>
+                            <input class="form-input" type="text" id="full-name" name="full_name" placeholder="Your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address</label>
+                            <input class="form-input" type="email" id="email" name="email" placeholder="your@email.com" readonly>
+                            <span class="form-hint">Email cannot be changed.</span>
+                        </div>
+                    </div>
+
+                    <!-- Change Password section -->
+                    <div class="password-section">
+                        <p class="password-section__heading">Change Password</p>
+
+                        <div class="form-group">
+                            <label class="form-label" for="old-password">Current Password</label>
+                            <input class="form-input" type="password" id="old-password" name="old_password" placeholder="Current password">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new-password">New Password</label>
+                            <input class="form-input" type="password" id="new-password" name="new_password" placeholder="New password">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirm-password">Confirm New Password</label>
+                            <input class="form-input" type="password" id="confirm-password" name="confirm_password" placeholder="Confirm new password">
+                        </div>
+                    </div>
+
+                    <!-- Save button -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn--primary">Save Changes</button>
+                    </div>
+
+                </form>
             </div>
 
-            <!-- Profile Form -->
-            <form>
+            <!-- RIGHT COLUMN — Sidebar -->
+            <aside class="profile-sidebar">
 
-                <!-- Two-column row: Name + Email side by side on desktop -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="full-name">Full Name</label>
-                        <input class="form-input" type="text" id="full-name" name="full_name" placeholder="Your full name">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="email">Email Address</label>
-                        <input class="form-input" type="email" id="email" name="email" placeholder="your@email.com" readonly>
-                        <span class="form-hint">Email cannot be changed.</span>
-                    </div>
+                <!-- Order Tracking card -->
+                <div class="sidebar-card">
+                    <h2 class="sidebar-card__title">Order tracking</h2>
+                    <p class="sidebar-card__text">Track your latest purchase and follow its delivery progress.</p>
+                     <a href="order.html" class="sidebar-card__link">TRACK AN ORDER</a>
                 </div>
 
-                <!-- Change Password section -->
-                <div class="password-section">
-                    <p class="password-section__heading">Change Password</p>
+                <!-- Perks card -->
+                <div class="sidebar-card sidebar-card--perks">
 
-                    <div class="form-group">
-                        <label class="form-label" for="old-password">Current Password</label>
-                        <input class="form-input" type="password" id="old-password" name="old_password" placeholder="Current password">
+                    <div class="perk-item">
+                        <div class="perk-icon">
+                            <!-- Headset / Customer Service icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+                            </svg>
+                        </div>
+                        <div class="perk-content">
+                            <p class="perk-content__title">Customer Service</p>
+                            <p class="perk-content__detail">contact@parfum.com</p>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="new-password">New Password</label>
-                        <input class="form-input" type="password" id="new-password" name="new_password" placeholder="New password">
+                    <div class="perk-item">
+                        <div class="perk-icon">
+                            <!-- Gift / Samples icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="8" width="18" height="4" rx="1"/>
+                                <path d="M12 8v13"/>
+                                <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+                                <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
+                            </svg>
+                        </div>
+                        <div class="perk-content">
+                            <p class="perk-content__title">Complimentary Samples</p>
+                            <p class="perk-content__detail">2 complimentary samples with every order</p>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="confirm-password">Confirm New Password</label>
-                        <input class="form-input" type="password" id="confirm-password" name="confirm_password" placeholder="Confirm new password">
+                    <div class="perk-item">
+                        <div class="perk-icon">
+                            <!-- Box / Package icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                                <path d="m3.3 7 8.7 5 8.7-5"/>
+                                <path d="M12 22V12"/>
+                            </svg>
+                        </div>
+                        <div class="perk-content">
+                            <p class="perk-content__title">Gift Box Set</p>
+                            <p class="perk-content__detail">Elegant gift packaging available</p>
+                        </div>
                     </div>
+
                 </div>
 
-                <!-- Save button -->
-                <div class="form-actions">
-                    <button type="submit" class="btn btn--primary">Save Changes</button>
-                </div>
+            </aside>
 
-            </form>
         </div>
 
     </main>
