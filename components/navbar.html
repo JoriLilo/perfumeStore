@@ -70,8 +70,8 @@
         <i class="bi bi-bag"></i>
         <span class="scente-badge" id="cart-count">0</span>
       </a>
-      <a href="../pages/login.html" class="scente-icon-btn" aria-label="Account">
-        <i class="bi bi-person"></i>
+      <a href="../pages/login.html" class="scente-icon-btn" id="navbar-account-link" aria-label="Account">
+        <i class="bi bi-person" id="navbar-account-icon"></i>
       </a>
       <button
         class="scente-menu-pill"
@@ -170,9 +170,25 @@
       <li><a href="../pages/shop.html?cat=sale" class="nav-sale">Sale</a></li>
     </ul>
     <div class="scente-mob-footer mt-auto">
-      <a href="../pages/login.html"><i class="bi bi-person"></i> Sign In</a>
+      <a href="../pages/login.html" id="mob-account-link"><i class="bi bi-person"></i> Sign In</a>
       <a href="../pages/wishlist.html"><i class="bi bi-heart"></i> Wishlist</a>
       <a href="../pages/cart.html"><i class="bi bi-bag"></i> Cart</a>
     </div>
   </div>
 </div>
+
+<script>
+// Update navbar account icon based on session
+(function() {
+  const session = JSON.parse(sessionStorage.getItem('session'));
+  const desktopLink = document.getElementById('navbar-account-link');
+  const mobLink     = document.getElementById('mob-account-link');
+  const icon        = document.getElementById('navbar-account-icon');
+
+  if (session && session.loggedIn) {
+    if (desktopLink) desktopLink.href = '../pages/profile.html';
+    if (mobLink)     { mobLink.href = '../pages/profile.html'; mobLink.innerHTML = '<i class="bi bi-person-check"></i> My Profile'; }
+    if (icon)        { icon.className = 'bi bi-person-check'; }
+  }
+})();
+</script>
