@@ -1153,3 +1153,43 @@ input, textarea, select {
   }
 
 }
+
+/* ============================
+   BUTTON INTERACTION EFFECTS
+   ============================ */
+
+.btn--primary {
+  width: auto;              /* not full width */
+  padding: 12px 40px;      /* control size */
+  font-size: 14px;
+  letter-spacing: 2px;
+  display: block;
+}
+
+/* HOVER */
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* CLICK (PRESS EFFECT) */
+.btn--primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn--primary:focus {
+  outline: none;
+}
+
+.btn-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.center-text {
+  text-align: center;
+  margin-top: 10px;
+}
