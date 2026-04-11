@@ -146,7 +146,6 @@
     <div id="footer-placeholder"></div>
 
     <script>
-        // Fetch-based shared component loader — same pattern as login.html and cart.html
         fetch('../components/navbar.html')
             .then(res => res.text())
             .then(html => document.getElementById('navbar-placeholder').innerHTML = html);
@@ -156,5 +155,7 @@
             .then(html => document.getElementById('footer-placeholder').innerHTML = html);
     </script>
 
+    <script src="/js/toast.js"></script>
+    <script src="/js/profile.js"></script>
 </body>
 </html>
