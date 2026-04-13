@@ -8,9 +8,56 @@ body {
 
 /* --- Checkout Header --- */
 .checkout-header {
+    position: relative;
+    padding: var(--space-lg) 0;
     margin-bottom: var(--space-xl);
-    padding-bottom: var(--space-md);
     border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.btn-back-circle {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    
+    /* Circle Styling */
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background-color: transparent;
+    
+    /* Icon Alignment */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-black);
+    text-decoration: none;
+    
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.btn-back-circle i {
+    font-size: 14px;
+    /* Slight shift to the left to look visually centered in the circle */
+    margin-right: 2px; 
+}
+
+/* Hover Effect */
+.btn-back-circle:hover {
+    background-color: var(--color-black);
+    color: var(--color-white) !important;
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Ensure the title doesn't overlap on very small screens */
+@media (max-width: 480px) {
+    .heading-xl {
+        font-size: 1.5rem;
+        padding: 0 50px; /* Gives room for the button */
+    }
 }
 
 /* --- Products Section --- */
@@ -71,36 +118,6 @@ body {
     }
 }
 
-/* --- Custom Place Order Button (Reverting to previous style) --- */
-.btn-place-order {
-    width: 100%;
-    /* This uses the primary color (likely black) from your shared system */
-    background-color: var(--color-primary, #000); 
-    color: #ffffff;
-    border: none;
-    padding: 1.25rem;
-    font-family: var(--font-body); /* Ensures it matches the rest of the form */
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    cursor: pointer;
-    margin-top: 2rem;
-    transition: opacity var(--transition-base, 0.3s ease);
-    display: block;
-}
-
-.btn-place-order:hover {
-    opacity: 0.8;
-}
-
-/* Ensure it looks good on mobile */
-@media (max-width: 768px) {
-    .btn-place-order {
-        padding: 1rem;
-        font-size: 0.9rem;
-    }
-}
-
 /* --- Custom Place Order Button --- */
 .btn-place-order {
     width: 100%;
@@ -158,7 +175,7 @@ body {
 
 .modal-heading {
     font-family: var(--font-heading);
-    font-size: 2rem; /* Using a standard rem size here if var(--text-2xl) isn't working */
+    font-size: 2rem; 
     margin-bottom: 30px;
 }
 
@@ -176,7 +193,6 @@ body {
     text-decoration: none;
 
     transition: none !important;
-    pointer-events: auto;
 }
 
 .btn-modal-home:hover {
@@ -231,4 +247,11 @@ body {
 
 .d-none {
     display: none !important;
+}
+
+/* Message shown if the user cart is empty */
+.empty-cart-msg {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--color-secondary);
 }
