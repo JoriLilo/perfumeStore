@@ -390,32 +390,7 @@
     function seedDemoProducts() {
       const existing = getCart();
       if (existing.length === 0) {
-        const demo = [
-          {
-            name: "Love, Don't Be Shy",
-            brand: "Kilian",
-            price: 295,
-            qty: 1,
-            image: "/images/perfume1hp.jpg",
-            size: "100ml"
-          },
-          {
-            name: "Black Orchid",
-            brand: "Tom Ford",
-            price: 180,
-            qty: 2,
-            image: "/images/perfume2hp.jpeg",
-            size: "50ml"
-          },
-          {
-            name: "Libre",
-            brand: "YSL",
-            price: 142,
-            qty: 1,
-            image: "/images/perfume3.jpeg",
-            size: "90ml"
-          }
-        ];
+        const demo = [];
         localStorage.setItem('scente_cart', JSON.stringify(demo));
       }
     }
