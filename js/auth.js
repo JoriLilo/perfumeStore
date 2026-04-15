@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     registerForm.addEventListener("submit", function (e) {
       e.preventDefault();
 
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();      const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
       const confirmPassword = document.getElementById("confirmPassword").value;
 
@@ -16,13 +16,31 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
   document.querySelectorAll(".form-input").forEach(i => i.classList.remove("input-error"));
 
+  const nameRegex = /^[A-Za-z]+$/;
+
   let valid = true;
 
-  if (!name) {
-    document.getElementById("nameError").textContent = "Full name is required";
-    document.getElementById("name").classList.add("input-error");
-    valid = false;
-  }
+  if (!firstName) {
+  document.getElementById("firstNameError").textContent = "Name is required";
+  document.getElementById("firstName").classList.add("input-error");
+  valid = false;
+} else if (!nameRegex.test(firstName)) {
+  document.getElementById("firstNameError").innerHTML =
+    `<i class="bi bi-exclamation-circle-fill error-icon"></i> Only letters allowed`;
+  document.getElementById("firstName").classList.add("input-error");
+  valid = false;
+}
+
+if (!lastName) {
+  document.getElementById("lastNameError").textContent = "Surname is required";
+  document.getElementById("lastName").classList.add("input-error");
+  valid = false;
+} else if (!nameRegex.test(lastName)) {
+  document.getElementById("lastNameError").innerHTML =
+    `<i class="bi bi-exclamation-circle-fill error-icon"></i> Only letters allowed`;
+  document.getElementById("lastName").classList.add("input-error");
+  valid = false;
+}
 
   if (!email) {
     document.getElementById("emailError").textContent = "Email is required";
@@ -82,7 +100,7 @@ if (exists) {
   return;
 }
 
-      const newUser = { name, email, password };
+      const newUser = { firstName, lastName, email, password };
 
       users.push(newUser);
       localStorage.setItem("users", JSON.stringify(users));
@@ -149,7 +167,7 @@ if (exists) {
 
     // SUCCESS LOGIN
     const session = {
-      name: user.name,
+      name: user.firstName,
       email: user.email,
       loggedIn: true
     };
