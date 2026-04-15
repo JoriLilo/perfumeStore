@@ -26,45 +26,53 @@
       <p class="text-secondary mt-sm">Join Scenté and discover your signature scent</p>
     </div>
 
-    <form id="register-form">
+    <form id="register-form" novalidate>
 
       <div class="form-group">
-        <label class="form-label">Full Name</label>
-        <input type="text" class="form-input" required>
+        <label class="form-label">Name</label>
+        <input type="text" id="firstName" class="form-input" placeholder="Enter your name">
+        <small class="error-message" id="firstNameError"></small>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Surname</label>
+        <input type="text" id="lastName" class="form-input" placeholder="Enter your surname">
+        <small class="error-message" id="lastNameError"></small>
       </div>
 
       <div class="form-group">
         <label class="form-label">Email</label>
-        <input type="email" class="form-input" required>
+        <input type="email" id="email" class="form-input" placeholder="Enter your email">      
+        <small class="error-message" id="emailError"></small>
       </div>
 
       <div class="form-group">
         <label class="form-label">Password</label>
-
         <div style="position: relative;">
-        <input type="password" id="password" class="form-input">
-
+        <input type="password" id="password" class="form-input" placeholder="Create a password">
         <i class="bi bi-eye"
            id="togglePassword"
            style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer;">
         </i>
+        <small class="error-message" id="passwordError"></small>
         </div>
-    </div>
+      </div>
 
-    <div class="form-group">
+      <div class="form-group">
         <label class="form-label">Confirm Password</label>
-
         <div style="position: relative;">
-        <input type="password" id="confirmPassword" class="form-input">
-
+        <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password">        
         <i class="bi bi-eye"
             id="toggleConfirmPassword"
             style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer;">
         </i>
+        <small class="error-message" id="confirmError"></small>
         </div>
-    </div>
+      </div>
 
-      <button class="btn btn--primary btn--full mt-md">Register</button>
+      <div class="btn-wrapper">
+        <button class="btn btn--primary mt-md">REGISTER</button>
+      </div>
 
       <p class="text-center mt-lg text-sm">
         Already have an account?
@@ -89,13 +97,9 @@ fetch('/components/navbar.html')
 fetch('/components/footer.html')
   .then(res => res.text())
   .then(html => document.getElementById('footer-placeholder').innerHTML = html);
-
-/* Simple validation */
-document.getElementById('register-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  alert("Account created (frontend demo)");
-});
 </script>
+
+<script src="/js/auth.js"></script>
 
 </body>
 </html>

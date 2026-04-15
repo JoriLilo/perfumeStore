@@ -326,7 +326,7 @@ form select.input-error {
   display: flex;
 }
 
-/* MODAL BOX */
+/* MODAL BOX (Add / Edit product) */
 .modal-box {
   background-color: white;
   border-radius: 12px;
@@ -355,6 +355,106 @@ form select.input-error {
   color: #2d1b2e;
 }
 
+/* DELETE CONFIRMATION MODAL */
+.ConfirmDeletion {
+  background-color: white;
+  border-radius: 12px;
+  padding: 40px;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 80px rgba(45, 27, 46, 0.9);
+}
+
+/* Title */
+.ConfirmDeletion h2 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #8a6070;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+/* Warning icon */
+.ConfirmDeletion h2::before {
+  content: "⚠︎ ";
+  color: #c4687e;
+}
+
+/* Product detail card */
+#delete-product-details {
+  background-color: #fdf0f3;
+  border: 1px solid #f0c4d4;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 0;
+}
+
+/* Product detail rows */
+#delete-product-details p {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5d4db;
+  margin: 0;
+}
+
+#delete-product-details p:last-of-type {
+  border-bottom: none;
+}
+
+/* Value side */
+#delete-product-details p span {
+  font-weight: 600;
+  color: #2d1b2e;
+  text-align: right;
+  text-transform: none;
+  letter-spacing: 0;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+/* Buttons sit outside the card */
+.ConfirmDeletion .btn-yes,
+.ConfirmDeletion .btn-no {
+  margin-top: 24px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.ConfirmDeletion .btn-yes {
+  background-color: #c4687e;
+  color: white;
+  margin-right: 8px;
+}
+
+.ConfirmDeletion .btn-yes:hover {
+  background-color: #b05570;
+}
+
+.ConfirmDeletion .btn-no {
+  background-color: #fdf0f3;
+  color: #c4687e;
+}
+
+.ConfirmDeletion .btn-no:hover {
+  background-color: #f5d4db;
+}
+
+/* SECTION VISIBILITY */
 .section {
   display: none;
 }
@@ -363,6 +463,7 @@ form select.input-error {
   display: block;
 }
 
+/* STOCK LEVEL COLOURS */
 .stock-danger {
   color: #e53935;
   font-weight: 600;
@@ -376,4 +477,21 @@ form select.input-error {
 .stock-good {
   color: #2e7d32;
   font-weight: 600;
+}
+
+#search-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #f0dde2;
+  border-radius: 20px;
+  font-size: 13px;
+  background-color: #fdf6f8;
+  margin-bottom: 16px;
+  transition: border-color 0.2s ease;
+}
+
+#search-input:focus {
+  outline: none;
+  border-color: #c4687e;
+  background-color: #fff0f2;
 }

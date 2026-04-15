@@ -39,19 +39,10 @@
           <a href="../pages/shop.html?cat=men">Men</a>
           <a href="../pages/shop.html?cat=unisex">Unisex</a>
           <a href="../pages/shop.html?cat=new">New Arrivals</a>
-          <a href="../pages/shop.html?cat=sets">Gift Sets</a>
+    
         </div>
       </li>
 
-      <li>
-        <a href="../pages/shop.html?view=brands">Brands</a>
-        <div class="scente-dropdown">
-          <a href="../pages/shop.html?brand=chanel">Chanel</a>
-          <a href="../pages/shop.html?brand=dior">Dior</a>
-          <a href="../pages/shop.html?brand=ysl">YSL</a>
-          <a href="../pages/shop.html?brand=burberry">Burberry</a>
-        </div>
-      </li>
 
       <li>
         <a href="../pages/shop.html?cat=sale" class="nav-sale">Sale</a>
@@ -70,17 +61,9 @@
         <i class="bi bi-bag"></i>
         <span class="scente-badge" id="cart-count">0</span>
       </a>
-      <a href="../pages/login.html" class="scente-icon-btn" aria-label="Account">
-        <i class="bi bi-person"></i>
+      <a href="../pages/login.html" class="scente-icon-btn" id="navbar-account-link" aria-label="Account">
+        <i class="bi bi-person" id="navbar-account-icon"></i>
       </a>
-      <button
-        class="scente-menu-pill"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#scenteMobileMenu"
-        aria-label="More"
-      >
-        <i class="bi bi-three-dots"></i>
-      </button>
     </div>
 
     <!-- Mobile: cart + hamburger -->
@@ -170,9 +153,25 @@
       <li><a href="../pages/shop.html?cat=sale" class="nav-sale">Sale</a></li>
     </ul>
     <div class="scente-mob-footer mt-auto">
-      <a href="../pages/login.html"><i class="bi bi-person"></i> Sign In</a>
+      <a href="../pages/login.html" id="mob-account-link"><i class="bi bi-person"></i> Sign In</a>
       <a href="../pages/wishlist.html"><i class="bi bi-heart"></i> Wishlist</a>
       <a href="../pages/cart.html"><i class="bi bi-bag"></i> Cart</a>
     </div>
   </div>
 </div>
+
+<script>
+// Update navbar account icon based on session
+(function() {
+  const session = JSON.parse(sessionStorage.getItem('session'));
+  const desktopLink = document.getElementById('navbar-account-link');
+  const mobLink     = document.getElementById('mob-account-link');
+  const icon        = document.getElementById('navbar-account-icon');
+
+  if (session && session.loggedIn) {
+    if (desktopLink) desktopLink.href = '../pages/profile.html';
+    if (mobLink)     { mobLink.href = '../pages/profile.html'; mobLink.innerHTML = '<i class="bi bi-person-check"></i> My Profile'; }
+    if (icon)        { icon.className = 'bi bi-person-check'; }
+  }
+})();
+</script>

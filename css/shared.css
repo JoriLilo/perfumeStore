@@ -238,7 +238,7 @@ input, textarea, select {
 
 /* ============================================================
    4. TYPOGRAPHY CLASSES
-   Usage: <h1 class="heading-hero">PARFUM</h1>
+   Usage: <h1 class="heading-hero">PERFUME</h1>
    ============================================================ */
 
 /* Headings — Cormorant Garamond (serif, luxury feel) */
@@ -810,6 +810,45 @@ input, textarea, select {
   margin-top: 4px;
 }
 
+.error-message {
+  color: var(--color-error);
+  font-size: var(--text-xs);
+  margin-top: 6px;
+}
+
+/* override existing input border */
+.input-error {
+  border: none !important;
+  border-bottom: 2px solid var(--color-error) !important;
+  background: transparent;
+}
+
+.error-message {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.error-message.hint {
+  color: #888;
+}
+
+.error-message.error {
+  color: #c0392b;
+}
+
+.error-message {
+  font-size: 13px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #e74c3c;
+}
+
+.error-icon {
+  font-size: 14px;
+  font-weight: bold;
+}
 
 /* ============================================================
    10. FOOTER
@@ -978,20 +1017,22 @@ input, textarea, select {
 
 /* Toast notification */
 /* Usage: <div class="toast toast--success">Added to cart!</div> */
+/* ============================================================
+   TOAST NOTIFICATION
+   ============================================================ */
+
 .toast {
   position: fixed;
-  bottom: var(--space-xl);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
-  padding: 12px var(--space-xl);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  border-radius: 0;
+  top: 20px;
+  right: 20px;
+  background: #2ecc71;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-size: 14px;
   opacity: 0;
-  transition: opacity var(--transition-base);
-  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 9999;
 }
 
 .toast.show {
@@ -1110,4 +1151,45 @@ input, textarea, select {
   :root {
     --text-hero: 32px;
   }
+
+}
+
+/* ============================
+   BUTTON INTERACTION EFFECTS
+   ============================ */
+
+.btn--primary {
+  width: auto;              /* not full width */
+  padding: 12px 40px;      /* control size */
+  font-size: 14px;
+  letter-spacing: 2px;
+  display: block;
+}
+
+/* HOVER */
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* CLICK (PRESS EFFECT) */
+.btn--primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn--primary:focus {
+  outline: none;
+}
+
+.btn-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.center-text {
+  text-align: center;
+  margin-top: 10px;
 }
