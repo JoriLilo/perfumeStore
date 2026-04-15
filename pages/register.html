@@ -29,9 +29,15 @@
     <form id="register-form" novalidate>
 
       <div class="form-group">
-        <label class="form-label">Full Name</label>
-        <input type="text" id="name" class="form-input" placeholder="Enter your full name">
-        <small class="error-message" id="nameError"></small>
+        <label class="form-label">Name</label>
+        <input type="text" id="firstName" class="form-input" placeholder="Enter your name">
+        <small class="error-message" id="firstNameError"></small>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Surname</label>
+        <input type="text" id="lastName" class="form-input" placeholder="Enter your surname">
+        <small class="error-message" id="lastNameError"></small>
       </div>
 
       <div class="form-group">
@@ -64,7 +70,9 @@
         </div>
       </div>
 
-      <button class="btn btn--primary btn--full mt-md">Register</button>
+      <div class="btn-wrapper">
+        <button class="btn btn--primary mt-md">REGISTER</button>
+      </div>
 
       <p class="text-center mt-lg text-sm">
         Already have an account?
