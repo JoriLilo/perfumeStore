@@ -90,19 +90,56 @@ function renderPagination(totalItems) {
 }
 
 // -- 5. Apply filters + sorting --
+// -- 5. Apply filters + sorting --
 function applyFilters(resetPage = true) {
     if (resetPage) currentPage = 1;
     let products = getProducts();
+
+    // CHECK FOR SEARCH QUERY FROM URL OR SESSION
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search');
+    
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase().trim();
+        products = products.filter(p => {
+            const searchableText = `${p.name} ${p.brand} ${p.category || ''} ${p.description || ''}`.toLowerCase();
+            return searchableText.includes(query);
+        });
+        
+        // Update the page title or heading to show search results
+        const resultsCount = document.getElementById('results-count');
+        if (resultsCount) {
+            resultsCount.textContent = `Search results for "${searchQuery}"`;
+        }
+    } else {
+        // Check sessionStorage for recent search
+        const recentQuery = sessionStorage.getItem('searchQuery');
+        const recentResults = sessionStorage.getItem('searchResults');
+        
+        if (recentQuery && recentResults) {
+            const resultIds = JSON.parse(recentResults);
+            products = products.filter(p => resultIds.includes(String(p.id)));
+            
+            const resultsCount = document.getElementById('results-count');
+            if (resultsCount) {
+                resultsCount.textContent = `Search results for "${recentQuery}"`;
+            }
+            
+            // Clear after using
+            sessionStorage.removeItem('searchQuery');
+            sessionStorage.removeItem('searchResults');
+        }
+    }
 
     // CATEGORY
     const categories = [...document.querySelectorAll('.sidebar input[type="checkbox"]:checked')]
     .map(cb => cb.value.trim().toLowerCase());
 
-if (categories.length) {
-    products = products.filter(p =>
-        categories.includes((p.category || "").trim().toLowerCase())
-    );
-}
+    if (categories.length) {
+        products = products.filter(p =>
+            categories.includes((p.category || "").trim().toLowerCase())
+        );
+    }
 
     // PRICE
     const min = parseFloat(document.getElementById('price-min').value);
@@ -114,31 +151,23 @@ if (categories.length) {
     const genderRadio = document.querySelector('input[name="gender"]:checked');
     if (genderRadio && genderRadio.value !== '') {
         const selectedGender = genderRadio.value.toLowerCase().trim();
-        console.log('Selected gender filter:', selectedGender);
         
         products = products.filter(p => {
-            if (!p.gender) {
-                console.warn('Product has no gender:', p);
-                return false;
-            }
+            if (!p.gender) return false;
             
             const productGender = String(p.gender).toLowerCase().trim();
             
-            // Handle different gender value variations
             if (selectedGender === 'men') {
                 return productGender === 'men' || productGender === 'male' || productGender === 'man';
             } else if (selectedGender === 'women') {
                 return productGender === 'women' || productGender === 'female' || productGender === 'woman';
             } else if (selectedGender === 'unisex') {
-                return productGender === 'unisex' || productGender === 'unisex';
+                return productGender === 'unisex';
             }
             
             return productGender === selectedGender;
         });
-        
-        console.log('Products after gender filter:', products.length);
     }
-
 
     // SORT
     const sort = document.getElementById('sort-select').value;

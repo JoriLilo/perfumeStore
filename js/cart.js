@@ -166,6 +166,33 @@ function toggleSearch() {
   }
 }
 
+// ── Search functionality ─────────────────────────────────
+function performSearch() {
+  const input = document.getElementById('scente-search-input');
+  if (!input) return;
+  
+  const query = input.value.trim();
+  if (query.length === 0) return;
+  
+  // Get all products from localStorage
+  const products = JSON.parse(localStorage.getItem('products')) || [];
+  
+  // Search in product names and brands
+  const searchResults = products.filter(product => {
+    const searchableText = `${product.name} ${product.brand} ${product.category || ''} ${product.description || ''}`.toLowerCase();
+    return searchableText.includes(query.toLowerCase());
+  });
+  
+  // Store search results in sessionStorage for the shop page to use
+  sessionStorage.setItem('searchQuery', query);
+  sessionStorage.setItem('searchResults', JSON.stringify(searchResults.map(p => p.id)));
+  
+  // Redirect to shop page with search parameter
+  window.location.href = `/pages/shop.html?search=${encodeURIComponent(query)}`;
+}
+
+// Make it globally available
+window.performSearch = performSearch;
 // ── Update navbar based on session ─────────────────────────
 function updateNavbarSession() {
   const session = JSON.parse(sessionStorage.getItem('session'));

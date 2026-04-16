@@ -245,7 +245,20 @@ function syncWishlistHearts() {
     }
   });
 }
+// ── Search functionality ─────────────────────────────────
+function performSearch() {
+  const input = document.getElementById('scente-search-input');
+  if (!input) return;
+  
+  const query = input.value.trim();
+  if (query.length === 0) return;
+  
+  // Redirect to shop page with search parameter
+  window.location.href = `/pages/shop.html?search=${encodeURIComponent(query)}`;
+}
 
+// Make it globally available
+window.performSearch = performSearch;
 
 // ── 7. Newsletter ─────────────────────────────────────────
 function handleNewsletter(e) {
