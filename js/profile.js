@@ -26,6 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileForm   = document.querySelector(".profile-card form");
   const avatarEl      = document.querySelector(".avatar-placeholder span");
 
+  // ── Populate form with current user data ─────────────────
+  nameInput.value  = session.name  || "";
+  emailInput.value = session.email || "";
+
+  // Set avatar initials from user name
+  if (avatarEl && session.name) {
+    const parts = session.name.trim().split(/\s+/);
   // ── Force-clear password fields (browsers autofill these even with autocomplete=off) ──
   oldPwInput.value     = "";
   newPwInput.value     = "";
