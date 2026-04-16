@@ -20,7 +20,7 @@ function buildCard(product) {
         <div class="product-card">
             <div class="product-card__image-wrap">
 
-                ${product.sale ? '<span class="product-card__badge product-card__badge--sale">Sale</span>' : ''}
+               
 
                 <img src="${product.image}" alt="${product.name}">
 
@@ -35,7 +35,9 @@ function buildCard(product) {
             </div>
 
             <p>${product.brand}</p>
-            <h3>${product.name}</h3>
+           <h3 class="product-title" onclick="goToDetails('${product.id}')">
+            ${product.name}
+                   </h3>
             <p>$${product.price}</p>
         </div>
     `;
@@ -79,27 +81,28 @@ function renderPagination(totalItems) {
             btn.style.color = 'white';
         }
 
-        btn.onclick = () => {
-            currentPage = i;
-            applyFilters();
-        };
-
+       btn.onclick = () => {
+    currentPage = i;
+    applyFilters(false); //dont reset page
+};
         container.appendChild(btn);
     }
 }
 
 // -- 5. Apply filters + sorting --
-function applyFilters() {
-    currentPage = 1;
+function applyFilters(resetPage = true) {
+    if (resetPage) currentPage = 1;
     let products = getProducts();
 
     // CATEGORY
     const categories = [...document.querySelectorAll('.sidebar input[type="checkbox"]:checked')]
-        .map(cb => cb.value);
+    .map(cb => cb.value.trim().toLowerCase());
 
-    if (categories.length) {
-        products = products.filter(p => categories.includes(p.category));
-    }
+if (categories.length) {
+    products = products.filter(p =>
+        categories.includes((p.category || "").trim().toLowerCase())
+    );
+}
 
     // PRICE
     const min = parseFloat(document.getElementById('price-min').value);
@@ -176,4 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleSidebar(btn) {
     btn.parentElement.classList.toggle('open');
     btn.textContent = btn.parentElement.classList.contains('open') ? 'Filters –' : 'Filters +';
+}
+
+function goToDetails(id) {
+    window.location.href = `details.html?id=${id}`;
 }
