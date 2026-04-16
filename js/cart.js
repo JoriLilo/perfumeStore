@@ -155,12 +155,91 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
 });
 
-/*fetch('/components/navbar.html')
-  .then(res => res.text())
-  .then(html => {
-    navbarEl.innerHTML = html;
-    updateCartBadge();
-    updateNavbarSession(); // add this
-  });*/
+function toggleSearch() {
+  const bar = document.getElementById('scente-search-bar');
+  if (bar) {
+    bar.classList.toggle('open');
+    if (bar.classList.contains('open')) {
+      const input = document.getElementById('scente-search-input');
+      if (input) setTimeout(() => input.focus(), 100);
+    }
+  }
+}
+
+// ── Search functionality ─────────────────────────────────
+function performSearch() {
+  const input = document.getElementById('scente-search-input');
+  if (!input) return;
+  
+  const query = input.value.trim();
+  if (query.length === 0) return;
+  
+  // Get all products from localStorage
+  const products = JSON.parse(localStorage.getItem('products')) || [];
+  
+  // Search in product names and brands
+  const searchResults = products.filter(product => {
+    const searchableText = `${product.name} ${product.brand} ${product.category || ''} ${product.description || ''}`.toLowerCase();
+    return searchableText.includes(query.toLowerCase());
+  });
+  
+  // Store search results in sessionStorage for the shop page to use
+  sessionStorage.setItem('searchQuery', query);
+  sessionStorage.setItem('searchResults', JSON.stringify(searchResults.map(p => p.id)));
+  
+  // Redirect to shop page with search parameter
+  window.location.href = `/pages/shop.html?search=${encodeURIComponent(query)}`;
+}
+
+// Make it globally available
+window.performSearch = performSearch;
+// ── Update navbar based on session ─────────────────────────
+function updateNavbarSession() {
+  const session = JSON.parse(sessionStorage.getItem('session'));
+  const isLoggedIn = session && session.loggedIn;
+  
+  // Desktop profile link
+  const profileLink = document.getElementById('profile-link');
+  if (profileLink) {
+    if (isLoggedIn) {
+      profileLink.href = '/pages/profile.html';
+      profileLink.innerHTML = '<i class="bi bi-person-check"></i>';
+      profileLink.setAttribute('title', session.name || 'My Profile');
+    } else {
+      profileLink.href = '/pages/login.html';
+      profileLink.innerHTML = '<i class="bi bi-person"></i>';
+      profileLink.setAttribute('title', 'Sign In');
+    }
+  }
+  
+  // Mobile account link
+  const mobAccountLink = document.getElementById('mob-account-link');
+  if (mobAccountLink) {
+    if (isLoggedIn) {
+      mobAccountLink.href = '/pages/profile.html';
+      mobAccountLink.innerHTML = '<i class="bi bi-person-check"></i> My Profile';
+    } else {
+      mobAccountLink.href = '/pages/login.html';
+      mobAccountLink.innerHTML = '<i class="bi bi-person"></i> Sign In';
+    }
+  }
+}
+
+// Update the navbar load fetch calls
+document.addEventListener('DOMContentLoaded', () => {
+  const navbarEl = document.getElementById('navbar-placeholder');
+  if (navbarEl) {
+    fetch('/components/navbar.html')
+      .then(res => res.text())
+      .then(html => {
+        navbarEl.innerHTML = html;
+        updateCartBadge();
+        updateNavbarSession(); // ADD THIS LINE
+      });
+  }
+  
+  // Also update existing navbar if already loaded
+  setTimeout(updateNavbarSession, 100);
+});
 
   
