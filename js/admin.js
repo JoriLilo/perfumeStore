@@ -6,25 +6,24 @@ let deleteIndex = null;
 let searchQuery = "";
 let orderSearchQuery = "";
 let userSearchQuery = "";
+let allOrders = [];
+let currentOrderKey = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
   renderOrders();
-  renderUsers(); 
+  renderUsers();
+  updateDashboard();
 
   const orderModal = document.getElementById("viewOrderModal");
-
   if (orderModal) {
     orderModal.addEventListener("click", function (e) {
-      if (e.target === orderModal) {
-        closeOrderModal();
-      }
+      if (e.target === orderModal) closeOrderModal();
     });
   }
 });
 
 const links = document.querySelectorAll(".nav-link");
-
 links.forEach(link => {
   link.addEventListener("click", function () {
     links.forEach(l => l.classList.remove("active"));
@@ -32,7 +31,6 @@ links.forEach(link => {
 
     const sectionId = this.textContent.trim().toLowerCase();
     const sections = document.querySelectorAll(".section");
-
     sections.forEach(section => {
       section.classList.toggle("active", section.id === sectionId);
     });
@@ -42,10 +40,26 @@ links.forEach(link => {
 function updateDashboard() {
   const products = JSON.parse(localStorage.getItem("products")) || [];
   document.getElementById("total-products").textContent = products.length;
+
+  let totalOrders = 0;
+  let totalRevenue = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("scente_order_")) {
+      totalOrders++;
+      const order = JSON.parse(localStorage.getItem(key));
+      const amount = parseFloat(order.totalPaid?.replace("$", "")) || 0;
+      totalRevenue += amount;
+    }
+  }
+  document.getElementById("total-orders").textContent = totalOrders;
+  document.getElementById("total-revenue").textContent = "$" + totalRevenue.toFixed(2);
+
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  document.getElementById("total-users").textContent = users.length;
 }
 
 const searchInput = document.getElementById("search-input");
-
 if (searchInput) {
   searchInput.addEventListener("input", function () {
     searchQuery = this.value.toLowerCase();
@@ -72,14 +86,9 @@ if (userSearchInput) {
 function renderProducts() {
   let products = JSON.parse(localStorage.getItem("products")) || [];
   const tableBody = document.getElementById("products-table-body");
-
   tableBody.innerHTML = "";
 
-  const processed = products.map((product, index) => ({
-    product,
-    index
-  }));
-
+  const processed = products.map((product, index) => ({ product, index }));
   processed.sort((a, b) => b.product.id - a.product.id);
 
   const filteredProducts = processed.filter(item => {
@@ -97,8 +106,7 @@ function renderProducts() {
         <td colspan="9" style="text-align:center; padding:20px; color:#888;">
           No results found
         </td>
-      </tr>
-    `;
+      </tr>`;
     updateDashboard();
     return;
   }
@@ -113,7 +121,6 @@ function renderProducts() {
     else stockClass = "stock-good";
 
     const row = document.createElement("tr");
-
     row.innerHTML = `
       <td>${product.id}</td>
       <td>${product.name}</td>
@@ -132,7 +139,6 @@ function renderProducts() {
         </span>
       </td>
     `;
-
     tableBody.appendChild(row);
   });
 
@@ -141,22 +147,17 @@ function renderProducts() {
 
 function openModal() {
   editingIndex = null;
-
   const form = document.getElementById("add-product-form");
   form.reset();
-
   document.getElementById("modal-title").textContent = "Add New Product";
   document.querySelector(".btn-submit").textContent = "Add Product";
-
   modal.classList.add("active");
 }
 
 function closeModal() {
   modal.classList.remove("active");
-
   document.getElementById("modal-title").textContent = "Add New Product";
   document.querySelector(".btn-submit").textContent = "Add Product";
-
   editingIndex = null;
 }
 
@@ -168,35 +169,31 @@ if (modal) {
 
 function handleSubmit(e) {
   e.preventDefault();
-
   const form = document.getElementById("add-product-form");
-
-  const requiredFields = ["name", "brand", "price", "stock", "category"];
+  const requiredFields = ["name", "brand", "price", "stock", "category", "gender"];
   let hasErrors = false;
 
   requiredFields.forEach(field => {
     const input = form.elements[field];
     const errorEl = document.getElementById("err-" + field);
-
     if (input.value.trim() === "") {
       input.classList.add("input-error");
-      errorEl.classList.add("visible");
+      if (errorEl) errorEl.classList.add("visible");
       hasErrors = true;
     } else {
       input.classList.remove("input-error");
-      errorEl.classList.remove("visible");
+      if (errorEl) errorEl.classList.remove("visible");
     }
   });
 
   if (hasErrors) return;
 
   const products = JSON.parse(localStorage.getItem("products")) || [];
-
   const productData = {
     id: Date.now(),
     name: form.elements["name"].value,
     brand: form.elements["brand"].value,
-    gender: form.elements["gender"].value || "unisex",
+    gender: form.elements["gender"].value,
     status: form.elements["status"].value || "active",
     price: Number(form.elements["price"].value),
     stock: Number(form.elements["stock"].value),
@@ -214,7 +211,6 @@ function handleSubmit(e) {
   }
 
   localStorage.setItem("products", JSON.stringify(products));
-
   renderProducts();
   form.reset();
   closeModal();
@@ -223,31 +219,27 @@ function handleSubmit(e) {
 function editProduct(index) {
   const products = JSON.parse(localStorage.getItem("products")) || [];
   const product = products[index];
-
   editingIndex = index;
 
   const form = document.getElementById("add-product-form");
-
   form.elements["name"].value = product.name;
   form.elements["brand"].value = product.brand;
   form.elements["price"].value = product.price;
   form.elements["stock"].value = product.stock;
   form.elements["category"].value = product.category;
-  form.elements["gender"].value = product.gender || "unisex";
+  form.elements["gender"].value = product.gender || "";
   form.elements["status"].value = product.status || "active";
   form.elements["image"].value = product.image || "";
   form.elements["description"].value = product.description || "";
 
   document.getElementById("modal-title").textContent = "Edit Product";
   document.querySelector(".btn-submit").textContent = "Update Product";
-
   modal.classList.add("active");
 }
 
 function deleteProduct(index) {
   const products = JSON.parse(localStorage.getItem("products")) || [];
   const product = products[index];
-
   deleteIndex = index;
 
   document.getElementById("delete-product-id").textContent = product.id;
@@ -266,9 +258,7 @@ function deleteProduct(index) {
 function confirmDeletion() {
   const products = JSON.parse(localStorage.getItem("products")) || [];
   products.splice(deleteIndex, 1);
-
   localStorage.setItem("products", JSON.stringify(products));
-
   renderProducts();
   deleteModal.classList.remove("active");
 }
@@ -284,27 +274,27 @@ if (deleteModal) {
 }
 
 function renderOrders() {
-  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  allOrders = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("scente_order_")) {
+      const order = JSON.parse(localStorage.getItem(key));
+      allOrders.push(order);
+    }
+  }
+
   const tableBody = document.getElementById("orders-table-body");
   tableBody.innerHTML = "";
 
-  const processed = orders.map((order, index) => ({
-    order,
-    index
-  }));
-
-  processed.sort((a, b) => b.order.id - a.order.id);
-
-  const filteredOrders = processed.filter(item => {
-    const o = item.order;
+  const filtered = allOrders.filter(o => {
+    const customer = o.customerDetails?.name || o.customerDetails?.fullName || "Guest";
     return (
-      String(o.id).includes(orderSearchQuery) ||
-      o.customer.toLowerCase().includes(orderSearchQuery) ||
-      o.status.toLowerCase().includes(orderSearchQuery)
+      o.orderNumber.toLowerCase().includes(orderSearchQuery) ||
+      customer.toLowerCase().includes(orderSearchQuery)
     );
   });
 
-  if (filteredOrders.length === 0) {
+  if (filtered.length === 0) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="6" style="text-align:center; padding:20px; color:#888;">
@@ -314,35 +304,48 @@ function renderOrders() {
     return;
   }
 
-  filteredOrders.forEach(item => {
-    const order = item.order;
+  filtered.forEach((order, index) => {
+    const customer = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
+    const date = new Date(order.date).toLocaleDateString("en-US");
+    const status = order.status || "pending";
 
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>#${order.id}</td>
-      <td>${order.customer}</td>
-      <td>${order.date}</td>
-      <td>$${order.total}</td>
+      <td>#${order.orderNumber}</td>
+      <td>${customer}</td>
+      <td>${date}</td>
+      <td>${order.totalPaid}</td>
       <td>
-        <span class="status-badge ${order.status}">
-          ${order.status.toUpperCase()}
-        </span>
+        <span class="status-badge ${status}">${status.toUpperCase()}</span>
       </td>
-      <td><a href="#" class="action-link edit" onclick="viewOrder(${item.index})">View</a></td>
+      <td><a href="#" class="action-link edit" onclick="viewOrder(${index})">View</a></td>
     `;
     tableBody.appendChild(row);
   });
 }
 
 function viewOrder(index) {
-  const orders = JSON.parse(localStorage.getItem("orders")) || [];
-  const order = orders[index];
+  const order = allOrders[index];
+  currentOrderKey = order.orderNumber;
 
-  document.getElementById("order-id").textContent = "#" + order.id;
-  document.getElementById("order-customer").textContent = order.customer;
-  document.getElementById("order-date").textContent = order.date;
-  document.getElementById("order-total").textContent = "$" + order.total;
-  document.getElementById("order-status").textContent = order.status;
+  const customer = order.customerDetails?.name ||
+                   order.customerDetails?.fullName || "Guest";
+
+  document.getElementById("order-id").textContent = "#" + order.orderNumber;
+  document.getElementById("order-customer").textContent = customer;
+  document.getElementById("order-date").textContent = new Date(order.date).toLocaleDateString("en-US");
+  document.getElementById("order-total").textContent = order.totalPaid;
+
+  const statusEl = document.getElementById("order-status");
+  const currentStatus = order.status || "pending";
+  statusEl.className = `status-badge ${currentStatus}`;
+  statusEl.innerHTML = `
+    <select id="order-status-select" onchange="updateOrderStatus(this.value)">
+      <option value="pending"   ${currentStatus === "pending"   ? "selected" : ""}>Pending</option>
+      <option value="shipped"   ${currentStatus === "shipped"   ? "selected" : ""}>Shipped</option>
+      <option value="delivered" ${currentStatus === "delivered" ? "selected" : ""}>Delivered</option>
+    </select>
+  `;
 
   const itemsList = document.getElementById("order-items");
   itemsList.innerHTML = "";
@@ -350,7 +353,7 @@ function viewOrder(index) {
   if (order.items && order.items.length > 0) {
     order.items.forEach(item => {
       const li = document.createElement("li");
-      li.textContent = `${item.name} - ${item.quantity} x $${item.price}`;
+      li.textContent = `${item.name} - ${item.qty || item.quantity} x $${item.price}`;
       itemsList.appendChild(li);
     });
   } else {
@@ -358,6 +361,21 @@ function viewOrder(index) {
   }
 
   document.getElementById("viewOrderModal").classList.add("active");
+}
+
+function updateOrderStatus(newStatus) {
+  const key = `scente_order_${currentOrderKey}`;
+  const order = JSON.parse(localStorage.getItem(key));
+  if (!order) return;
+
+  order.status = newStatus;
+  localStorage.setItem(key, JSON.stringify(order));
+
+  const statusEl = document.getElementById("order-status");
+  statusEl.className = `status-badge ${newStatus}`;
+
+  renderOrders();
+  updateDashboard();
 }
 
 function closeOrderModal() {
@@ -369,23 +387,18 @@ function renderUsers() {
   const tableBody = document.getElementById("users-table-body");
   tableBody.innerHTML = "";
 
-  const processed = users.map((user, index) => ({
-    user,
-    index
-  }));
+  const processed = users.map((user, index) => ({ user, index }));
 
-  processed.sort((a, b) => b.user.id - a.user.id);
-
-  const filteredUsers = processed.filter(item => {
+  const filtered = processed.filter(item => {
     const u = item.user;
+    const fullName = (u.firstName + " " + u.lastName).toLowerCase();
     return (
-      String(u.id).includes(userSearchQuery) ||
-      u.name.toLowerCase().includes(userSearchQuery) ||
+      fullName.includes(userSearchQuery) ||
       u.email.toLowerCase().includes(userSearchQuery)
     );
   });
 
-  if (filteredUsers.length === 0) {
+  if (filtered.length === 0) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="5" style="text-align:center; padding:20px; color:#888;">
@@ -395,15 +408,14 @@ function renderUsers() {
     return;
   }
 
-  filteredUsers.forEach(item => {
+  filtered.forEach((item, i) => {
     const user = item.user;
-
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${user.id}</td>
-      <td>${user.name}</td>
+      <td>${i + 1}</td>
+      <td>${user.firstName} ${user.lastName}</td>
       <td>${user.email}</td>
-      <td>${user.joinDate}</td>
+      <td>${user.joinDate || "—"}</td>
       <td>${user.orders ? user.orders.length : 0}</td>
     `;
     tableBody.appendChild(row);
