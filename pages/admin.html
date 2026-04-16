@@ -30,16 +30,16 @@
             <p id="total-products">0</p>
           </div>
           <div class="stat-card">
-            <h3>Orders</h3>
-            <p>124</p>
+            <h3>Total Orders</h3>
+            <p id="total-orders">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total Users</h3>
+            <p id="total-users">0</p>
           </div>
           <div class="stat-card">
             <h3>Revenue</h3>
-            <p>$3200</p>
-          </div>
-          <div class="stat-card">
-            <h3>Users</h3>
-            <p>310</p>
+            <p id="total-revenue">$0</p>
           </div>
         </div>
       </div>
@@ -51,13 +51,14 @@
           <button class="btn-add" onclick="openModal()">+ Add Product</button>
         </div>
 
-        <input 
-          type="text" 
-          id="search-input" 
-          placeholder="Search by name, brand, or ID..." 
-         />
-         
-         <div class="products-table">
+        <input
+          type="text"
+          id="search-input"
+          class="search-input"
+          placeholder="Search by name, brand, or ID..."
+        />
+
+        <div class="products-table">
           <table>
             <thead>
               <tr>
@@ -79,6 +80,12 @@
 
       <div class="section" id="orders">
         <h3 class="heading">Orders</h3>
+        <input
+          type="text"
+          id="order-search-input"
+          class="search-input"
+          placeholder="Search by customer, ID, or status..."
+        />
         <div class="orders-table">
           <table>
             <thead>
@@ -91,29 +98,19 @@
                 <th>View</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>#001</td><td>Jane Doe</td><td>2026-03-20</td><td>$215</td>
-                <td><span class="status-badge delivered">Delivered</span></td>
-                <td><a href="#" class="action-link edit">View</a></td>
-              </tr>
-              <tr>
-                <td>#002</td><td>John Smith</td><td>2026-03-21</td><td>$88</td>
-                <td><span class="status-badge pending">Pending</span></td>
-                <td><a href="#" class="action-link edit">View</a></td>
-              </tr>
-              <tr>
-                <td>#003</td><td>Emily Rose</td><td>2026-03-22</td><td>$143</td>
-                <td><span class="status-badge shipped">Shipped</span></td>
-                <td><a href="#" class="action-link edit">View</a></td>
-              </tr>
-            </tbody>
+            <tbody id="orders-table-body"></tbody>
           </table>
         </div>
       </div>
 
       <div class="section" id="users">
         <h3 class="heading">Users</h3>
+        <input
+          type="text"
+          id="user-search-input"
+          class="search-input"
+          placeholder="Search by name, email, or ID..."
+        />
         <div class="users-table">
           <table>
             <thead>
@@ -121,23 +118,18 @@
                 <th>ID</th><th>Name</th><th>Email</th><th>Join Date</th><th>Orders</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>1</td><td>Jane Doe</td><td>jane@email.com</td><td>2026-01-10</td><td>3</td>
-              </tr>
-              <tr>
-                <td>2</td><td>John Smith</td><td>john@email.com</td><td>2026-02-14</td><td>1</td>
-              </tr>
-            </tbody>
+            <tbody id="users-table-body"></tbody>
           </table>
         </div>
       </div>
     </div>
 
+    <!-- ADD / EDIT PRODUCT MODAL -->
     <div class="modal-overlay" id="addProductModal">
       <div class="modal-box">
         <button class="modal-close" onclick="closeModal()">✕</button>
-        <h3 class="heading">Add New Product</h3>
+
+        <h3 class="heading" id="modal-title">Add New Product</h3>
         <form id="add-product-form">
           <label>Name:</label>
           <input type="text" name="name" placeholder="Product name">
@@ -158,12 +150,26 @@
           <label>Category:</label>
           <select name="category">
             <option value="">-- Select category --</option>
-            <option value="women">Women</option>
-            <option value="men">Men</option>
-            <option value="unisex">Unisex</option>
-            <option value="niche">Niche</option>
+            <option value="perfume">Perfume</option>
+            <option value="cologne">Cologne</option>
+           
           </select>
           <span class="error-msg" id="err-category">Please select a category.</span>
+
+          <label>Gender:</label>
+          <select name="gender">
+            <option value="">-- Select gender --</option>
+            <option value="unisex">Unisex</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+          </select>
+          <span class="error-msg" id="err-gender">Please select a gender.</span>
+
+          <label>Status:</label>
+          <select name="status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
 
           <label>Image URL:</label>
           <input type="text" name="image" placeholder="Image URL">
@@ -176,6 +182,7 @@
       </div>
     </div>
 
+    <!-- DELETE CONFIRM MODAL -->
     <div class="modal-overlay" id="deleteConfirmModal">
       <div class="ConfirmDeletion">
         <h2>Are you sure you want to delete this product?</h2>
@@ -188,9 +195,39 @@
           <p>Price: <span id="delete-product-price"></span></p>
           <p>Description: <span id="delete-product-description"></span></p>
           <p>Image: <span id="delete-product-image"></span></p>
+          <p>Status: <span id="delete-product-status"></span></p>
         </div>
         <button class="btn-yes" onclick="confirmDeletion()">Confirm</button>
         <button class="btn-no" onclick="cancelDeletion()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- VIEW ORDER MODAL -->
+    <div class="modal-overlay" id="viewOrderModal">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeOrderModal()">×</button>
+        <p class="order-modal-section-label">Order Details</p>
+
+        <div class="order-modal-header">
+          <div>
+            <p class="order-modal-id" id="order-id"></p>
+            <p class="order-modal-date" id="order-date"></p>
+          </div>
+          <span class="status-badge pending" id="order-status"></span>
+        </div>
+
+        <div class="order-modal-customer-box">
+          <p class="order-modal-section-label">Customer</p>
+          <p class="order-modal-customer-name" id="order-customer"></p>
+        </div>
+
+        <p class="order-modal-section-label">Items Ordered</p>
+        <ul class="order-modal-items" id="order-items"></ul>
+
+        <div class="order-modal-total-row">
+          <p class="order-modal-total-label">Total Paid</p>
+          <p class="order-modal-total-value" id="order-total"></p>
+        </div>
       </div>
     </div>
 

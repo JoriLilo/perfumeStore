@@ -224,6 +224,15 @@
   color: var(--color-accent);
 }
 
+.product-card h3 {
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
+
+.product-card h3:hover {
+    color: palevioletred;
+}
+
 /* Quick add */
 .product-card__quick-add {
   position: absolute;
