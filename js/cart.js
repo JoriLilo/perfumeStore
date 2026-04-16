@@ -155,12 +155,12 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
 });
 
-fetch('/components/navbar.html')
+/*fetch('/components/navbar.html')
   .then(res => res.text())
   .then(html => {
     navbarEl.innerHTML = html;
     updateCartBadge();
     updateNavbarSession(); // add this
-  });
+  });*/
 
   
