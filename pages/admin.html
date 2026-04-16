@@ -24,28 +24,25 @@
     <div class="main-content">
       <div class="section active" id="dashboard">
         <h3 class="heading">Dashboard</h3>
-      <div class="stat-cards">
-        <div class="stat-card">
-          <h3>Total Products</h3>
-          <p id="total-products">0</p>
-        </div>
-
-        <div class="stat-card">
-          <h3>Total Orders</h3>
-          <p id="total-orders">0</p>
-        </div>
-
-        <div class="stat-card">
-          <h3>Total Users</h3>
-          <p id="total-users">0</p>
-        </div>
-
-        <div class="stat-card">
-          <h3>Revenue</h3>
-          <p>$3200</p>
+        <div class="stat-cards">
+          <div class="stat-card">
+            <h3>Total Products</h3>
+            <p id="total-products">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total Orders</h3>
+            <p id="total-orders">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total Users</h3>
+            <p id="total-users">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Revenue</h3>
+            <p id="total-revenue">$0</p>
+          </div>
         </div>
       </div>
-            </div>
 
       <div class="section" id="products">
         <h3 class="heading">Products</h3>
@@ -54,14 +51,14 @@
           <button class="btn-add" onclick="openModal()">+ Add Product</button>
         </div>
 
-        <input 
-          type="text" 
-          id="search-input" 
+        <input
+          type="text"
+          id="search-input"
           class="search-input"
-          placeholder="Search by name, brand, or ID..." 
-         />
-         
-         <div class="products-table">
+          placeholder="Search by name, brand, or ID..."
+        />
+
+        <div class="products-table">
           <table>
             <thead>
               <tr>
@@ -83,12 +80,12 @@
 
       <div class="section" id="orders">
         <h3 class="heading">Orders</h3>
-        <input 
-          type="text" 
-          id="order-search-input" 
+        <input
+          type="text"
+          id="order-search-input"
           class="search-input"
-          placeholder="Search by customer, ID, or status..." 
-         />
+          placeholder="Search by customer, ID, or status..."
+        />
         <div class="orders-table">
           <table>
             <thead>
@@ -108,11 +105,11 @@
 
       <div class="section" id="users">
         <h3 class="heading">Users</h3>
-        <input 
-          type="text" 
-          id="user-search-input" 
+        <input
+          type="text"
+          id="user-search-input"
           class="search-input"
-          placeholder="Search by name, email, or ID..." 
+          placeholder="Search by name, email, or ID..."
         />
         <div class="users-table">
           <table>
@@ -127,11 +124,11 @@
       </div>
     </div>
 
-   
+    <!-- ADD / EDIT PRODUCT MODAL -->
     <div class="modal-overlay" id="addProductModal">
       <div class="modal-box">
         <button class="modal-close" onclick="closeModal()">✕</button>
-        
+
         <h3 class="heading" id="modal-title">Add New Product</h3>
         <form id="add-product-form">
           <label>Name:</label>
@@ -153,19 +150,19 @@
           <label>Category:</label>
           <select name="category">
             <option value="">-- Select category --</option>
-            <option value="women">Women</option>
-            <option value="men">Men</option>
-            <option value="unisex">Unisex</option>
-            <option value="niche">Niche</option>
+            <option value="perfume">Perfume</option>
+            <option value="cologne">Cologne</option>
           </select>
           <span class="error-msg" id="err-category">Please select a category.</span>
 
           <label>Gender:</label>
           <select name="gender">
+            <option value="">-- Select gender --</option>
             <option value="unisex">Unisex</option>
-            <option value="men">Men</option>
-            <option value="women">Women</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
           </select>
+          <span class="error-msg" id="err-gender">Please select a gender.</span>
 
           <label>Status:</label>
           <select name="status">
@@ -204,22 +201,34 @@
       </div>
     </div>
 
+    <!-- VIEW ORDER MODAL -->
     <div class="modal-overlay" id="viewOrderModal">
       <div class="modal-box">
-        <button class="modal-close" onclick="closeOrderModal()">✕</button>
+        <button class="modal-close" onclick="closeOrderModal()">×</button>
+        <p class="order-modal-section-label">Order Details</p>
 
-        <h3 class="heading">Order Details</h3>
+        <div class="order-modal-header">
+          <div>
+            <p class="order-modal-id" id="order-id"></p>
+            <p class="order-modal-date" id="order-date"></p>
+          </div>
+          <span class="status-badge pending" id="order-status"></span>
+        </div>
 
-        <p><strong>ID:</strong> <span id="order-id"></span></p>
-        <p><strong>Customer:</strong> <span id="order-customer"></span></p>
-        <p><strong>Date:</strong> <span id="order-date"></span></p>
-        <p><strong>Total:</strong> <span id="order-total"></span></p>
-        <p><strong>Status:</strong> <span id="order-status"></span></p>
+        <div class="order-modal-customer-box">
+          <p class="order-modal-section-label">Customer</p>
+          <p class="order-modal-customer-name" id="order-customer"></p>
+        </div>
 
-        <h4>Items:</h4>
-        <ul id="order-items"></ul>
+        <p class="order-modal-section-label">Items Ordered</p>
+        <ul class="order-modal-items" id="order-items"></ul>
+
+        <div class="order-modal-total-row">
+          <p class="order-modal-total-label">Total Paid</p>
+          <p class="order-modal-total-value" id="order-total"></p>
+        </div>
       </div>
-  </div>
+    </div>
 
   </div>
 
