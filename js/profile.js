@@ -13,8 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const session = JSON.parse(sessionStorage.getItem("session"));
 
   if (!session || !session.loggedIn) {
-    window.location.href = "login.html";
-    return;
+  window.location.href = "/pages/login.html";
   }
 
   // ── DOM refs ─────────────────────────────────────────────
