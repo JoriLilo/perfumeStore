@@ -79,7 +79,13 @@
     <script>
         fetch('/components/navbar.html')
             .then(res => res.text())
-            .then(html => { document.getElementById('navbar').innerHTML = html; });
+            .then(html => { document.getElementById('navbar').innerHTML = html; 
+                    setTimeout(() => {
+            if (typeof updateCartBadge === 'function') {
+                updateCartBadge();
+            }
+            }, 50);
+            });
 
         fetch('/components/footer.html')
             .then(res => res.text())

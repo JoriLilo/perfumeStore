@@ -1,10 +1,6 @@
 // ============================================================
 // js/profile.js — Profile Page Logic
-// Parfum · Handles profile form population, editing & password change
-//
-// Uses the same auth pattern as auth.js:
-//   - sessionStorage "session"  → current logged-in user
-//   - localStorage   "users"   → array of all registered users
+// SCENTÉ · Handles profile form population, editing & password change
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,90 +9,84 @@ document.addEventListener("DOMContentLoaded", () => {
   const session = JSON.parse(sessionStorage.getItem("session"));
 
   if (!session || !session.loggedIn) {
-  window.location.href = "/pages/login.html";
+    window.location.href = "/pages/login.html";
+    return;
   }
 
   // ── DOM refs ─────────────────────────────────────────────
-  const nameInput     = document.getElementById("full-name");
-  const emailInput    = document.getElementById("email");
-  const oldPwInput    = document.getElementById("old-password");
-  const newPwInput    = document.getElementById("new-password");
+  const nameInput = document.getElementById("full-name");
+  const emailInput = document.getElementById("email");
+  const oldPwInput = document.getElementById("old-password");
+  const newPwInput = document.getElementById("new-password");
   const confirmPwInput = document.getElementById("confirm-password");
-  const profileForm   = document.querySelector(".profile-card form");
-  const avatarEl      = document.querySelector(".avatar-placeholder span");
+  const profileForm = document.getElementById("profile-form");
+  const avatarEl = document.getElementById("avatar-initials");
 
-  // ── Populate form with current user data ─────────────────
-  nameInput.value  = session.name  || "";
-  emailInput.value = session.email || "";
-
-  // Set avatar initials from user name
-  if (avatarEl && session.name) {
-    const parts = session.name.trim().split(/\s+/);
-  // ── Force-clear password fields (browsers autofill these even with autocomplete=off) ──
-  oldPwInput.value     = "";
-  newPwInput.value     = "";
-  confirmPwInput.value = "";
-
-  // ── Populate form with current user data ─────────────────
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const currentUser = users.find(u => u.email === session.email);
-
-  // DEBUG — open browser console (F12) to see what properties your user actually has
-  console.log("Current user object from localStorage:", currentUser);
-  console.log("Session object:", session);
-
-  // Build the full name by checking every common combination of first/last name fields.
-  // Covers: firstName+lastName, firstname+lastname, first_name+last_name,
-  //         name+surname, name+lastName, fname+lname, given_name+family_name
-  function buildFullName(user) {
-    if (!user) return "";
-
-    const first =
-      user.firstName || user.firstname || user.first_name ||
-      user.fname     || user.given_name || user.first      || "";
-
-    const last =
-      user.lastName  || user.lastname  || user.last_name  ||
-      user.surname   || user.lname     || user.family_name || user.last || "";
-
-    // If we found both parts, join them
-    const combined = `${first} ${last}`.trim();
-    if (combined) return combined;
-
-    // Fallback: single `name` or `fullName` field
-    return user.fullName || user.full_name || user.name || "";
+  // ── Load user data from localStorage ─────────────────────
+  function loadUserData() {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const currentUser = users.find(u => u.email === session.email);
+    
+    console.log("Session:", session);
+    console.log("Current user from localStorage:", currentUser);
+    
+    // Build full name from user object
+    let fullName = "";
+    
+    if (currentUser) {
+      // Try different possible name fields
+      const firstName = currentUser.firstName || currentUser.firstname || currentUser.first_name || currentUser.name || "";
+      const lastName = currentUser.lastName || currentUser.lastname || currentUser.last_name || currentUser.surname || "";
+      
+      fullName = `${firstName} ${lastName}`.trim();
+      
+      // Fallback to session name
+      if (!fullName && session.name) {
+        fullName = session.name;
+      }
+      
+      // If still empty, use email username
+      if (!fullName && session.email) {
+        fullName = session.email.split('@')[0];
+      }
+    } else {
+      // Use session data if user not found in localStorage
+      fullName = session.name || session.email?.split('@')[0] || "User";
+    }
+    
+    // Populate form
+    nameInput.value = fullName;
+    emailInput.value = session.email || "";
+    
+    // Set avatar initials
+    if (avatarEl) {
+      const parts = fullName.trim().split(/\s+/);
+      const initials = parts.map(p => p.charAt(0).toUpperCase()).slice(0, 2).join("");
+      avatarEl.textContent = initials || "U";
+    }
+    
+    // Clear password fields
+    oldPwInput.value = "";
+    newPwInput.value = "";
+    confirmPwInput.value = "";
   }
+  
+  loadUserData();
 
-  let fullName = buildFullName(currentUser);
-  if (!fullName) fullName = buildFullName(session);
-
-  nameInput.value  = fullName;
-  emailInput.value = session.email || "";
-
-  // Set avatar initials from the full name
-  if (avatarEl && fullName) {
-    const parts = fullName.trim().split(/\s+/);
-    const initials = parts.map(p => p.charAt(0).toUpperCase()).slice(0, 2).join("");
-    avatarEl.textContent = initials;
-  }
-
-  // ── Show / Hide password toggle (works for all 3 fields) ──
+  // ── Password toggle ──────────────────────────────────────
   document.querySelectorAll(".toggle-password").forEach(btn => {
     btn.addEventListener("click", () => {
-      const targetId = btn.dataset.target;
+      const targetId = btn.getAttribute("data-target");
       const input = document.getElementById(targetId);
-      const eyeIcon = btn.querySelector(".icon-eye");
-      const eyeOffIcon = btn.querySelector(".icon-eye-off");
-
+      const icon = btn.querySelector("i");
+      
       if (input.type === "password") {
         input.type = "text";
-        eyeIcon.style.display = "none";
-        eyeOffIcon.style.display = "block";
+        icon.className = "bi bi-eye-slash";
         btn.setAttribute("aria-label", "Hide password");
       } else {
         input.type = "password";
-        eyeIcon.style.display = "block";
-        eyeOffIcon.style.display = "none";
+        icon.className = "bi bi-eye";
         btn.setAttribute("aria-label", "Show password");
       }
     });
@@ -108,25 +98,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const newName = nameInput.value.trim();
 
-    // — Basic validation —
+    // Basic validation
     if (!newName) {
       showToast("Name cannot be empty.", "error");
       nameInput.focus();
       return;
     }
 
-    // — Grab users array from localStorage —
+    // Get users array from localStorage
     let users = JSON.parse(localStorage.getItem("users")) || [];
     const userIndex = users.findIndex(u => u.email === session.email);
 
     if (userIndex === -1) {
-      showToast("User not found. Please log in again.", "error");
-      return;
+      // User not found in localStorage - create from session
+      const newUser = {
+        firstName: newName.split(' ')[0] || newName,
+        lastName: newName.split(' ').slice(1).join(' ') || "",
+        email: session.email,
+        password: "",
+        joinDate: new Date().toISOString().split("T")[0]
+      };
+      users.push(newUser);
     }
 
-    // — Handle password change (only if any password field is filled) —
-    const oldPw    = oldPwInput.value;
-    const newPw    = newPwInput.value;
+    // Handle password change
+    const oldPw = oldPwInput.value;
+    const newPw = newPwInput.value;
     const confirmPw = confirmPwInput.value;
 
     const wantsPasswordChange = oldPw || newPw || confirmPw;
@@ -139,16 +136,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Verify current password
-      if (oldPw !== users[userIndex].password) {
-        showToast("Current password is incorrect.", "error");
-        oldPwInput.focus();
-        return;
+      if (userIndex !== -1) {
+        if (oldPw !== users[userIndex].password) {
+          showToast("Current password is incorrect.", "error");
+          oldPwInput.focus();
+          return;
+        }
       }
 
-      // Validate new password strength (same rule as register)
+      // Validate new password strength
       const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
       if (!passwordPattern.test(newPw)) {
-        showToast("New password needs 8+ chars, upper & lowercase, and a number.", "error");
+        showToast("Password needs 8+ chars, upper & lowercase, and a number.", "error");
         newPwInput.focus();
         return;
       }
@@ -161,29 +160,59 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Update password
-      users[userIndex].password = newPw;
+      if (userIndex !== -1) {
+        users[userIndex].password = newPw;
+      }
     }
 
-    // — Update name —
-    users[userIndex].name = newName;
+    // Update name
+    if (userIndex !== -1) {
+      const nameParts = newName.trim().split(/\s+/);
+      users[userIndex].firstName = nameParts[0] || "";
+      users[userIndex].lastName = nameParts.slice(1).join(" ") || "";
+      users[userIndex].name = newName;
+    }
+
+    // Save to localStorage
     localStorage.setItem("users", JSON.stringify(users));
 
-    // — Update session —
+    // Update session
     session.name = newName;
     sessionStorage.setItem("session", JSON.stringify(session));
 
-    // — Update avatar initials —
+    // Update avatar initials
     if (avatarEl) {
       const parts = newName.trim().split(/\s+/);
       const initials = parts.map(p => p.charAt(0).toUpperCase()).slice(0, 2).join("");
-      avatarEl.textContent = initials;
+      avatarEl.textContent = initials || "U";
     }
 
-    // — Clear password fields —
-    oldPwInput.value    = "";
-    newPwInput.value    = "";
+    // Clear password fields
+    oldPwInput.value = "";
+    newPwInput.value = "";
     confirmPwInput.value = "";
+
+    // Reset password toggle icons
+    document.querySelectorAll(".toggle-password i").forEach(icon => {
+      icon.className = "bi bi-eye";
+    });
+    document.querySelectorAll(".toggle-password input, .password-wrapper input").forEach(input => {
+      if (input.type === "text") input.type = "password";
+    });
 
     showToast("Profile updated successfully!");
   });
+
 });
+
+// ── Logout function ───────────────────────────────────────
+function logout() {
+  sessionStorage.removeItem("session");
+  showToast("You have been logged out", "info");
+  setTimeout(() => {
+    window.location.href = "/index.html";
+  }, 1000);
+}
+
+// Expose to global
+window.logout = logout;

@@ -387,6 +387,41 @@ function renderUsers() {
   const tableBody = document.getElementById("users-table-body");
   tableBody.innerHTML = "";
 
+  // First, collect all orders and group by email
+  const orderCounts = {};
+  
+  // Check individual order keys
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("scente_order_")) {
+      try {
+        const order = JSON.parse(localStorage.getItem(key));
+        const email = order.customerDetails?.email || order.email || order.userEmail;
+        
+        if (email) {
+          const normalizedEmail = email.toLowerCase().trim();
+          orderCounts[normalizedEmail] = (orderCounts[normalizedEmail] || 0) + 1;
+        }
+      } catch (e) {
+        console.warn('Failed to parse order:', key);
+      }
+    }
+  }
+  
+  // Also check the global orders array if it exists
+  const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+  allOrders.forEach(order => {
+    const email = order.customerDetails?.email || order.email || order.userEmail;
+    if (email) {
+      const normalizedEmail = email.toLowerCase().trim();
+      // Only count if not already counted from individual keys
+      // (the orders array might have duplicates)
+      if (!orderCounts[normalizedEmail]) {
+        orderCounts[normalizedEmail] = 1;
+      }
+    }
+  });
+
   const processed = users.map((user, index) => ({ user, index }));
 
   const filtered = processed.filter(item => {
@@ -410,13 +445,16 @@ function renderUsers() {
 
   filtered.forEach((item, i) => {
     const user = item.user;
+    const normalizedEmail = user.email.toLowerCase().trim();
+    const orderCount = orderCounts[normalizedEmail] || 0;
+    
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${i + 1}</td>
       <td>${user.firstName} ${user.lastName}</td>
       <td>${user.email}</td>
       <td>${user.joinDate || "—"}</td>
-      <td>${user.orders ? user.orders.length : 0}</td>
+      <td>${orderCount}</td>
     `;
     tableBody.appendChild(row);
   });

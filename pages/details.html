@@ -73,15 +73,7 @@
     Long-lasting and deeply sensual — perfect for evening wear.
   </p>
 
-  <!-- Volume selector -->
-  <div>
-    <span class="volume-selector__label">Size</span>
-    <div class="volume-options" id="detail-volumes">
-      <button class="volume-option">30 ml</button>
-      <button class="volume-option active">50 ml</button>
-      <button class="volume-option">100 ml</button>
-    </div>
-  </div>
+  
 
           <!-- Quantity -->
           <div class="qty-row">
@@ -93,10 +85,10 @@
             </div>
           </div>
 
-          <!-- CTA Buttons -->
+         <!-- CTA Buttons -->
           <div class="product-info__actions">
-            <button class="btn btn--primary btn--full">Add to Cart</button>
-            <button class="btn btn--secondary btn--full">Add to Wishlist</button>
+            <button class="btn btn--primary btn--full" id="btn-add-cart">Add to Cart</button>
+            <button class="btn btn--secondary btn--full" id="btn-wishlist">Add to Wishlist</button>
           </div>
 
           <!-- Accordion details -->
@@ -140,16 +132,20 @@
   <div id="footer-placeholder"></div>
 
   <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  
-
-  <script>
-    /* Load navbar and footer */
+<!-- Load navbar and footer -->
+<script>
     fetch('/components/navbar.html')
       .then(res => res.text())
       .then(html => {
         document.getElementById('navbar-placeholder').innerHTML = html;
+        setTimeout(() => {
+          if (typeof updateCartBadge === 'function') {
+            updateCartBadge();
+          }
+        }, 50);
       });
 
     fetch('/components/footer.html')
@@ -157,11 +153,13 @@
       .then(html => {
         document.getElementById('footer-placeholder').innerHTML = html;
       });
+</script>
 
-   
-  
-  </script>
-  <script src="/js/details.js"></script>
+<!-- Core Scripts - ORDER IS IMPORTANT! -->
+<script src="/js/cart.js"></script>
+<script src="/js/toast.js"></script>
+<script src="/js/wishlist.js"></script>
+<script src="/js/details.js"></script>
 
 </body>
 </html>

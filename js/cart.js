@@ -155,12 +155,64 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
 });
 
-/*fetch('/components/navbar.html')
-  .then(res => res.text())
-  .then(html => {
-    navbarEl.innerHTML = html;
-    updateCartBadge();
-    updateNavbarSession(); // add this
-  });*/
+function toggleSearch() {
+  const bar = document.getElementById('scente-search-bar');
+  if (bar) {
+    bar.classList.toggle('open');
+    if (bar.classList.contains('open')) {
+      const input = document.getElementById('scente-search-input');
+      if (input) setTimeout(() => input.focus(), 100);
+    }
+  }
+}
+
+// ── Update navbar based on session ─────────────────────────
+function updateNavbarSession() {
+  const session = JSON.parse(sessionStorage.getItem('session'));
+  const isLoggedIn = session && session.loggedIn;
+  
+  // Desktop profile link
+  const profileLink = document.getElementById('profile-link');
+  if (profileLink) {
+    if (isLoggedIn) {
+      profileLink.href = '/pages/profile.html';
+      profileLink.innerHTML = '<i class="bi bi-person-check"></i>';
+      profileLink.setAttribute('title', session.name || 'My Profile');
+    } else {
+      profileLink.href = '/pages/login.html';
+      profileLink.innerHTML = '<i class="bi bi-person"></i>';
+      profileLink.setAttribute('title', 'Sign In');
+    }
+  }
+  
+  // Mobile account link
+  const mobAccountLink = document.getElementById('mob-account-link');
+  if (mobAccountLink) {
+    if (isLoggedIn) {
+      mobAccountLink.href = '/pages/profile.html';
+      mobAccountLink.innerHTML = '<i class="bi bi-person-check"></i> My Profile';
+    } else {
+      mobAccountLink.href = '/pages/login.html';
+      mobAccountLink.innerHTML = '<i class="bi bi-person"></i> Sign In';
+    }
+  }
+}
+
+// Update the navbar load fetch calls
+document.addEventListener('DOMContentLoaded', () => {
+  const navbarEl = document.getElementById('navbar-placeholder');
+  if (navbarEl) {
+    fetch('/components/navbar.html')
+      .then(res => res.text())
+      .then(html => {
+        navbarEl.innerHTML = html;
+        updateCartBadge();
+        updateNavbarSession(); // ADD THIS LINE
+      });
+  }
+  
+  // Also update existing navbar if already loaded
+  setTimeout(updateNavbarSession, 100);
+});
 
   
