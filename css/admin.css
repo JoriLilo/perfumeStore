@@ -479,7 +479,7 @@ form select.input-error {
   font-weight: 600;
 }
 
-#search-input {
+.search-input {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #f0dde2;
@@ -490,8 +490,105 @@ form select.input-error {
   transition: border-color 0.2s ease;
 }
 
-#search-input:focus {
+/* FOCUS STYLE */
+.search-input:focus {
   outline: none;
   border-color: #c4687e;
   background-color: #fff0f2;
+  box-shadow: 0 0 0 2px rgba(196, 104, 126, 0.2);
+}
+
+/* VIEW ORDER MODAL */
+.viewOrderModal .modal-box {
+  width: 480px;
+}
+
+.order-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.order-modal-id {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d1b2e;
+  margin: 0 0 4px;
+}
+
+.order-modal-date {
+  font-size: 12px;
+  color: #999999;
+  margin: 0;
+}
+
+.order-modal-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #8a6070;
+  margin: 0 0 10px;
+}
+
+.order-modal-customer-box {
+  background-color: #fdf0f3;
+  border: 1px solid #f0c4d4;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.order-modal-customer-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2d1b2e;
+  margin: 0;
+}
+
+.order-modal-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  list-style: none;
+  padding: 0;
+}
+
+.order-modal-items li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: #fdf6f8;
+  border: 1px solid #f0dde2;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #2d1b2e;
+  border-bottom: 1px solid #f0dde2;
+}
+
+.order-modal-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #fdf0f3;
+  padding-top: 16px;
+}
+
+.order-modal-total-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #888888;
+  margin: 0;
+}
+
+.order-modal-total-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d1b2e;
+  margin: 0;
 }

@@ -85,18 +85,40 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Package the order details for saving
         const formData = new FormData(form);
-        const orderCredentials = Object.fromEntries(formData.entries()); // Grabs all inputs like name, address, card info
+        const orderCredentials = Object.fromEntries(formData.entries());
+
+        // Get the current user's email from session
+        const session = JSON.parse(sessionStorage.getItem('session'));
+        const userEmail = session?.email || orderCredentials.email || 'guest@example.com';
 
         const completedOrder = {
             orderNumber: newCode,
             date: new Date().toISOString(),
-            customerDetails: orderCredentials,
+            status: 'pending',  // Add default status
+            payment: cardRadio.checked ? 'Paid' : 'COD',
+            customerDetails: {
+                name: orderCredentials.fullName || session?.name || 'Customer',
+                email: userEmail,  // IMPORTANT: Save email here
+                address: orderCredentials.addressLine1,
+                city: orderCredentials.city,
+                country: orderCredentials.country,
+                phone: orderCredentials.phone
+            },
             items: JSON.parse(localStorage.getItem('scente_cart') || '[]'),
             totalPaid: document.getElementById('grandTotalDisplay').textContent
         };
 
-        // Save everything into localStorage 
+        // Save to localStorage with user email as part of the key for easier lookup
         localStorage.setItem(`scente_order_${newCode}`, JSON.stringify(completedOrder));
+
+        // Also add to a global orders array for easier querying
+        const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        allOrders.push(completedOrder);
+        localStorage.setItem('orders', JSON.stringify(allOrders));
+
+        console.log('Order saved:', completedOrder);
+        //Delete cart
+        localStorage.removeItem('scente_cart');
 
         // Show the modal and the dark overlay
         modal.classList.add('active');
