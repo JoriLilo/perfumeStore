@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Save everything into localStorage 
         localStorage.setItem(`scente_order_${newCode}`, JSON.stringify(completedOrder));
 
+        //Delete cart
+        localStorage.removeItem('scente_cart');
+
         // Show the modal and the dark overlay
         modal.classList.add('active');
         overlay.classList.add('active');
