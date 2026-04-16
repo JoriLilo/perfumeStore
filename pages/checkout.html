@@ -19,48 +19,29 @@
 
     <main class="container--narrow section">
         
+        
         <header class="checkout-header">
+            <a href="/pages/cart.html" class="btn-back-circle" aria-label="Go back to cart">
+                <i class="bi bi-chevron-left"></i>
+            </a>
             <h1 class="heading-xl text-center">Your Shopping Bag</h1>
         </header>
 
-        <section class="bag-items-section mb-xl">
-            <div class="cart-item">
-                <div class="item-image">
-                    <img src="/images/terroni.avif" alt="Terroni">
-                </div>
-                <div class="item-details">
-                    <h3 class="heading-md">Terroni</h3>
-                    <p class="text-sm text-secondary">Size: 50ml</p>
-                    <p class="text-sm text-secondary">Qty: 1</p>
-                </div>
-                <div class="item-price text-lg font-medium">$155.00</div>
-            </div>
-
-            <div class="cart-item">
-                <div class="item-image">
-                    <img src="/images/angels share.avif" alt="Angles Share">
-                </div>
-                <div class="item-details">
-                    <h3 class="heading-md">Angels Share</h3>
-                    <p class="text-sm text-secondary">Size: 50ml</p>
-                    <p class="text-sm text-secondary">Qty: 1</p>
-                </div>
-                <div class="item-price text-lg font-medium">$275.00</div>
-            </div>
-        </section>
+        <section class="bag-items-section mb-xl" id="cartItemsContainer">
+            </section>
 
         <section class="price-summary-section mb-xl">
             <div class="summary-row">
                 <span class="text-secondary">Subtotal</span>
-                <span>$430.00</span>
+                <span id="subtotalDisplay">$0.00</span>
             </div>
             <div class="summary-row">
                 <span class="text-secondary">Shipping</span>
-                <span>$15.00</span>
+                <span id="shippingDisplay">$15.00</span>
             </div>
             <div class="summary-row grand-total mt-md pt-md">
                 <span class="heading-sm">Total</span>
-                <span class="heading-sm">$445.00</span>
+                <span class="heading-sm" id="grandTotalDisplay">$0.00</span>
             </div>
         </section>
 
@@ -100,6 +81,7 @@
                         <label for="country" class="form-label">Country</label>
                         <select id="country" name="country" class="form-select" required>
                             <option value="" disabled selected>Select a country</option>
+                            <option value="AL">Albania</option>
                             <option value="US">United States</option>
                             <option value="UK">United Kingdom</option>
                             <option value="FR">France</option>
