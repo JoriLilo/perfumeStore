@@ -479,7 +479,7 @@ form select.input-error {
   font-weight: 600;
 }
 
-#search-input {
+.search-input {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #f0dde2;
@@ -490,8 +490,10 @@ form select.input-error {
   transition: border-color 0.2s ease;
 }
 
-#search-input:focus {
+/* FOCUS STYLE */
+.search-input:focus {
   outline: none;
   border-color: #c4687e;
   background-color: #fff0f2;
+  box-shadow: 0 0 0 2px rgba(196, 104, 126, 0.2);
 }
