@@ -1,15 +1,11 @@
 <!-- ═══════════════════════════════════════════
      SCENTÉ — Navbar Component
      components/navbar.html
-     
-     HOW TO USE:
-     Copy everything below into the <body> of every page,
-     right after the opening <body> tag.
      ═══════════════════════════════════════════ -->
 <link rel="stylesheet" href="../css/shared.css">
 <link rel="stylesheet" href="../css/navbar.css">
 
-<!-- Google Fonts (same as shared.css) -->
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&family=Great+Vibes&display=swap" rel="stylesheet" />
  
 <!-- Bootstrap 5 -->
@@ -39,23 +35,13 @@
           <a href="../pages/shop.html?cat=men">Men</a>
           <a href="../pages/shop.html?cat=unisex">Unisex</a>
           <a href="../pages/shop.html?cat=new">New Arrivals</a>
-          <a href="../pages/shop.html?cat=sets">Gift Sets</a>
         </div>
       </li>
 
-      <li>
-        <a href="../pages/shop.html?view=brands">Brands</a>
-        <div class="scente-dropdown">
-          <a href="../pages/shop.html?brand=chanel">Chanel</a>
-          <a href="../pages/shop.html?brand=dior">Dior</a>
-          <a href="../pages/shop.html?brand=ysl">YSL</a>
-          <a href="../pages/shop.html?brand=burberry">Burberry</a>
-        </div>
-      </li>
-
-      <li>
+      <!-- Sale link - commented out for now -->
+      <!-- <li>
         <a href="../pages/shop.html?cat=sale" class="nav-sale">Sale</a>
-      </li>
+      </li> -->
     </ul>
 
     <!-- Desktop action icons -->
@@ -63,31 +49,24 @@
       <button class="scente-icon-btn" onclick="toggleSearch()" aria-label="Search">
         <i class="bi bi-search"></i>
       </button>
-      <a href="../pages/wishlist.html" class="scente-icon-btn" aria-label="Wishlist">
+      <a href="/pages/wishlist.html" class="scente-icon-btn" aria-label="Wishlist">
         <i class="bi bi-heart"></i>
       </a>
-      <a href="../pages/cart.html" class="scente-icon-btn" aria-label="Cart">
+      <a href="/pages/cart.html" class="scente-icon-btn" aria-label="Cart">
         <i class="bi bi-bag"></i>
         <span class="scente-badge" id="cart-count">0</span>
       </a>
-      <a href="../pages/login.html" class="scente-icon-btn" aria-label="Account">
+      <!-- Profile link - controlled by JS -->
+      <a href="/pages/login.html" id="profile-link" class="scente-icon-btn" aria-label="Account">
         <i class="bi bi-person"></i>
       </a>
-      <button
-        class="scente-menu-pill"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#scenteMobileMenu"
-        aria-label="More"
-      >
-        <i class="bi bi-three-dots"></i>
-      </button>
     </div>
 
     <!-- Mobile: cart + hamburger -->
     <div class="scente-mobile-right">
       <a href="../pages/cart.html" class="scente-icon-btn" aria-label="Cart">
         <i class="bi bi-bag"></i>
-        <span class="scente-badge">0</span>
+        <span class="scente-badge" id="cart-count-mobile">0</span>
       </a>
       <button
         class="scente-hamburger"
@@ -110,7 +89,11 @@
         id="scente-search-input"
         placeholder="Search for a perfume or brand…"
         autocomplete="off"
+        onkeypress="if(event.key==='Enter') performSearch()"
       />
+      <button onclick="performSearch()" aria-label="Search" style="margin-right: 8px;">
+        <i class="bi bi-arrow-right"></i>
+      </button>
       <button onclick="toggleSearch()" aria-label="Close search">
         <i class="bi bi-x"></i>
       </button>
@@ -167,12 +150,44 @@
           </ul>
         </div>
       </li>
-      <li><a href="../pages/shop.html?cat=sale" class="nav-sale">Sale</a></li>
+      <!-- Sale link in mobile -->
+      <!-- <li><a href="../pages/shop.html?cat=sale" class="nav-sale">Sale</a></li> -->
     </ul>
     <div class="scente-mob-footer mt-auto">
-      <a href="../pages/login.html"><i class="bi bi-person"></i> Sign In</a>
+      <a href="../pages/login.html" id="mob-account-link"><i class="bi bi-person"></i> Sign In</a>
       <a href="../pages/wishlist.html"><i class="bi bi-heart"></i> Wishlist</a>
       <a href="../pages/cart.html"><i class="bi bi-bag"></i> Cart</a>
     </div>
   </div>
 </div>
+
+<script>
+// Update navbar account icon based on session
+(function() {
+  const session = JSON.parse(sessionStorage.getItem('session'));
+  const profileLink = document.getElementById('profile-link');
+  const mobAccountLink = document.getElementById('mob-account-link');
+
+  if (session && session.loggedIn) {
+    if (profileLink) {
+      profileLink.href = '../pages/profile.html';
+      profileLink.innerHTML = '<i class="bi bi-person-check"></i>';
+      profileLink.setAttribute('title', session.name || 'My Profile');
+    }
+    if (mobAccountLink) {
+      mobAccountLink.href = '../pages/profile.html';
+      mobAccountLink.innerHTML = '<i class="bi bi-person-check"></i> My Profile';
+    }
+  } else {
+    if (profileLink) {
+      profileLink.href = '../pages/login.html';
+      profileLink.innerHTML = '<i class="bi bi-person"></i>';
+      profileLink.setAttribute('title', 'Sign In');
+    }
+    if (mobAccountLink) {
+      mobAccountLink.href = '../pages/login.html';
+      mobAccountLink.innerHTML = '<i class="bi bi-person"></i> Sign In';
+    }
+  }
+})();
+</script>

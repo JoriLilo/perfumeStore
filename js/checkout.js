@@ -2,16 +2,70 @@
 fetch('/components/footer.html')
     .then(res => res.text())
     .then(html => {
-    document.getElementById('footer-placeholder').innerHTML = html;
+        document.getElementById('footer-placeholder').innerHTML = html;
     });
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 1. DYNAMIC CART RENDERING ---
+    const cartContainer = document.getElementById('cartItemsContainer');
+    const subtotalDisplay = document.getElementById('subtotalDisplay');
+    const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+    const shippingCost = 15.00;
+
+    function loadCartItems() {
+        // Read from local storage (parse string to array)
+        const cartData = JSON.parse(localStorage.getItem('scente_cart')) || [];
+        
+        // Handle empty cart
+        if (cartData.length === 0) {
+            cartContainer.innerHTML = '<p class="empty-cart-msg">Your shopping bag is empty.</p>';
+            subtotalDisplay.textContent = '$0.00';
+            grandTotalDisplay.textContent = '$0.00';
+            return;
+        }
+
+        cartContainer.innerHTML = ''; // Clear container
+        let subtotal = 0;
+
+        // Loop through each product and create the HTML structure
+        cartData.forEach(item => {
+            const price = parseFloat(item.price) || 0;
+            const qty = parseInt(item.quantity) || 1;
+            const itemTotal = price * qty;
+            subtotal += itemTotal;
+
+            const itemHTML = `
+                <div class="cart-item">
+                    <div class="item-image">
+                        <img src="${item.image || '/images/terroni.avif'}" alt="${item.name}">
+                    </div>
+                    <div class="item-details">
+                        <h3 class="heading-md">${item.name}</h3>
+                        <p class="text-sm text-secondary">Size: ${item.size || '50ml'}</p>
+                        <p class="text-sm text-secondary">Qty: ${qty}</p>
+                    </div>
+                    <div class="item-price text-lg font-medium">$${itemTotal.toFixed(2)}</div>
+                </div>
+            `;
+            cartContainer.insertAdjacentHTML('beforeend', itemHTML);
+        });
+
+        // Update Summary displays
+        subtotalDisplay.textContent = `$${subtotal.toFixed(2)}`;
+        grandTotalDisplay.textContent = `$${(subtotal + shippingCost).toFixed(2)}`;
+    }
+
+    // Run this immediately when page loads
+    loadCartItems();
+
+
+    // --- 2. ORDER MODAL & DATA SAVING ---
     const form = document.querySelector('form');
     const modal = document.getElementById('orderModal');
     const overlay = document.getElementById('orderOverlay');
     const orderDisplay = document.getElementById('orderNumberDisplay');
 
-    // Function to generate a random order code (e.g., F + 14 random digits)
     function generateOrderCode() {
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const randomLetter = letters.charAt(Math.floor(Math.random() * letters.length));
@@ -22,20 +76,57 @@ document.addEventListener('DOMContentLoaded', () => {
         return randomLetter + randomDigits;
     }
 
-    // Listen for the Place Order form submission
     form.addEventListener('submit', function(e) {
         e.preventDefault(); 
         
-        // Generate and display the new random code
+        // Generate random code
         const newCode = generateOrderCode();
         orderDisplay.textContent = `Order number ${newCode}`;
         
+        // Package the order details for saving
+        const formData = new FormData(form);
+        const orderCredentials = Object.fromEntries(formData.entries());
+
+        // Get the current user's email from session
+        const session = JSON.parse(sessionStorage.getItem('session'));
+        const userEmail = session?.email || orderCredentials.email || 'guest@example.com';
+
+        const completedOrder = {
+            orderNumber: newCode,
+            date: new Date().toISOString(),
+            status: 'pending',  // Add default status
+            payment: cardRadio.checked ? 'Paid' : 'COD',
+            customerDetails: {
+                name: orderCredentials.fullName || session?.name || 'Customer',
+                email: userEmail,  // IMPORTANT: Save email here
+                address: orderCredentials.addressLine1,
+                city: orderCredentials.city,
+                country: orderCredentials.country,
+                phone: orderCredentials.phone
+            },
+            items: JSON.parse(localStorage.getItem('scente_cart') || '[]'),
+            totalPaid: document.getElementById('grandTotalDisplay').textContent
+        };
+
+        // Save to localStorage with user email as part of the key for easier lookup
+        localStorage.setItem(`scente_order_${newCode}`, JSON.stringify(completedOrder));
+
+        // Also add to a global orders array for easier querying
+        const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        allOrders.push(completedOrder);
+        localStorage.setItem('orders', JSON.stringify(allOrders));
+
+        console.log('Order saved:', completedOrder);
+        //Delete cart
+        localStorage.removeItem('scente_cart');
+
         // Show the modal and the dark overlay
         modal.classList.add('active');
         overlay.classList.add('active');
     });
 
-    // --- PAYMENT TOGGLE LOGIC ---
+
+    // --- 3. PAYMENT TOGGLE LOGIC ---
     const postRadio = document.getElementById('payPost');
     const cardRadio = document.getElementById('payCard');
     const labelPost = document.getElementById('labelPost');
