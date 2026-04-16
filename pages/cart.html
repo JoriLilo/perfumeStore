@@ -346,20 +346,13 @@
             <span>Shipping</span>
             <span id="summary-shipping" class="summary-free">Free</span>
           </div>
-          <div class="summary-row">
-            <span>Discount</span>
-            <span id="summary-discount">—</span>
-          </div>
+          
           <div class="summary-row total">
             <span>Total</span>
             <span id="summary-total">$0.00</span>
           </div>
 
-          <div class="promo-wrap">
-            <input type="text" class="promo-input" id="promo-input" placeholder="Promo code">
-            <button class="promo-apply" onclick="applyPromo()">Apply</button>
-          </div>
-          <p class="promo-msg" id="promo-msg"></p>
+         
 
           <a href="checkout.html" class="btn-checkout">Proceed to Checkout</a>
           <a href="/index.html" class="btn-continue">Continue Shopping</a>
@@ -383,7 +376,6 @@
   <script src="/js/cart.js"></script>
 
   <script>
-    const PROMO_CODES = { 'SCENTE10': 0.10, 'SAVE20': 0.20 };
     let appliedDiscount = 0;
 
     // ── Seed demo products if cart is empty ───────────────────

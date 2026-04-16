@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile — Parfum</title>
+    <title>My Profile — SCENTÉ</title>
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="../css/shared.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="../css/profile.css">
 </head>
 <body>
 
-    <!-- NAVBAR — loaded via fetch (same pattern as login.html and cart.html) -->
+    <!-- NAVBAR -->
     <div id="navbar-placeholder"></div>
 
     <!-- MAIN CONTENT -->
@@ -28,13 +34,13 @@
 
                 <!-- Avatar placeholder -->
                 <div class="avatar-placeholder">
-                    <span>Avatar</span>
+                    <span id="avatar-initials">AV</span>
                 </div>
 
-                <!-- Profile Form — autocomplete off to prevent browser pre-fill -->
-                <form autocomplete="off">
+                <!-- Profile Form -->
+                <form id="profile-form" autocomplete="off">
 
-                    <!-- Two-column row: Name + Email side by side on desktop -->
+                    <!-- Two-column row: Name + Email -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="full-name">Full Name</label>
@@ -52,35 +58,13 @@
                     <div class="password-section">
                         <p class="password-section__heading">Change Password</p>
 
-                        <div class="form-group">
-                            <label class="form-label" for="old-password">Current Password</label>
-                            <input class="form-input" type="password" id="old-password" name="old_password" placeholder="Current password">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="new-password">New Password</label>
-                            <input class="form-input" type="password" id="new-password" name="new_password" placeholder="New password">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="confirm-password">Confirm New Password</label>
-                            <input class="form-input" type="password" id="confirm-password" name="confirm_password" placeholder="Confirm new password">
                         <!-- Current Password -->
                         <div class="form-group">
                             <label class="form-label" for="old-password">Current Password</label>
                             <div class="password-wrapper">
-                                <input class="form-input" type="password" id="old-password" name="old_password" placeholder="Current password" autocomplete="new-password">
+                                <input class="form-input" type="password" id="old-password" name="old_password" placeholder="Current password" autocomplete="off">
                                 <button type="button" class="toggle-password" data-target="old-password" aria-label="Show password">
-                                    <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                    <svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-                                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
-                                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
-                                        <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
-                                        <line x1="2" y1="2" x2="22" y2="22"/>
-                                    </svg>
+                                    <i class="bi bi-eye"></i>
                                 </button>
                             </div>
                         </div>
@@ -89,18 +73,9 @@
                         <div class="form-group">
                             <label class="form-label" for="new-password">New Password</label>
                             <div class="password-wrapper">
-                                <input class="form-input" type="password" id="new-password" name="new_password" placeholder="New password" autocomplete="new-password">
+                                <input class="form-input" type="password" id="new-password" name="new_password" placeholder="New password" autocomplete="off">
                                 <button type="button" class="toggle-password" data-target="new-password" aria-label="Show password">
-                                    <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                    <svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-                                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
-                                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
-                                        <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
-                                        <line x1="2" y1="2" x2="22" y2="22"/>
-                                    </svg>
+                                    <i class="bi bi-eye"></i>
                                 </button>
                             </div>
                         </div>
@@ -109,18 +84,9 @@
                         <div class="form-group">
                             <label class="form-label" for="confirm-password">Confirm New Password</label>
                             <div class="password-wrapper">
-                                <input class="form-input" type="password" id="confirm-password" name="confirm_password" placeholder="Confirm new password" autocomplete="new-password">
+                                <input class="form-input" type="password" id="confirm-password" name="confirm_password" placeholder="Confirm new password" autocomplete="off">
                                 <button type="button" class="toggle-password" data-target="confirm-password" aria-label="Show password">
-                                    <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                    <svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-                                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
-                                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
-                                        <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
-                                        <line x1="2" y1="2" x2="22" y2="22"/>
-                                    </svg>
+                                    <i class="bi bi-eye"></i>
                                 </button>
                             </div>
                         </div>
@@ -137,15 +103,19 @@
             <!-- RIGHT COLUMN — Sidebar -->
             <aside class="profile-sidebar">
 
-
-            <!-- RIGHT COLUMN — Sidebar -->
-            <aside class="profile-sidebar">
-
                 <!-- Order Tracking card -->
                 <div class="sidebar-card">
                     <h2 class="sidebar-card__title">Order tracking</h2>
                     <p class="sidebar-card__text">Track your latest purchase and follow its delivery progress.</p>
-                     <a href="order.html" class="sidebar-card__link">TRACK AN ORDER</a>
+                    <a href="order.html" class="sidebar-card__link">TRACK AN ORDER →</a>
+                </div>
+
+                <!-- Sign Out card -->
+                <div class="sidebar-card">
+                    <h2 class="sidebar-card__title">Account</h2>
+                    <button onclick="logout()" class="btn btn--secondary btn--full btn--sm" style="margin-top: 12px;">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out
+                    </button>
                 </div>
 
                 <!-- Perks card -->
@@ -153,42 +123,27 @@
 
                     <div class="perk-item">
                         <div class="perk-icon">
-                            <!-- Headset / Customer Service icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-                                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-                            </svg>
+                            <i class="bi bi-headset" style="font-size: 24px;"></i>
                         </div>
                         <div class="perk-content">
                             <p class="perk-content__title">Customer Service</p>
-                            <p class="perk-content__detail">contact@parfum.com</p>
+                            <p class="perk-content__detail">contact@scente.com</p>
                         </div>
                     </div>
 
                     <div class="perk-item">
                         <div class="perk-icon">
-                            <!-- Gift / Samples icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="8" width="18" height="4" rx="1"/>
-                                <path d="M12 8v13"/>
-                                <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
-                                <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
-                            </svg>
+                            <i class="bi bi-gift" style="font-size: 24px;"></i>
                         </div>
                         <div class="perk-content">
                             <p class="perk-content__title">Complimentary Samples</p>
-                            <p class="perk-content__detail">2 complimentary samples with every order</p>
+                            <p class="perk-content__detail">2 samples with every order</p>
                         </div>
                     </div>
 
                     <div class="perk-item">
                         <div class="perk-icon">
-                            <!-- Box / Package icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-                                <path d="m3.3 7 8.7 5 8.7-5"/>
-                                <path d="M12 22V12"/>
-                            </svg>
+                            <i class="bi bi-box-seam" style="font-size: 24px;"></i>
                         </div>
                         <div class="perk-content">
                             <p class="perk-content__title">Gift Box Set</p>
@@ -204,20 +159,35 @@
 
     </main>
 
-    <!-- FOOTER — loaded via fetch -->
+    <!-- FOOTER -->
     <div id="footer-placeholder"></div>
 
-    <script>
-        fetch('../components/navbar.html')
-            .then(res => res.text())
-            .then(html => document.getElementById('navbar-placeholder').innerHTML = html);
-
-        fetch('../components/footer.html')
-            .then(res => res.text())
-            .then(html => document.getElementById('footer-placeholder').innerHTML = html);
-    </script>
-
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/cart.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/profile.js"></script>
+    
+    <script>
+        // Load navbar and footer
+        fetch('/components/navbar.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('navbar-placeholder').innerHTML = html;
+                // Update cart badge after navbar loads
+                setTimeout(() => {
+                    if (typeof updateCartBadge === 'function') {
+                        updateCartBadge();
+                    }
+                }, 100);
+            });
+
+        fetch('/components/footer.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('footer-placeholder').innerHTML = html;
+            });
+    </script>
+
 </body>
 </html>
