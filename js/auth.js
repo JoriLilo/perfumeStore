@@ -100,7 +100,13 @@ if (exists) {
   return;
 }
 
-      const newUser = { firstName, lastName, email, password };
+      const newUser = {
+        firstName,
+        lastName,
+        email,
+        password,
+        joinDate: new Date().toISOString().split("T")[0]
+      };
 
       users.push(newUser);
       localStorage.setItem("users", JSON.stringify(users));
@@ -113,8 +119,8 @@ if (exists) {
   const loginForm = document.getElementById("login-form");
 
     if (loginForm) {
-  loginForm.addEventListener("submit", function (e) {
-    e.preventDefault();
+      loginForm.addEventListener("submit", function (e) {
+      e.preventDefault();
 
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
@@ -174,7 +180,7 @@ if (exists) {
 
     sessionStorage.setItem("session", JSON.stringify(session));
 
-    window.location.href = "../pages/profile.html";
+    window.location.href = "/index.html";
   });
 }
 
@@ -241,4 +247,37 @@ function showToast(message) {
     toast.classList.remove("show");
   }, 3000);
 }
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+
+let updated = false;
+
+users = users.map(user => {
+  if (!user.joinDate) {
+    updated = true;
+    return {
+      ...user,
+      joinDate: new Date().toISOString().split("T")[0]
+    };
+  }
+  return user;
+});
+
+if (updated) {
+  localStorage.setItem("users", JSON.stringify(users));
+}
 })
+
+const profileLink = document.getElementById("profile-link");
+
+if (profileLink) {
+  profileLink.addEventListener("click", function (e) {
+    const session = JSON.parse(sessionStorage.getItem("session"));
+
+    if (!session || !session.loggedIn) {
+      e.preventDefault(); // stop going to profile
+      window.location.href = "/pages/login.html";
+    }
+    // else → allow default (go to profile)
+  });
+}
