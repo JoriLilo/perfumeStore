@@ -16,20 +16,18 @@
   <!-- Navbar -->
   <div id="navbar-placeholder"></div>
 
-
-
-  <!-- BREADCRUMB -->
-  <div class="breadcrumb">
-    <div class="container">
-      <ul class="breadcrumb__list">
-        <li class="breadcrumb__item"><a href="../index.html">Home</a></li>
-        <li class="breadcrumb__sep">›</li>
-        <li class="breadcrumb__item"><a href="../pages/shop.html">Perfumes</a></li>
-        <li class="breadcrumb__sep">›</li>
-        <li class="breadcrumb__item breadcrumb__item--active">Velvet Rose & Oud</li>
-      </ul>
-    </div>
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <div class="container">
+    <ul class="breadcrumb__list">
+      <li class="breadcrumb__item"><a href="../index.html">Home</a></li>
+      <li class="breadcrumb__sep">›</li>
+      <li class="breadcrumb__item"><a href="../pages/shop.html">Perfumes</a></li>
+      <li class="breadcrumb__sep">›</li>
+      <li class="breadcrumb__item breadcrumb__item--active" id="breadcrumb-name">Velvet Rose & Oud</li>
+    </ul>
   </div>
+</div>
 
   <!-- PRODUCT DETAIL -->
   <main>
@@ -39,7 +37,8 @@
         <!-- LEFT: Gallery -->
         <div class="product-gallery">
           <div class="gallery__main">
-            <div class="img-placeholder"><span>Product Image</span></div>
+           <img id="detail-main-img" src="" alt="" style="display: none;">
+           <div class="img-placeholder"><span>Product Image</span></div>
           </div>
           <div class="gallery__thumbs">
             <div class="gallery__thumb active"><div class="thumb-placeholder"></div></div>
@@ -48,45 +47,45 @@
           </div>
         </div>
 
-        <!-- RIGHT: Info -->
-        <div class="product-info">
-          <span class="product-info__brand">Maison de Parfum</span>
+       <!-- RIGHT: Info -->
+<div class="product-info">
+  <span class="product-info__brand" id="detail-brand">Maison de Parfum</span>
 
-          <h1 class="product-info__name">Velvet Rose<br>& Oud</h1>
+  <h1 class="product-info__name" id="detail-name">Velvet Rose<br>& Oud</h1>
 
-          <div class="product-info__rating">
-            <div class="stars">
-              <span class="star star--filled">★</span>
-              <span class="star star--filled">★</span>
-              <span class="star star--filled">★</span>
-              <span class="star star--filled">★</span>
-              <span class="star">★</span>
-            </div>
-            <span class="product-info__rating-count">4.0 (3 reviews)</span>
-          </div>
+  <div class="product-info__rating">
+    <div class="stars">
+      <span class="star star--filled">★</span>
+      <span class="star star--filled">★</span>
+      <span class="star star--filled">★</span>
+      <span class="star star--filled">★</span>
+      <span class="star">★</span>
+    </div>
+    <span class="product-info__rating-count">4.0 (3 reviews)</span>
+  </div>
 
-          <div class="product-info__meta">
-            <span class="product-info__price">$89.00</span>
-            <span class="product-info__volume">50 ml</span>
-          </div>
+  <div class="product-info__meta">
+    <span class="product-info__price" id="detail-price">$89.00</span>
+    <span class="product-info__volume" id="detail-volume">50 ml</span>
+  </div>
 
-          <hr class="divider" style="margin: 0;">
+  <hr class="divider" style="margin: 0;">
 
-          <p class="product-info__description">
-            A rich, opulent fragrance that opens with fresh bergamot and Bulgarian rose,
-            settling into a warm base of oud, amber, and sandalwood.
-            Long-lasting and deeply sensual — perfect for evening wear.
-          </p>
+  <p class="product-info__description" id="detail-description">
+    A rich, opulent fragrance that opens with fresh bergamot and Bulgarian rose,
+    settling into a warm base of oud, amber, and sandalwood.
+    Long-lasting and deeply sensual — perfect for evening wear.
+  </p>
 
-          <!-- Volume selector -->
-          <div>
-            <span class="volume-selector__label">Size</span>
-            <div class="volume-options">
-              <button class="volume-option">30 ml</button>
-              <button class="volume-option active">50 ml</button>
-              <button class="volume-option">100 ml</button>
-            </div>
-          </div>
+  <!-- Volume selector -->
+  <div>
+    <span class="volume-selector__label">Size</span>
+    <div class="volume-options" id="detail-volumes">
+      <button class="volume-option">30 ml</button>
+      <button class="volume-option active">50 ml</button>
+      <button class="volume-option">100 ml</button>
+    </div>
+  </div>
 
           <!-- Quantity -->
           <div class="qty-row">
@@ -111,9 +110,9 @@
                 Fragrance Notes <span class="accordion-item__icon">+</span>
               </button>
               <div class="accordion-item__body">
-                <strong>Top:</strong> Bergamot, Pink Pepper<br>
-                <strong>Heart:</strong> Bulgarian Rose, Jasmine<br>
-                <strong>Base:</strong> Oud, Amber, Sandalwood, Musk
+                <strong>Top:</strong> <span id="notes-top">Bergamot, Pink Pepper</span><br>
+                <strong>Heart:</strong> <span id="notes-middle">Bulgarian Rose, Jasmine</span><br>
+                <strong>Base:</strong> <span id="notes-base">Oud, Amber, Sandalwood, Musk</span>
               </div>
             </div>
             <div class="accordion-item">
