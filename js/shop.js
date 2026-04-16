@@ -111,11 +111,34 @@ if (categories.length) {
     if (!isNaN(min)) products = products.filter(p => p.price >= min);
     if (!isNaN(max)) products = products.filter(p => p.price <= max);
 
-    // GENDER
-    const gender = document.querySelector('input[name="gender"]:checked');
-    if (gender && gender.value !== '') {
-        products = products.filter(p => p.gender === gender.value);
+    const genderRadio = document.querySelector('input[name="gender"]:checked');
+    if (genderRadio && genderRadio.value !== '') {
+        const selectedGender = genderRadio.value.toLowerCase().trim();
+        console.log('Selected gender filter:', selectedGender);
+        
+        products = products.filter(p => {
+            if (!p.gender) {
+                console.warn('Product has no gender:', p);
+                return false;
+            }
+            
+            const productGender = String(p.gender).toLowerCase().trim();
+            
+            // Handle different gender value variations
+            if (selectedGender === 'men') {
+                return productGender === 'men' || productGender === 'male' || productGender === 'man';
+            } else if (selectedGender === 'women') {
+                return productGender === 'women' || productGender === 'female' || productGender === 'woman';
+            } else if (selectedGender === 'unisex') {
+                return productGender === 'unisex' || productGender === 'unisex';
+            }
+            
+            return productGender === selectedGender;
+        });
+        
+        console.log('Products after gender filter:', products.length);
     }
+
 
     // SORT
     const sort = document.getElementById('sort-select').value;
