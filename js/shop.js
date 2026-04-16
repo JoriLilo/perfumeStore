@@ -20,7 +20,7 @@ function buildCard(product) {
         <div class="product-card">
             <div class="product-card__image-wrap">
 
-                ${product.sale ? '<span class="product-card__badge product-card__badge--sale">Sale</span>' : ''}
+               
 
                 <img src="${product.image}" alt="${product.name}">
 
@@ -35,7 +35,9 @@ function buildCard(product) {
             </div>
 
             <p>${product.brand}</p>
-            <h3>${product.name}</h3>
+           <h3 class="product-title" onclick="goToDetails('${product.id}')">
+            ${product.name}
+                   </h3>
             <p>$${product.price}</p>
         </div>
     `;
@@ -79,26 +81,64 @@ function renderPagination(totalItems) {
             btn.style.color = 'white';
         }
 
-        btn.onclick = () => {
-            currentPage = i;
-            applyFilters();
-        };
-
+       btn.onclick = () => {
+    currentPage = i;
+    applyFilters(false); //dont reset page
+};
         container.appendChild(btn);
     }
 }
 
 // -- 5. Apply filters + sorting --
-function applyFilters() {
-    currentPage = 1;
+// -- 5. Apply filters + sorting --
+function applyFilters(resetPage = true) {
+    if (resetPage) currentPage = 1;
     let products = getProducts();
+
+    // CHECK FOR SEARCH QUERY FROM URL OR SESSION
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search');
+    
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase().trim();
+        products = products.filter(p => {
+            const searchableText = `${p.name} ${p.brand} ${p.category || ''} ${p.description || ''}`.toLowerCase();
+            return searchableText.includes(query);
+        });
+        
+        // Update the page title or heading to show search results
+        const resultsCount = document.getElementById('results-count');
+        if (resultsCount) {
+            resultsCount.textContent = `Search results for "${searchQuery}"`;
+        }
+    } else {
+        // Check sessionStorage for recent search
+        const recentQuery = sessionStorage.getItem('searchQuery');
+        const recentResults = sessionStorage.getItem('searchResults');
+        
+        if (recentQuery && recentResults) {
+            const resultIds = JSON.parse(recentResults);
+            products = products.filter(p => resultIds.includes(String(p.id)));
+            
+            const resultsCount = document.getElementById('results-count');
+            if (resultsCount) {
+                resultsCount.textContent = `Search results for "${recentQuery}"`;
+            }
+            
+            // Clear after using
+            sessionStorage.removeItem('searchQuery');
+            sessionStorage.removeItem('searchResults');
+        }
+    }
 
     // CATEGORY
     const categories = [...document.querySelectorAll('.sidebar input[type="checkbox"]:checked')]
-        .map(cb => cb.value);
+    .map(cb => cb.value.trim().toLowerCase());
 
     if (categories.length) {
-        products = products.filter(p => categories.includes(p.category));
+        products = products.filter(p =>
+            categories.includes((p.category || "").trim().toLowerCase())
+        );
     }
 
     // PRICE
@@ -108,10 +148,25 @@ function applyFilters() {
     if (!isNaN(min)) products = products.filter(p => p.price >= min);
     if (!isNaN(max)) products = products.filter(p => p.price <= max);
 
-    // GENDER
-    const gender = document.querySelector('input[name="gender"]:checked');
-    if (gender && gender.value !== '') {
-        products = products.filter(p => p.gender === gender.value);
+    const genderRadio = document.querySelector('input[name="gender"]:checked');
+    if (genderRadio && genderRadio.value !== '') {
+        const selectedGender = genderRadio.value.toLowerCase().trim();
+        
+        products = products.filter(p => {
+            if (!p.gender) return false;
+            
+            const productGender = String(p.gender).toLowerCase().trim();
+            
+            if (selectedGender === 'men') {
+                return productGender === 'men' || productGender === 'male' || productGender === 'man';
+            } else if (selectedGender === 'women') {
+                return productGender === 'women' || productGender === 'female' || productGender === 'woman';
+            } else if (selectedGender === 'unisex') {
+                return productGender === 'unisex';
+            }
+            
+            return productGender === selectedGender;
+        });
     }
 
     // SORT
@@ -176,4 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleSidebar(btn) {
     btn.parentElement.classList.toggle('open');
     btn.textContent = btn.parentElement.classList.contains('open') ? 'Filters –' : 'Filters +';
+}
+
+function goToDetails(id) {
+    window.location.href = `details.html?id=${id}`;
 }

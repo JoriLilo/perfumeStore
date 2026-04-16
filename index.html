@@ -272,6 +272,31 @@
       </p>
     </section>
 
+  <!-- <button onclick="resetAllData()" style="position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 20px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">
+  RESET ALL DATA
+</button>
+
+<script>
+function resetAllData() {
+  if (confirm('Are you sure you want to delete ALL data? This cannot be undone.')) {
+    // Clear everything
+    localStorage.clear("users");
+    // Remove all order keys (they start with 'scente_order_')
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('scente_order_')) {
+        localStorage.removeItem(key);
+        i--; // Adjust index since we removed an item
+      }
+    }
+    sessionStorage.clear();
+    
+    alert('All data cleared! Refreshing page...');
+    location.reload();
+  }
+}
+</script>  -->
+
   </main>
 
 

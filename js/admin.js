@@ -1,190 +1,461 @@
-// Grab the modal element once so we can reuse it everywhere
 const modal = document.getElementById("addProductModal");
+const deleteModal = document.getElementById("deleteConfirmModal");
 
-// Tracks which product is being edited. null = adding new, number = editing existing
 let editingIndex = null;
+let deleteIndex = null;
+let searchQuery = "";
+let orderSearchQuery = "";
+let userSearchQuery = "";
+let allOrders = [];
+let currentOrderKey = null;
 
-// Opens the modal and resets editingIndex to null (we assume adding unless editProduct sets it)
-function openModal(){
-  editingIndex = null;
-  modal.classList.add("active");
-}
+document.addEventListener("DOMContentLoaded", () => {
+  renderProducts();
+  renderOrders();
+  renderUsers();
+  updateDashboard();
 
-// Closes the modal and resets everything back to default state
-function closeModal(){
-  modal.classList.remove("active");
-  const submitBtn = document.querySelector(".btn-submit");
-  submitBtn.textContent = "Add Product"; // reset button text
-  editingIndex = null; // reset editing state
-}
-
-// Close modal when clicking the dark backdrop (not the white box)
-modal.addEventListener("click", function(event){
-  if(event.target === modal){
-    closeModal();
+  const orderModal = document.getElementById("viewOrderModal");
+  if (orderModal) {
+    orderModal.addEventListener("click", function (e) {
+      if (e.target === orderModal) closeOrderModal();
+    });
   }
 });
 
-// Nav link click — switch active link and show matching section
 const links = document.querySelectorAll(".nav-link");
 links.forEach(link => {
-  link.addEventListener("click", function(){
-    // remove active from all links
+  link.addEventListener("click", function () {
     links.forEach(l => l.classList.remove("active"));
-    // add active to clicked link
     this.classList.add("active");
 
-    // get section id from link text e.g "Products" → "products"
     const sectionId = this.textContent.trim().toLowerCase();
     const sections = document.querySelectorAll(".section");
-
-    // hide all sections, show only the matching one
     sections.forEach(section => {
-      if(section.id === sectionId){
-        section.classList.add("active");
-      } else {
-        section.classList.remove("active");
-      }
+      section.classList.toggle("active", section.id === sectionId);
     });
   });
 });
 
-// Handles both adding and editing a product
-function handleSubmit(e) {
-  e.preventDefault();
-  const form = document.getElementById("add-product-form");
-  const requiredFields = ["name", "brand", "price", "stock", "category"];
-  let hasErrors = false;
-
-  // Validate required fields — add red border and show error message if empty
-  requiredFields.forEach(field => {   
-    const input = form.elements[field];
-    const errorEl = document.getElementById("err-" + field);
-    if (input.value.trim() === "") {
-      input.classList.add("input-error");
-      errorEl.classList.add("visible");
-      hasErrors = true; 
-    } else {
-      input.classList.remove("input-error");
-      errorEl.classList.remove("visible");
-    }
-  });
-
-  if(hasErrors === false) {
-    // Load existing products from localStorage
-    const products = JSON.parse(localStorage.getItem("products")) || [];
-
-    // Collect form data into an object
-    const productData = {
-      name: form.elements["name"].value,
-      brand: form.elements["brand"].value,
-      price: Number(form.elements["price"].value),
-      stock: Number(form.elements["stock"].value),
-      category: form.elements["category"].value,
-      image: form.elements["image"].value,
-      description: form.elements["description"].value
-    };
-
-    if(editingIndex !== null) {
-      // EDIT MODE — overwrite the product at editingIndex
-      products[editingIndex] = productData;
-      editingIndex = null; // reset after saving
-    } else {
-      // ADD MODE — push new product to the array
-      products.push(productData);
-    }
-
-    // Save updated array back to localStorage
-    localStorage.setItem("products", JSON.stringify(products));
-
-    // Refresh the table to show updated data
-    renderProducts();
-    form.reset();
-    closeModal();
-  }
-} 
-
-// Reads products from localStorage and builds the table rows dynamically
-function renderProducts() {
+function updateDashboard() {
   const products = JSON.parse(localStorage.getItem("products")) || [];
+  document.getElementById("total-products").textContent = products.length;
+
+  let totalOrders = 0;
+  let totalRevenue = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("scente_order_")) {
+      totalOrders++;
+      const order = JSON.parse(localStorage.getItem(key));
+      const amount = parseFloat(order.totalPaid?.replace("$", "")) || 0;
+      totalRevenue += amount;
+    }
+  }
+  document.getElementById("total-orders").textContent = totalOrders;
+  document.getElementById("total-revenue").textContent = "$" + totalRevenue.toFixed(2);
+
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  document.getElementById("total-users").textContent = users.length;
+}
+
+const searchInput = document.getElementById("search-input");
+if (searchInput) {
+  searchInput.addEventListener("input", function () {
+    searchQuery = this.value.toLowerCase();
+    renderProducts();
+  });
+}
+
+const orderSearchInput = document.getElementById("order-search-input");
+if (orderSearchInput) {
+  orderSearchInput.addEventListener("input", function () {
+    orderSearchQuery = this.value.toLowerCase();
+    renderOrders();
+  });
+}
+
+const userSearchInput = document.getElementById("user-search-input");
+if (userSearchInput) {
+  userSearchInput.addEventListener("input", function () {
+    userSearchQuery = this.value.toLowerCase();
+    renderUsers();
+  });
+}
+
+function renderProducts() {
+  let products = JSON.parse(localStorage.getItem("products")) || [];
   const tableBody = document.getElementById("products-table-body");
-  
-  // Clear existing rows before re-rendering
   tableBody.innerHTML = "";
 
-  products.forEach((product, index) => {
-    const row = document.createElement("tr");
+  const processed = products.map((product, index) => ({ product, index }));
+  processed.sort((a, b) => b.product.id - a.product.id);
 
-    // determine stock level color
+  const filteredProducts = processed.filter(item => {
+    const p = item.product;
+    return (
+      p.name.toLowerCase().includes(searchQuery) ||
+      p.brand.toLowerCase().includes(searchQuery) ||
+      String(p.id).includes(searchQuery)
+    );
+  });
+
+  if (filteredProducts.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align:center; padding:20px; color:#888;">
+          No results found
+        </td>
+      </tr>`;
+    updateDashboard();
+    return;
+  }
+
+  filteredProducts.forEach(item => {
+    const product = item.product;
+    const index = item.index;
+
     let stockClass = "";
-    if(Number(product.stock) < 5) {
-      stockClass = "stock-danger";
-    } else if(Number(product.stock) < 10) {
-      stockClass = "stock-warning";
-    } else {
-      stockClass = "stock-good";
-    }
+    if (product.stock < 5) stockClass = "stock-danger";
+    else if (product.stock < 10) stockClass = "stock-warning";
+    else stockClass = "stock-good";
 
+    const row = document.createElement("tr");
     row.innerHTML = `
+      <td>${product.id}</td>
       <td>${product.name}</td>
       <td>${product.brand}</td>
       <td>${product.category}</td>
+      <td>${product.gender || "—"}</td>
       <td>$${product.price}</td>
       <td class="${stockClass}">${product.stock}</td>
       <td>
         <a href="#" class="action-link edit" onclick="editProduct(${index})">Edit</a>
         <a href="#" class="action-link delete" onclick="deleteProduct(${index})">Delete</a>
       </td>
+      <td>
+        <span class="status-badge ${product.status || "active"}">
+          ${product.status || "active"}
+        </span>
+      </td>
     `;
     tableBody.appendChild(row);
   });
 
-  // Update dashboard after rendering — outside forEach so it runs once
   updateDashboard();
 }
 
-// Render products as soon as the page loads
-document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
-});
-
-// Removes a product from localStorage by index and refreshes the table
-function deleteProduct(index) {
-  const products = JSON.parse(localStorage.getItem("products")) || [];
-  products.splice(index, 1); // remove 1 item at that index
-  localStorage.setItem("products", JSON.stringify(products));
-  renderProducts();
+function openModal() {
+  editingIndex = null;
+  const form = document.getElementById("add-product-form");
+  form.reset();
+  document.getElementById("modal-title").textContent = "Add New Product";
+  document.querySelector(".btn-submit").textContent = "Add Product";
+  modal.classList.add("active");
 }
 
-// Prefills the modal form with existing product data for editing
+function closeModal() {
+  modal.classList.remove("active");
+  document.getElementById("modal-title").textContent = "Add New Product";
+  document.querySelector(".btn-submit").textContent = "Add Product";
+  editingIndex = null;
+}
+
+if (modal) {
+  modal.addEventListener("click", function (event) {
+    if (event.target === modal) closeModal();
+  });
+}
+
+function handleSubmit(e) {
+  e.preventDefault();
+  const form = document.getElementById("add-product-form");
+  const requiredFields = ["name", "brand", "price", "stock", "category", "gender"];
+  let hasErrors = false;
+
+  requiredFields.forEach(field => {
+    const input = form.elements[field];
+    const errorEl = document.getElementById("err-" + field);
+    if (input.value.trim() === "") {
+      input.classList.add("input-error");
+      if (errorEl) errorEl.classList.add("visible");
+      hasErrors = true;
+    } else {
+      input.classList.remove("input-error");
+      if (errorEl) errorEl.classList.remove("visible");
+    }
+  });
+
+  if (hasErrors) return;
+
+  const products = JSON.parse(localStorage.getItem("products")) || [];
+  const productData = {
+    id: Date.now(),
+    name: form.elements["name"].value,
+    brand: form.elements["brand"].value,
+    gender: form.elements["gender"].value,
+    status: form.elements["status"].value || "active",
+    price: Number(form.elements["price"].value),
+    stock: Number(form.elements["stock"].value),
+    category: form.elements["category"].value,
+    image: form.elements["image"].value,
+    description: form.elements["description"].value
+  };
+
+  if (editingIndex !== null) {
+    productData.id = products[editingIndex].id;
+    products[editingIndex] = productData;
+    editingIndex = null;
+  } else {
+    products.push(productData);
+  }
+
+  localStorage.setItem("products", JSON.stringify(products));
+  renderProducts();
+  form.reset();
+  closeModal();
+}
+
 function editProduct(index) {
   const products = JSON.parse(localStorage.getItem("products")) || [];
   const product = products[index];
-  
-  // Save the index so handleSubmit knows which product to overwrite
   editingIndex = index;
-  
-  // Fill in the form fields with existing product data
+
   const form = document.getElementById("add-product-form");
   form.elements["name"].value = product.name;
   form.elements["brand"].value = product.brand;
   form.elements["price"].value = product.price;
   form.elements["stock"].value = product.stock;
   form.elements["category"].value = product.category;
+  form.elements["gender"].value = product.gender || "";
+  form.elements["status"].value = product.status || "active";
   form.elements["image"].value = product.image || "";
   form.elements["description"].value = product.description || "";
 
-  // Change button text to make it clear we are updating not adding
-  const submitBtn = form.querySelector(".btn-submit");
-  submitBtn.textContent = "Update Product";
-
-  // Open modal directly to avoid resetting editingIndex
+  document.getElementById("modal-title").textContent = "Edit Product";
+  document.querySelector(".btn-submit").textContent = "Update Product";
   modal.classList.add("active");
 }
 
-// Updates dashboard stat cards from localStorage
-function updateDashboard(){
+function deleteProduct(index) {
   const products = JSON.parse(localStorage.getItem("products")) || [];
-  document.getElementById("total-products").textContent = products.length;
+  const product = products[index];
+  deleteIndex = index;
+
+  document.getElementById("delete-product-id").textContent = product.id;
+  document.getElementById("delete-product-name").textContent = product.name;
+  document.getElementById("delete-product-brand").textContent = product.brand;
+  document.getElementById("delete-product-category").textContent = product.category;
+  document.getElementById("delete-product-stock").textContent = product.stock;
+  document.getElementById("delete-product-price").textContent = `$${product.price}`;
+  document.getElementById("delete-product-description").textContent = product.description || "—";
+  document.getElementById("delete-product-image").textContent = product.image || "No image";
+  document.getElementById("delete-product-status").textContent = product.status || "active";
+
+  deleteModal.classList.add("active");
 }
 
+function confirmDeletion() {
+  const products = JSON.parse(localStorage.getItem("products")) || [];
+  products.splice(deleteIndex, 1);
+  localStorage.setItem("products", JSON.stringify(products));
+  renderProducts();
+  deleteModal.classList.remove("active");
+}
+
+function cancelDeletion() {
+  deleteModal.classList.remove("active");
+}
+
+if (deleteModal) {
+  deleteModal.addEventListener("click", function (event) {
+    if (event.target === deleteModal) cancelDeletion();
+  });
+}
+
+function renderOrders() {
+  allOrders = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("scente_order_")) {
+      const order = JSON.parse(localStorage.getItem(key));
+      allOrders.push(order);
+    }
+  }
+
+  const tableBody = document.getElementById("orders-table-body");
+  tableBody.innerHTML = "";
+
+  const filtered = allOrders.filter(o => {
+    const customer = o.customerDetails?.name || o.customerDetails?.fullName || "Guest";
+    return (
+      o.orderNumber.toLowerCase().includes(orderSearchQuery) ||
+      customer.toLowerCase().includes(orderSearchQuery)
+    );
+  });
+
+  if (filtered.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; padding:20px; color:#888;">
+          No results found
+        </td>
+      </tr>`;
+    return;
+  }
+
+  filtered.forEach((order, index) => {
+    const customer = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
+    const date = new Date(order.date).toLocaleDateString("en-US");
+    const status = order.status || "pending";
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>#${order.orderNumber}</td>
+      <td>${customer}</td>
+      <td>${date}</td>
+      <td>${order.totalPaid}</td>
+      <td>
+        <span class="status-badge ${status}">${status.toUpperCase()}</span>
+      </td>
+      <td><a href="#" class="action-link edit" onclick="viewOrder(${index})">View</a></td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+function viewOrder(index) {
+  const order = allOrders[index];
+  currentOrderKey = order.orderNumber;
+
+  const customer = order.customerDetails?.name ||
+                   order.customerDetails?.fullName || "Guest";
+
+  document.getElementById("order-id").textContent = "#" + order.orderNumber;
+  document.getElementById("order-customer").textContent = customer;
+  document.getElementById("order-date").textContent = new Date(order.date).toLocaleDateString("en-US");
+  document.getElementById("order-total").textContent = order.totalPaid;
+
+  const statusEl = document.getElementById("order-status");
+  const currentStatus = order.status || "pending";
+  statusEl.className = `status-badge ${currentStatus}`;
+  statusEl.innerHTML = `
+    <select id="order-status-select" onchange="updateOrderStatus(this.value)">
+      <option value="pending"   ${currentStatus === "pending"   ? "selected" : ""}>Pending</option>
+      <option value="shipped"   ${currentStatus === "shipped"   ? "selected" : ""}>Shipped</option>
+      <option value="delivered" ${currentStatus === "delivered" ? "selected" : ""}>Delivered</option>
+    </select>
+  `;
+
+  const itemsList = document.getElementById("order-items");
+  itemsList.innerHTML = "";
+
+  if (order.items && order.items.length > 0) {
+    order.items.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item.name} - ${item.qty || item.quantity} x $${item.price}`;
+      itemsList.appendChild(li);
+    });
+  } else {
+    itemsList.innerHTML = "<li>No items</li>";
+  }
+
+  document.getElementById("viewOrderModal").classList.add("active");
+}
+
+function updateOrderStatus(newStatus) {
+  const key = `scente_order_${currentOrderKey}`;
+  const order = JSON.parse(localStorage.getItem(key));
+  if (!order) return;
+
+  order.status = newStatus;
+  localStorage.setItem(key, JSON.stringify(order));
+
+  const statusEl = document.getElementById("order-status");
+  statusEl.className = `status-badge ${newStatus}`;
+
+  renderOrders();
+  updateDashboard();
+}
+
+function closeOrderModal() {
+  document.getElementById("viewOrderModal").classList.remove("active");
+}
+
+function renderUsers() {
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  const tableBody = document.getElementById("users-table-body");
+  tableBody.innerHTML = "";
+
+  // First, collect all orders and group by email
+  const orderCounts = {};
+  
+  // Check individual order keys
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("scente_order_")) {
+      try {
+        const order = JSON.parse(localStorage.getItem(key));
+        const email = order.customerDetails?.email || order.email || order.userEmail;
+        
+        if (email) {
+          const normalizedEmail = email.toLowerCase().trim();
+          orderCounts[normalizedEmail] = (orderCounts[normalizedEmail] || 0) + 1;
+        }
+      } catch (e) {
+        console.warn('Failed to parse order:', key);
+      }
+    }
+  }
+  
+  // Also check the global orders array if it exists
+  const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+  allOrders.forEach(order => {
+    const email = order.customerDetails?.email || order.email || order.userEmail;
+    if (email) {
+      const normalizedEmail = email.toLowerCase().trim();
+      // Only count if not already counted from individual keys
+      // (the orders array might have duplicates)
+      if (!orderCounts[normalizedEmail]) {
+        orderCounts[normalizedEmail] = 1;
+      }
+    }
+  });
+
+  const processed = users.map((user, index) => ({ user, index }));
+
+  const filtered = processed.filter(item => {
+    const u = item.user;
+    const fullName = (u.firstName + " " + u.lastName).toLowerCase();
+    return (
+      fullName.includes(userSearchQuery) ||
+      u.email.toLowerCase().includes(userSearchQuery)
+    );
+  });
+
+  if (filtered.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center; padding:20px; color:#888;">
+          No results found
+        </td>
+      </tr>`;
+    return;
+  }
+
+  filtered.forEach((item, i) => {
+    const user = item.user;
+    const normalizedEmail = user.email.toLowerCase().trim();
+    const orderCount = orderCounts[normalizedEmail] || 0;
+    
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${user.firstName} ${user.lastName}</td>
+      <td>${user.email}</td>
+      <td>${user.joinDate || "—"}</td>
+      <td>${orderCount}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
