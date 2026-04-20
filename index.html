@@ -1,322 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCENTÉ — Luxury Fragrances</title>
-
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500&family=Great+Vibes&display=swap" rel="stylesheet">
-
-  <!-- Project CSS — order matters -->
-  <link rel="stylesheet" href="/css/shared.css">
-  <link rel="stylesheet" href="/css/navbar.css">
-  <link rel="stylesheet" href="/css/footer.css">
-  <link rel="stylesheet" href="/css/homepage.css">
-</head>
-<body>
-
-  <div id="navbar-placeholder"></div>
-
-
-  <main>
-
-  <!-- HERO Carusel -->
-    <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel">
-
-      <div class="carousel-indicators">
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-      </div>
-
-      <div class="carousel-inner">
-        <div class="carousel-item active" data-bs-interval="4500">
-          <img
-            src="https://d1msew97rp2nin.cloudfront.net/prodin/smyttenshop/blogthumbnail/H_2-2513cba0-54d8-4895-b5b8-aea0c3f3a22a.jpeg"
-            alt="New Collection — SCENTÉ 2025"
-          >
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>SCENTÉ — Luxury Fragrances</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500&family=Great+Vibes&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/css/shared.css">
+        <link rel="stylesheet" href="/css/navbar.css">
+        <link rel="stylesheet" href="/css/footer.css">
+        <link rel="stylesheet" href="/css/homepage.css">
+    </head>
+    <body>
+        <div id="navbar-placeholder">
         </div>
-        <div class="carousel-item" data-bs-interval="4500">
-          <img
-            src="https://islandthymesoap.com/cdn/shop/articles/the-art-of-scent-creation-721984.jpg?crop=center&height=1280&v=1691403276&width=1600"
-            alt="Spring Collection"
-          >
+        <main>
+            <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1">
+                    </button>
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2">
+                    </button>
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3">
+                    </button>
+                </div>
+                <div class="carousel-inner">
+                    <div class="carousel-item active" data-bs-interval="4500">
+                        <img src="https://d1msew97rp2nin.cloudfront.net/prodin/smyttenshop/blogthumbnail/H_2-2513cba0-54d8-4895-b5b8-aea0c3f3a22a.jpeg" alt="New Collection — SCENTÉ 2025">
+                    </div>
+                    <div class="carousel-item" data-bs-interval="4500">
+                        <img src="https://islandthymesoap.com/cdn/shop/articles/the-art-of-scent-creation-721984.jpg?crop=center&height=1280&v=1691403276&width=1600" alt="Spring Collection">
+                    </div>
+                    <div class="carousel-item" data-bs-interval="4500">
+                        <img src="https://thescentlab.com/cdn/shop/articles/1_hIosn9O3cPJDvge0M25edA.jpg?v=1724338427" alt="Fragrance Art">
+                    </div>
+                </div>
+                <div class="hero-overlay">
+                    <p class="hero-eyebrow">New Collection · 2025</p>
+                    <h1 class="hero-title">A New Fragrance Story</h1>
+                    <a href="/pages/shop.html" class="hero-cta">Explore the Collection</a>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true">
+                    </span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true">
+                    </span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+            <section class="featured-section">
+                <div class="featured-section__header">
+                    <p class="featured-section__eyebrow">Handpicked for you</p>
+                    <h2 class="featured-section__title">Featured Perfumes</h2>
+                </div>
+                <div class="product-grid" id="featured-grid">
+                    <div class="product-card" data-fallback>
+                        <div class="product-card__image-wrap">
+                            <span class="product-card__badge product-card__badge--new">New</span>
+                            <img class="product-card__img" src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.62615.2x.avif" alt="Angels' Share">
+                            <button class="product-card__wishlist" aria-label="Add to wishlist" onclick="toggleWishlistBtn(this, 'fallback-0')">
+                                <i class="bi bi-heart">
+                                </i>
+                            </button>
+                            <button class="product-card__quick-add" onclick="addFallbackToCart('Angels Share', 'Kilian', 275, 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.62615.2x.avif')">Add to Cart</button>
+                        </div>
+                        <p class="product-card__brand">Kilian</p>
+                        <h3 class="product-card__name">
+                            <a href="/pages/details.html">Angels' Share</a>
+                        </h3>
+                        <p class="product-card__price">$275.00</p>
+                    </div>
+                    <div class="product-card" data-fallback>
+                        <div class="product-card__image-wrap">
+                            <img class="product-card__img" src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.9828.2x.avif" alt="Aventus">
+                            <button class="product-card__wishlist" aria-label="Add to wishlist" onclick="toggleWishlistBtn(this, 'fallback-1')">
+                                <i class="bi bi-heart">
+                                </i>
+                            </button>
+                            <button class="product-card__quick-add" onclick="addFallbackToCart('Aventus', 'Creed', 235, 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.9828.2x.avif')">Add to Cart</button>
+                        </div>
+                        <p class="product-card__brand">Creed</p>
+                        <h3 class="product-card__name">
+                            <a href="/pages/details.html">Aventus</a>
+                        </h3>
+                        <p class="product-card__price">$235.00</p>
+                    </div>
+                    <div class="product-card" data-fallback>
+                        <div class="product-card__image-wrap">
+                            <span class="product-card__badge product-card__badge--sale">Sale</span>
+                            <img class="product-card__img" src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.6538.2x.avif" alt="Epic Woman">
+                            <button class="product-card__wishlist" aria-label="Add to wishlist" onclick="toggleWishlistBtn(this, 'fallback-2')">
+                                <i class="bi bi-heart">
+                                </i>
+                            </button>
+                            <button class="product-card__quick-add" onclick="addFallbackToCart('Epic Woman', 'Amouage', 295, 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.6538.2x.avif')">Add to Cart</button>
+                        </div>
+                        <p class="product-card__brand">Amouage</p>
+                        <h3 class="product-card__name">
+                            <a href="/pages/details.html">Epic Woman</a>
+                        </h3>
+                        <p class="product-card__price">
+                            <span class="product-card__price--original">$395.00</span>
+                            <span class="product-card__price--sale">$295.00</span>
+                        </p>
+                    </div>
+                    <div class="product-card" data-fallback>
+                        <div class="product-card__image-wrap">
+                            <img class="product-card__img" src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.46066.2x.avif" alt="Baccarat Rouge 540 Extrait">
+                            <button class="product-card__wishlist" aria-label="Add to wishlist" onclick="toggleWishlistBtn(this, 'fallback-3')">
+                                <i class="bi bi-heart">
+                                </i>
+                            </button>
+                            <button class="product-card__quick-add" onclick="addFallbackToCart('Baccarat Rouge 540 Extrait', 'MFK', 375, 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.46066.2x.avif')">Add to Cart</button>
+                        </div>
+                        <p class="product-card__brand">Maison Francis Kurkdjian</p>
+                        <h3 class="product-card__name">
+                            <a href="/pages/details.html">Baccarat Rouge 540 Extrait</a>
+                        </h3>
+                        <p class="product-card__price">$375.00</p>
+                    </div>
+                </div>
+                <div class="view-all-wrap">
+                    <a href="/pages/shop.html" class="btn btn--secondary">View All Perfumes</a>
+                </div>
+            </section>
+            <section class="editorial-banner">
+                <img src="/images/perfume3.jpeg" alt="Fragrance editorial">
+                <div class="editorial-banner__overlay">
+                    <p class="editorial-banner__eyebrow">Feel the essence</p>
+                    <h2 class="editorial-banner__title">The Art of Lasting Scent</h2>
+                    <p class="editorial-banner__sub">Discover timeless notes crafted for every moment.</p>
+                    <a href="/pages/shop.html" class="hero-cta">Shop Now</a>
+                </div>
+            </section>
+            <div class="aesthetic-grid">
+                <div class="aesthetic-card">
+                    <img src="images/perfume1hp.jpg" alt="Love Don't Be Shy">
+                    <div class="aesthetic-card__quote">
+                        <p>"Wear the night like a second skin."</p>
+                    </div>
+                </div>
+                <div class="aesthetic-card">
+                    <img src="images/perfume2hp.jpeg" alt="Delina">
+                    <div class="aesthetic-card__quote">
+                        <p>"A rose that never fades."</p>
+                    </div>
+                </div>
+                <div class="aesthetic-card">
+                    <img src="images/perfume4hp.jpeg" alt="Oud for Greatness">
+                    <div class="aesthetic-card__quote">
+                        <p>"Mystery in every drop."</p>
+                    </div>
+                </div>
+            </div>
+            <section class="newsletter-section">
+                <p class="newsletter-section__eyebrow">Stay in the scent</p>
+                <h2 class="newsletter-section__title">Join the Scenté Circle</h2>
+                <p class="newsletter-section__sub">New arrivals, exclusive offers and fragrance guides — straight to your inbox.</p>
+            </section>
+        </main>
+        <div id="footer-placeholder">
         </div>
-        <div class="carousel-item" data-bs-interval="4500">
-          <img
-            src="https://thescentlab.com/cdn/shop/articles/1_hIosn9O3cPJDvge0M25edA.jpg?v=1724338427"
-            alt="Fragrance Art"
-          >
-        </div>
-      </div>
-
-      <!-- Text overlay -->
-      <div class="hero-overlay">
-        <p class="hero-eyebrow">New Collection · 2025</p>
-        <h1 class="hero-title">A New Fragrance Story</h1>
-        <a href="/pages/shop.html" class="hero-cta">Explore the Collection</a>
-      </div>
-
-      <!-- Controls -->
-      <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div>
-
-
-  <!-- Featured Products -->
-    <section class="featured-section">
-
-      <div class="featured-section__header">
-        <p class="featured-section__eyebrow">Handpicked for you</p>
-        <h2 class="featured-section__title">Featured Perfumes</h2>
-      </div>
-
-     
-      <!--
-        homepage.js renders real products here if localStorage has data.
-        If localStorage is empty ,
-        these 4 fallback cards are shown instead.
-      -->
-      <div class="product-grid" id="featured-grid">
-
-       
-        <div class="product-card" data-fallback>
-          <div class="product-card__image-wrap">
-            <span class="product-card__badge product-card__badge--new">New</span>
-            <img
-              class="product-card__img"
-              src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.62615.2x.avif"
-              alt="Angels' Share">
-            <button
-              class="product-card__wishlist"
-              aria-label="Add to wishlist"
-              onclick="toggleWishlistBtn(this, 'fallback-0')">
-              <i class="bi bi-heart"></i>
-            </button>
-            <button
-              class="product-card__quick-add"
-              onclick="addFallbackToCart('Angels Share', 'Kilian', 275, 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.62615.2x.avif')">
-              Add to Cart
-            </button>
-          </div>
-          <p class="product-card__brand">Kilian</p>
-          <h3 class="product-card__name">
-            <a href="/pages/details.html">Angels' Share</a>
-          </h3>
-          <p class="product-card__price">$275.00</p>
-        </div>
-
-        <!-- Fallback Card 2 -->
-        <div class="product-card" data-fallback>
-          <div class="product-card__image-wrap">
-            <img
-              class="product-card__img"
-              src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.9828.2x.avif"
-              alt="Aventus"
-            >
-            <button
-              class="product-card__wishlist"
-              aria-label="Add to wishlist"
-              onclick="toggleWishlistBtn(this, 'fallback-1')">
-              <i class="bi bi-heart"></i>
-            </button>
-            <button
-              class="product-card__quick-add"
-              onclick="addFallbackToCart('Aventus', 'Creed', 235, 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.9828.2x.avif')">
-              Add to Cart
-            </button>
-          </div>
-          <p class="product-card__brand">Creed</p>
-          <h3 class="product-card__name">
-            <a href="/pages/details.html">Aventus</a>
-          </h3>
-          <p class="product-card__price">$235.00</p>
-        </div>
-
-        <!-- Fallback Card 3 -->
-        <div class="product-card" data-fallback>
-          <div class="product-card__image-wrap">
-            <span class="product-card__badge product-card__badge--sale">Sale</span>
-            <img
-              class="product-card__img"
-              src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.6538.2x.avif"
-              alt="Epic Woman"
-            >
-            <button
-              class="product-card__wishlist"
-              aria-label="Add to wishlist"
-              onclick="toggleWishlistBtn(this, 'fallback-2')">
-              <i class="bi bi-heart"></i>
-            </button>
-            <button
-              class="product-card__quick-add"
-              onclick="addFallbackToCart('Epic Woman', 'Amouage', 295, 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.6538.2x.avif')">
-              Add to Cart
-            </button>
-          </div>
-          <p class="product-card__brand">Amouage</p>
-          <h3 class="product-card__name">
-            <a href="/pages/details.html">Epic Woman</a>
-          </h3>
-          <p class="product-card__price">
-            <span class="product-card__price--original">$395.00</span>
-            <span class="product-card__price--sale">$295.00</span>
-          </p>
-        </div>
-
-        <!-- Fallback Card 4 -->
-        <div class="product-card" data-fallback>
-          <div class="product-card__image-wrap">
-            <img
-              class="product-card__img"
-              src="https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.46066.2x.avif"
-              alt="Baccarat Rouge 540 Extrait"
-            >
-            <button
-              class="product-card__wishlist"
-              aria-label="Add to wishlist"
-              onclick="toggleWishlistBtn(this, 'fallback-3')">
-              <i class="bi bi-heart"></i>
-            </button>
-            <button
-              class="product-card__quick-add"
-              onclick="addFallbackToCart('Baccarat Rouge 540 Extrait', 'MFK', 375, 'https://fimgs.net/mdimg/perfume-thumbs/dark-375x500.46066.2x.avif')">
-              Add to Cart
-            </button>
-          </div>
-          <p class="product-card__brand">Maison Francis Kurkdjian</p>
-          <h3 class="product-card__name">
-            <a href="/pages/details.html">Baccarat Rouge 540 Extrait</a>
-          </h3>
-          <p class="product-card__price">$375.00</p>
-        </div>
-
-      </div><!-- /product-grid -->
-
-      <div class="view-all-wrap">
-        <a href="/pages/shop.html" class="btn btn--secondary">View All Perfumes</a>
-      </div>
-
-    </section>
-
-
-    <section class="editorial-banner">
-      <img
-        src="/images/perfume3.jpeg"
-        alt="Fragrance editorial"
-      >
-      <div class="editorial-banner__overlay">
-        <p class="editorial-banner__eyebrow">Feel the essence</p>
-        <h2 class="editorial-banner__title">The Art of Lasting Scent</h2>
-        <p class="editorial-banner__sub">Discover timeless notes crafted for every moment.</p>
-        <a href="/pages/shop.html" class="hero-cta">Shop Now</a>
-      </div>
-    </section>
-
-
-    <!-- ══════════════════════════════════════
-         AESTHETIC QUOTE GRID
-    ══════════════════════════════════════ -->
-    <div class="aesthetic-grid">
-
-      <div class="aesthetic-card">
-        <img
-          src="images/perfume1hp.jpg"
-          alt="Love Don't Be Shy"
-        >
-        <div class="aesthetic-card__quote">
-          <p>"Wear the night like a second skin."</p>
-        </div>
-      </div>
-
-      <div class="aesthetic-card">
-        <img
-          src="images/perfume2hp.jpeg"
-          alt="Delina"
-        >
-        <div class="aesthetic-card__quote">
-          <p>"A rose that never fades."</p>
-        </div>
-      </div>
-
-      <div class="aesthetic-card">
-        <img
-          src="images/perfume4hp.jpeg"
-          alt="Oud for Greatness"
-        >
-        <div class="aesthetic-card__quote">
-          <p>"Mystery in every drop."</p>
-        </div>
-      </div>
-
-    </div><!-- /aesthetic-grid -->
-
-
-    
-    <section class="newsletter-section">
-      <p class="newsletter-section__eyebrow">Stay in the scent</p>
-      <h2 class="newsletter-section__title">Join the Scenté Circle</h2>
-      <p class="newsletter-section__sub">
-        New arrivals, exclusive offers and fragrance guides — straight to your inbox.
-      </p>
-    </section>
-
-  <!-- <button onclick="resetAllData()" style="position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 20px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">
-  RESET ALL DATA
-</button>
-
-<script>
-function resetAllData() {
-  if (confirm('Are you sure you want to delete ALL data? This cannot be undone.')) {
-    // Clear everything
-    localStorage.clear("users");
-    // Remove all order keys (they start with 'scente_order_')
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('scente_order_')) {
-        localStorage.removeItem(key);
-        i--; // Adjust index since we removed an item
-      }
-    }
-    sessionStorage.clear();
-    
-    alert('All data cleared! Refreshing page...');
-    location.reload();
-  }
-}
-</script>  -->
-
-  </main>
-
-
-
-  <div id="footer-placeholder"></div>
-
-
-
-  <!-- Bootstrap JS (required for carousel + offcanvas) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Shared utilities — must come before homepage.js -->
-  <script src="/js/cart.js"></script>
-  <script src="/js/toast.js"></script>
- <script src="/js/wishlist.js"></script>
-
-  <!-- Homepage logic -->
-  <script src="/js/index.js"></script>
-
-  <script src="/js/auth.js"></script>
-
-</body>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+        </script>
+        <script src="/js/cart.js">
+        </script>
+        <script src="/js/toast.js">
+        </script>
+        <script src="/js/wishlist.js">
+        </script>
+        <script src="/js/index.js">
+        </script>
+        <script src="/js/auth.js">
+        </script>
+    </body>
 </html>

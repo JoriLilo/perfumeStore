@@ -1,87 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order History — SCENTÉ</title>
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    
-    <link rel="stylesheet" href="../css/shared.css">
-    <link rel="stylesheet" href="../css/navbar.css">
-    <link rel="stylesheet" href="../css/footer.css">
-    <link rel="stylesheet" href="../css/order.css">
-</head>
-<body>
-
-    <!-- NAVBAR -->
-    <div id="navbar-placeholder"></div>
-
-    <main class="orders-page">
-        <div class="orders-container">
-
-            <!-- Page header -->
-            <div class="orders-page-header">
-                <span class="orders-page-header__eyebrow">My Account</span>
-                <h1 class="orders-page-header__title">Order History</h1>
-            </div>
-
-            <!-- Main card -->
-            <div class="orders-card">
-
-                <!-- Tabs -->
-                <div class="orders-card__tabs">
-                    <div class="tabs-left">
-                        <button class="otab active" data-filter="all">All Orders <span class="otab__n" id="count-all">(0)</span></button>
-                        <button class="otab" data-filter="delivered">Delivered <span class="otab__n" id="count-delivered">(0)</span></button>
-                        <button class="otab" data-filter="shipped">Shipped <span class="otab__n" id="count-shipped">(0)</span></button>
-                        <button class="otab" data-filter="pending">Pending <span class="otab__n" id="count-pending">(0)</span></button>
-                    </div>
-                    <div class="tabs-search">
-                        <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Search orders..." id="searchInput">
-                    </div>
-                </div>
-
-                <!-- Table (desktop) -->
-                <div class="otable-wrap">
-                    <table class="otable">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Product</th>
-                                <th>Date</th>
-                                <th>Payment</th>
-                                <th>Status</th>
-                                <th>Total</th>
-                                <th>Invoice</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-table-body">
-                            <!-- JS will populate this -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Mobile cards -->
-                <div class="mcards" id="mobile-orders-container">
-                    <!-- JS will populate this -->
-                </div>
-
-            </div>
-
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Order History — SCENTÉ</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/shared.css">
+        <link rel="stylesheet" href="../css/navbar.css">
+        <link rel="stylesheet" href="../css/footer.css">
+        <link rel="stylesheet" href="../css/order.css">
+    </head>
+    <body>
+        <div id="navbar-placeholder">
         </div>
-    </main>
-
-    <!-- FOOTER -->
-    <div id="footer-placeholder"></div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/cart.js"></script>
-    <script src="/js/toast.js"></script>
-    <script src="/js/order.js"></script>
-
+        <main class="orders-page">
+            <div class="orders-container">
+                <div class="orders-page-header">
+                    <span class="orders-page-header__eyebrow">My Account</span>
+                    <h1 class="orders-page-header__title">Order History</h1>
+                </div>
+                <div class="orders-card">
+                    <div class="orders-card__tabs">
+                        <div class="tabs-left">
+                            <button class="otab active" data-filter="all">All Orders <span class="otab__n" id="count-all">(0)</span>
+                        </button>
+                        <button class="otab" data-filter="delivered">Delivered <span class="otab__n" id="count-delivered">(0)</span>
+                    </button>
+                    <button class="otab" data-filter="shipped">Shipped <span class="otab__n" id="count-shipped">(0)</span>
+                </button>
+                <button class="otab" data-filter="pending">Pending <span class="otab__n" id="count-pending">(0)</span>
+            </button>
+        </div>
+        <div class="tabs-search">
+            <i class="bi bi-search">
+            </i>
+            <input type="text" placeholder="Search orders..." id="searchInput">
+        </div>
+    </div>
+    <div class="otable-wrap">
+        <table class="otable">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Product</th>
+                    <th>Date</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Invoice</th>
+                </tr>
+            </thead>
+            <tbody id="orders-table-body">
+            </tbody>
+        </table>
+    </div>
+    <div class="mcards" id="mobile-orders-container">
+    </div>
+</div>
+</div>
+</main>
+<div id="footer-placeholder">
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+<script src="/js/cart.js">
+</script>
+<script src="/js/toast.js">
+</script>
+<script src="/js/order.js">
+</script>
 </body>
 </html>

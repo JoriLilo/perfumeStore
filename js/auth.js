@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── REGISTER ─────────────────────────────
   const registerForm = document.getElementById("register-form");
 
   if (registerForm) {
@@ -12,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const password = document.getElementById("password").value;
       const confirmPassword = document.getElementById("confirmPassword").value;
 
-      // clear previous errors
+      
   document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
   document.querySelectorAll(".form-input").forEach(i => i.classList.remove("input-error"));
 
@@ -115,7 +114,6 @@ if (exists) {
     });
   }
 
-  // ── LOGIN ─────────────────────────────
   const loginForm = document.getElementById("login-form");
 
     if (loginForm) {
@@ -125,20 +123,17 @@ if (exists) {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
 
-    // clear previous errors
     document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
     document.querySelectorAll(".form-input").forEach(i => i.classList.remove("input-error"));
 
     let valid = true;
 
-    // EMAIL EMPTY
     if (!email) {
       document.getElementById("loginEmailError").textContent = "Email is required";
       document.getElementById("loginEmail").classList.add("input-error");
       valid = false;
     }
 
-    // EMAIL FORMAT
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (email && !emailPattern.test(email)) {
@@ -149,7 +144,6 @@ if (exists) {
       valid = false;
     }
 
-    // PASSWORD EMPTY
     if (!password) {
       document.getElementById("loginPasswordError").textContent = "Password is required";
       document.getElementById("loginPassword").classList.add("input-error");
@@ -158,7 +152,6 @@ if (exists) {
 
     if (!valid) return;
 
-    // CHECK USER
     let users = JSON.parse(localStorage.getItem("users")) || [];
 
     const user = users.find(u => u.email === email && u.password === password);
@@ -171,7 +164,6 @@ if (exists) {
       return;
     }
 
-    // SUCCESS LOGIN
     const session = {
       name: user.firstName,
       email: user.email,
@@ -184,7 +176,6 @@ if (exists) {
   });
 }
 
-  // ── SUCCESS MESSAGE ─────────────────────────────
   if (window.location.pathname.includes("login.html")) {
     const params = new URLSearchParams(window.location.search);
 
@@ -193,9 +184,7 @@ if (exists) {
     }
 };
 
-// ── PASSWORD TOGGLE ─────────────────────────────
 
-// LOGIN PAGE
 const loginPassword = document.getElementById("loginPassword");
 const toggleLogin = document.getElementById("toggleLoginPassword");
 
@@ -209,7 +198,6 @@ if (loginPassword && toggleLogin) {
   });
 }
 
-// REGISTER PAGE (password)
 const password = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
 
@@ -223,7 +211,6 @@ if (password && togglePassword) {
   });
 }
 
-// REGISTER PAGE (confirm password)
 const confirmPassword = document.getElementById("confirmPassword");
 const toggleConfirm = document.getElementById("toggleConfirmPassword");
 
@@ -275,9 +262,8 @@ if (profileLink) {
     const session = JSON.parse(sessionStorage.getItem("session"));
 
     if (!session || !session.loggedIn) {
-      e.preventDefault(); // stop going to profile
+      e.preventDefault(); 
       window.location.href = "/pages/login.html";
     }
-    // else → allow default (go to profile)
   });
 }

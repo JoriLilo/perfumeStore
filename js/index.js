@@ -1,9 +1,4 @@
-// ============================================================
-// js/homepage.js — Homepage Interactivity
-// SCENTÉ · Week 3
-// ============================================================
 
-// ── 1. Safety net — always show the page ─────────────────
 function revealPage() {
   document.body.classList.add('loaded');
 }
@@ -11,15 +6,12 @@ function revealPage() {
 window.addEventListener('load', revealPage);
 setTimeout(revealPage, 400);
 
-// ── 2. Homepage setup ─────────────────────────────────────
-// Navbar/footer are injected globally by cart.js.
 document.addEventListener('DOMContentLoaded', () => {
   renderFeaturedProducts();
   syncWishlistHearts();
   setTimeout(restoreAnnouncementBar, 150);
 });
 
-// ── 3. Announcement bar ───────────────────────────────────
 function restoreAnnouncementBar() {
   if (sessionStorage.getItem('ann_closed') === 'true') {
     const bar = document.getElementById('scente-announcement');
@@ -27,7 +19,6 @@ function restoreAnnouncementBar() {
   }
 }
 
-// ── 4. Featured products ──────────────────────────────────
 function renderFeaturedProducts() {
   const products = JSON.parse(localStorage.getItem('products')) || [];
   if (products.length === 0) return;
@@ -88,7 +79,6 @@ function renderFeaturedProducts() {
   });
 }
 
-// ── 5. Add to cart ────────────────────────────────────────
 function handleAddToCart(index) {
   const products = JSON.parse(localStorage.getItem('products')) || [];
   const product = products[index];
@@ -115,7 +105,6 @@ function addFallbackToCart(name, brand, price, image) {
   addToCart(product, '50ml');
 }
 
-// ── 6. Wishlist toggle ────────────────────────────────────
 function toggleWishlistBtn(btn, productId) {
   const id = String(productId);
   let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
@@ -179,7 +168,6 @@ function syncWishlistHearts() {
   });
 }
 
-// ── 7. Newsletter ─────────────────────────────────────────
 function handleNewsletter(e) {
   e.preventDefault();
   document.getElementById('newsletter-form').style.display = 'none';

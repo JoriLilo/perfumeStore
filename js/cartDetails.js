@@ -1,6 +1,5 @@
  let appliedDiscount = 0;
 
-    // ── Seed demo products if cart is empty ───────────────────
     function seedDemoProducts() {
       const existing = getCart();
       if (existing.length === 0) {
@@ -13,7 +12,6 @@
       return '$' + n.toFixed(2);
     }
 
-    // ── Render cart ───────────────────────────────────────────
     function render() {
       const cart = getCart();
       const tbody = document.getElementById('cart-tbody');
@@ -71,7 +69,6 @@
       updateSummary();
     }
 
-    // ── Summary ───────────────────────────────────────────────
     function updateSummary() {
       const subtotal = getSubtotal();
       const shipping = getShipping();
@@ -94,7 +91,6 @@
       document.getElementById('summary-total').textContent = fmt(total);
     }
 
-    // ── Actions ───────────────────────────────────────────────
     function handleQty(index, delta) {
       updateQty(index, delta);
       render();
@@ -124,6 +120,5 @@
       updateSummary();
     }
 
-    // ── Init ──────────────────────────────────────────────────
     seedDemoProducts();
     render();

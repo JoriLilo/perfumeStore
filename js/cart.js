@@ -1,231 +1,268 @@
-const CART_KEY = 'scente_cart';
-const FREE_SHIPPING_AT = 50;
-const SHIPPING_COST = 5.99;
-
-function getCart() {
-  return JSON.parse(localStorage.getItem(CART_KEY) || '[]');
-}
-
-function saveCart(cart) {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  updateCartBadge();
-}
-
-function clearCart() {
-  localStorage.removeItem(CART_KEY);
-  updateCartBadge();
-}
-
-function addToCart(product, size = null) {
-  const cart = getCart();
-
-  const existing = cart.find(item =>
-    item.name === product.name &&
-    item.brand === product.brand &&
-    item.size === size
-  );
-
-  if (existing) {
-    existing.qty += 1;
-  } else {
-    cart.push({
-      name: product.name,
-      brand: product.brand,
-      price: Number(product.price),
-      qty: 1,
-      image: product.image || null,
-      size
-    });
-  }
-
-  saveCart(cart);
-  showCartToast(`${product.name} added to cart`);
-}
-
-function removeFromCart(index) {
-  const cart = getCart();
-  cart.splice(index, 1);
-  saveCart(cart);
-}
-
-function updateQty(index, addedQty) {
-  const cart = getCart();
-  if (!cart[index]) return;
-
-  cart[index].qty += addedQty;
-  if (cart[index].qty <= 0) {
-    cart.splice(index, 1);
-  }
-
-  saveCart(cart);
-}
-
-function getSubtotal() {
-  return getCart().reduce((sum, item) => sum + item.price * item.qty, 0);
-}
-
-function getShipping() {
-  const subtotal = getSubtotal();
-  return subtotal === 0 || subtotal >= FREE_SHIPPING_AT ? 0 : SHIPPING_COST;
-}
-
-function getTotal(discountRate = 0) {
-  const subtotal = getSubtotal();
-  return subtotal - (subtotal * discountRate) + getShipping();
-}
-
-function getItemCount() {
-  return getCart().reduce((sum, item) => sum + item.qty, 0);
-}
-
-function updateCartBadge() {
-  const count = getItemCount();
-  document.querySelectorAll('#cart-count, .scente-badge').forEach(el => {
-    el.textContent = count;
-    el.style.display = count > 0 ? 'flex' : 'none';
-  });
-}
-
-function showCartToast(message) {
-  if (typeof showToast === 'function') {
-    showToast(message, 'success');
-    return;
-  }
-
-  let toast = document.getElementById('scente-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'scente-toast';
-    toast.style.cssText = `
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      background: var(--color-text-primary);
-      color: var(--color-white);
-      padding: 11px 28px;
-      font-family: var(--font-body);
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      opacity: 0;
-      transition: opacity 250ms ease;
-      pointer-events: none;
-      white-space: nowrap;
-    `;
-    document.body.appendChild(toast);
-  }
-
-  toast.textContent = message;
-  toast.style.opacity = '1';
-  setTimeout(() => {
-    toast.style.opacity = '0';
-  }, 2200);
-}
-
-function toggleSearch() {
-  const bar = document.getElementById('scente-search-bar');
-  if (!bar) return;
-
-  bar.classList.toggle('open');
-  if (bar.classList.contains('open')) {
-    const input = document.getElementById('scente-search-input');
-    if (input) {
-      setTimeout(() => input.focus(), 100);
-    }
-  }
-}
-
-function closeAnn() {
-  const ann = document.getElementById('scente-announcement');
-  if (ann) ann.style.display = 'none';
-  sessionStorage.setItem('ann_closed', 'true');
-}
-
-function performSearch() {
-  const input = document.getElementById('scente-search-input');
-  if (!input) return;
-
-  const query = input.value.trim();
-  if (query.length === 0) return;
-
-  const products = JSON.parse(localStorage.getItem('products')) || [];
-  const searchResults = products.filter(product => {
-    const searchableText = `${product.name} ${product.brand} ${product.category || ''} ${product.description || ''}`.toLowerCase();
-    return searchableText.includes(query.toLowerCase());
-  });
-
-  sessionStorage.setItem('searchQuery', query);
-  sessionStorage.setItem('searchResults', JSON.stringify(searchResults.map(p => p.id)));
-  window.location.href = `/pages/shop.html?search=${encodeURIComponent(query)}`;
-}
-
-function updateNavbarSession() {
-  const session = JSON.parse(sessionStorage.getItem('session'));
-  const isLoggedIn = session && session.loggedIn;
-
-  const profileLink = document.getElementById('profile-link');
-  if (profileLink) {
-    if (isLoggedIn) {
-      profileLink.href = '/pages/profile.html';
-      profileLink.innerHTML = '<i class="bi bi-person-check"></i>';
-      profileLink.setAttribute('title', session.name || 'My Profile');
-    } else {
-      profileLink.href = '/pages/login.html';
-      profileLink.innerHTML = '<i class="bi bi-person"></i>';
-      profileLink.setAttribute('title', 'Sign In');
-    }
-  }
-
-  const mobAccountLink = document.getElementById('mob-account-link');
-  if (mobAccountLink) {
-    if (isLoggedIn) {
-      mobAccountLink.href = '/pages/profile.html';
-      mobAccountLink.innerHTML = '<i class="bi bi-person-check"></i> My Profile';
-    } else {
-      mobAccountLink.href = '/pages/login.html';
-      mobAccountLink.innerHTML = '<i class="bi bi-person"></i> Sign In';
-    }
-  }
-}
-
-function restoreAnnouncementBar() {
-  if (sessionStorage.getItem('ann_closed') === 'true') {
-    const bar = document.getElementById('scente-announcement');
-    if (bar) bar.style.display = 'none';
-  }
-}
-
-function loadLayoutComponent(primaryId, fallbackId, componentPath, afterLoad) {
-  const host = document.getElementById(primaryId) || document.getElementById(fallbackId);
-  if (!host) return;
-
-  fetch(componentPath)
-    .then(res => res.text())
-    .then(html => {
-      host.innerHTML = html;
-      if (typeof afterLoad === 'function') afterLoad();
-    });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-  loadLayoutComponent('navbar-placeholder', 'navbar', '/components/navbar.html', () => {
-    restoreAnnouncementBar();
-    updateCartBadge();
-    updateNavbarSession();
+
+  const registerForm = document.getElementById("register-form");
+
+  if (registerForm) {
+    registerForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+  document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
+  document.querySelectorAll(".form-input").forEach(i => i.classList.remove("input-error"));
+
+  const nameRegex = /^[A-Za-z]+$/;
+
+  let valid = true;
+
+  if (!firstName) {
+  document.getElementById("firstNameError").textContent = "Name is required";
+  document.getElementById("firstName").classList.add("input-error");
+  valid = false;
+} else if (!nameRegex.test(firstName)) {
+  document.getElementById("firstNameError").innerHTML =
+    `<i class="bi bi-exclamation-circle-fill error-icon"></i> Only letters allowed`;
+  document.getElementById("firstName").classList.add("input-error");
+  valid = false;
+}
+
+if (!lastName) {
+  document.getElementById("lastNameError").textContent = "Surname is required";
+  document.getElementById("lastName").classList.add("input-error");
+  valid = false;
+} else if (!nameRegex.test(lastName)) {
+  document.getElementById("lastNameError").innerHTML =
+    `<i class="bi bi-exclamation-circle-fill error-icon"></i> Only letters allowed`;
+  document.getElementById("lastName").classList.add("input-error");
+  valid = false;
+}
+
+  if (!email) {
+    document.getElementById("emailError").textContent = "Email is required";
+    document.getElementById("email").classList.add("input-error");
+    valid = false;
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (email && !emailPattern.test(email)) {
+  document.getElementById("emailError").innerHTML =
+    `<i class="bi bi-exclamation-circle-fill error-icon"></i> Enter a valid email address (example: email@email.com).`;
+
+  document.getElementById("email").classList.add("input-error");
+  valid = false;
+}
+
+  if (!password) {
+    document.getElementById("passwordError").textContent = "Password is required";
+    document.getElementById("password").classList.add("input-error");
+    valid = false;
+  }
+
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    if (password && !passwordPattern.test(password)) {
+    document.getElementById("passwordError").innerHTML =
+        `<i class="bi bi-exclamation-circle-fill error-icon"></i>Enter a secure password: at least 8 characters, including upper-case and lower-case letters and numbers.`;
+
+    document.getElementById("password").classList.add("input-error");
+    valid = false;
+    }
+
+  if (!confirmPassword) {
+    document.getElementById("confirmError").textContent = "Confirm your password";
+    document.getElementById("confirmPassword").classList.add("input-error");
+    valid = false;
+  }
+
+  if (password && confirmPassword && password !== confirmPassword) {
+    document.getElementById("confirmError").textContent = "Passwords do not match";
+    document.getElementById("confirmPassword").classList.add("input-error");
+    valid = false;
+  }
+
+  if (!valid) return;
+
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+
+      const exists = users.find(user => user.email === email);
+
+if (exists) {
+  document.getElementById("emailError").innerHTML =
+    `<i class="bi bi-exclamation-circle-fill error-icon"></i> This email is already registered. Try logging in.`;
+
+  document.getElementById("email").classList.add("input-error");
+  return;
+}
+
+      const newUser = {
+        firstName,
+        lastName,
+        email,
+        password,
+        joinDate: new Date().toISOString().split("T")[0]
+      };
+
+      users.push(newUser);
+      localStorage.setItem("users", JSON.stringify(users));
+
+      window.location.href = "login.html?registered=true";
+    });
+  }
+
+  const loginForm = document.getElementById("login-form");
+
+    if (loginForm) {
+      loginForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
+    document.querySelectorAll(".form-input").forEach(i => i.classList.remove("input-error"));
+
+    let valid = true;
+
+    if (!email) {
+      document.getElementById("loginEmailError").textContent = "Email is required";
+      document.getElementById("loginEmail").classList.add("input-error");
+      valid = false;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (email && !emailPattern.test(email)) {
+      document.getElementById("loginEmailError").innerHTML =
+        `<i class="bi bi-exclamation-circle-fill error-icon"></i> Enter a valid email address (example: email@email.com).`;
+
+      document.getElementById("loginEmail").classList.add("input-error");
+      valid = false;
+    }
+
+    if (!password) {
+      document.getElementById("loginPasswordError").textContent = "Password is required";
+      document.getElementById("loginPassword").classList.add("input-error");
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if (!user) {
+      document.getElementById("loginPasswordError").innerHTML =
+        `<i class="bi bi-exclamation-circle-fill error-icon"></i> Invalid email or password`;
+
+      document.getElementById("loginPassword").classList.add("input-error");
+      return;
+    }
+
+    const session = {
+      name: user.firstName,
+      email: user.email,
+      loggedIn: true
+    };
+
+    sessionStorage.setItem("session", JSON.stringify(session));
+
+    window.location.href = "/index.html";
+  });
+}
+
+  if (window.location.pathname.includes("login.html")) {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("registered") === "true") {
+        showToast("Account created successfully!");  
+    }
+};
+
+
+const loginPassword = document.getElementById("loginPassword");
+const toggleLogin = document.getElementById("toggleLoginPassword");
+
+if (loginPassword && toggleLogin) {
+  toggleLogin.addEventListener("click", () => {
+    const isHidden = loginPassword.type === "password";
+    loginPassword.type = isHidden ? "text" : "password";
+
+    toggleLogin.classList.toggle("bi-eye");
+    toggleLogin.classList.toggle("bi-eye-slash");
+  });
+}
+
+const password = document.getElementById("password");
+const togglePassword = document.getElementById("togglePassword");
+
+if (password && togglePassword) {
+  togglePassword.addEventListener("click", () => {
+    const isHidden = password.type === "password";
+    password.type = isHidden ? "text" : "password";
+
+    togglePassword.classList.toggle("bi-eye");
+    togglePassword.classList.toggle("bi-eye-slash");
+  });
+}
+
+const confirmPassword = document.getElementById("confirmPassword");
+const toggleConfirm = document.getElementById("toggleConfirmPassword");
+
+if (confirmPassword && toggleConfirm) {
+  toggleConfirm.addEventListener("click", () => {
+    const isHidden = confirmPassword.type === "password";
+    confirmPassword.type = isHidden ? "text" : "password";
+
+    toggleConfirm.classList.toggle("bi-eye");
+    toggleConfirm.classList.toggle("bi-eye-slash");
   });
 
-  loadLayoutComponent('footer-placeholder', 'footer', '/components/footer.html');
+}
 
-  window.addEventListener('scroll', () => {
-    const header = document.getElementById('scente-header');
-    if (header) header.classList.toggle('scrolled', window.scrollY > 10);
-  });
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
 
-  updateCartBadge();
-  setTimeout(updateNavbarSession, 100);
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+
+let updated = false;
+
+users = users.map(user => {
+  if (!user.joinDate) {
+    updated = true;
+    return {
+      ...user,
+      joinDate: new Date().toISOString().split("T")[0]
+    };
+  }
+  return user;
 });
 
-window.performSearch = performSearch;
+if (updated) {
+  localStorage.setItem("users", JSON.stringify(users));
+}
+})
+
+const profileLink = document.getElementById("profile-link");
+
+if (profileLink) {
+  profileLink.addEventListener("click", function (e) {
+    const session = JSON.parse(sessionStorage.getItem("session"));
+
+    if (!session || !session.loggedIn) {
+      e.preventDefault(); 
+      window.location.href = "/pages/login.html";
+    }
+  });
+}

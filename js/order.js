@@ -1,11 +1,6 @@
-// ============================================================
-// js/order.js — Orders Page Logic
-// SCENTÉ · Tab filtering, search, and dynamic order rendering
-// ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ── Auth guard ───────────────────────────────────────────
   const session = JSON.parse(sessionStorage.getItem("session"));
 
   if (!session || !session.loggedIn) {
@@ -13,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // ── Load orders from localStorage ────────────────────────
 function loadUserOrders() {
   const session = JSON.parse(sessionStorage.getItem('session'));
   const userEmail = session?.email;
@@ -27,14 +21,12 @@ function loadUserOrders() {
   
   const orders = [];
   
-  // Method 1: Check individual order keys
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith('scente_order_')) {
       try {
         const order = JSON.parse(localStorage.getItem(key));
         
-        // Check multiple possible email locations
         const orderEmail = order.customerDetails?.email || 
                           order.customerDetails?.emailAddress ||
                           order.email ||
@@ -52,7 +44,6 @@ function loadUserOrders() {
     }
   }
   
-  // Method 2: Check the global orders array
   const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
   allOrders.forEach(order => {
     const orderEmail = order.customerDetails?.email || 
@@ -61,7 +52,6 @@ function loadUserOrders() {
                       '';
     
     if (orderEmail.toLowerCase() === userEmail.toLowerCase()) {
-      // Check if not already added
       if (!orders.find(o => o.orderNumber === order.orderNumber)) {
         orders.push(order);
       }
@@ -70,17 +60,14 @@ function loadUserOrders() {
   
   console.log('Total orders found for user:', orders.length);
   
-  // Sort by date (newest first)
   orders.sort((a, b) => new Date(b.date) - new Date(a.date));
   
   return orders;
 }
 
-  // ── Create demo orders if none exist ─────────────────────
   function createDemoOrdersIfNeeded(orders) {
     if (orders.length > 0) return orders;
     
-    // Create some demo orders for presentation
     const demoOrders = [
       {
         orderNumber: 'SC2025001',
@@ -120,7 +107,6 @@ function loadUserOrders() {
       }
     ];
     
-    // Save demo orders to localStorage
     demoOrders.forEach(order => {
       localStorage.setItem(`scente_order_${order.orderNumber}`, JSON.stringify(order));
     });
@@ -135,7 +121,6 @@ function loadUserOrders() {
   let activeFilter = 'all';
   let searchQuery = '';
 
-  // ── DOM refs ─────────────────────────────────────────────
   const tableBody = document.getElementById('orders-table-body');
   const mobileContainer = document.getElementById('mobile-orders-container');
   const tabs = document.querySelectorAll('.otab');
@@ -146,7 +131,6 @@ function loadUserOrders() {
   const countShipped = document.getElementById('count-shipped');
   const countPending = document.getElementById('count-pending');
 
-  // ── Helper functions ─────────────────────────────────────
   function getStatusClass(status) {
     const classes = {
       'delivered': 'stat--delivered',
@@ -179,7 +163,6 @@ function loadUserOrders() {
     return order.product || 'Fragrance';
   }
 
-  // ── Update counts ────────────────────────────────────────
   function updateCounts() {
     const counts = {
       all: orders.length,
@@ -194,15 +177,12 @@ function loadUserOrders() {
     if (countPending) countPending.textContent = `(${counts.pending})`;
   }
 
-  // ── Filter orders ────────────────────────────────────────
   function applyFilters() {
     filteredOrders = orders.filter(order => {
-      // Status filter
       if (activeFilter !== 'all' && order.status !== activeFilter) {
         return false;
       }
       
-      // Search filter
       if (searchQuery) {
         const searchable = [
           order.orderNumber,
@@ -223,7 +203,6 @@ function loadUserOrders() {
     renderOrders();
   }
 
-  // ── Render orders ────────────────────────────────────────
   function renderOrders() {
     if (!tableBody) return;
     
@@ -244,7 +223,6 @@ function loadUserOrders() {
       return;
     }
     
-    // Render desktop table
     tableBody.innerHTML = filteredOrders.map(order => {
       const productName = getProductNames(order);
       const date = formatDate(order.date);
@@ -271,7 +249,6 @@ function loadUserOrders() {
       `;
     }).join('');
     
-    // Render mobile cards
     if (mobileContainer) {
       mobileContainer.innerHTML = filteredOrders.map(order => {
         const productName = getProductNames(order);
@@ -303,7 +280,6 @@ function loadUserOrders() {
     }
   }
 
-  // ── Event listeners ──────────────────────────────────────
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       tabs.forEach(t => t.classList.remove('active'));
@@ -320,11 +296,9 @@ function loadUserOrders() {
     });
   }
 
-  // ── Initialize ───────────────────────────────────────────
   updateCounts();
   renderOrders();
   
-  // Also check URL params for filter
   const urlParams = new URLSearchParams(window.location.search);
   const statusFilter = urlParams.get('status');
   if (statusFilter) {

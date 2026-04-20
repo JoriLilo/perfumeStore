@@ -1,151 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Product Detail — SCENTÉ</title>
-  <link rel="stylesheet" href="../css/shared.css">
-  <link rel="stylesheet" href="../css/navbar.css">
-  <link rel="stylesheet" href="../css/details.css">
-  <link rel="stylesheet" href="../css/footer.css">
-</head>
-<body>
-
-
-
-  <!-- Navbar -->
-  <div id="navbar-placeholder"></div>
-
-<!-- BREADCRUMB -->
-<div class="breadcrumb">
-  <div class="container">
-    <ul class="breadcrumb__list">
-      <li class="breadcrumb__item"><a href="../index.html">Home</a></li>
-      <li class="breadcrumb__sep">›</li>
-      <li class="breadcrumb__item"><a href="../pages/shop.html">Perfumes</a></li>
-      <li class="breadcrumb__sep">›</li>
-      <li class="breadcrumb__item breadcrumb__item--active" id="breadcrumb-name">Velvet Rose & Oud</li>
-    </ul>
-  </div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Product Detail — SCENTÉ</title>
+        <link rel="stylesheet" href="../css/shared.css">
+        <link rel="stylesheet" href="../css/navbar.css">
+        <link rel="stylesheet" href="../css/details.css">
+        <link rel="stylesheet" href="../css/footer.css">
+    </head>
+    <body>
+        <div id="navbar-placeholder">
+        </div>
+        <div class="breadcrumb">
+            <div class="container">
+                <ul class="breadcrumb__list">
+                    <li class="breadcrumb__item">
+                        <a href="../index.html">Home</a>
+                    </li>
+                    <li class="breadcrumb__sep">›</li>
+                    <li class="breadcrumb__item">
+                        <a href="../pages/shop.html">Perfumes</a>
+                    </li>
+                    <li class="breadcrumb__sep">›</li>
+                    <li class="breadcrumb__item breadcrumb__item--active" id="breadcrumb-name">Velvet Rose & Oud</li>
+                </ul>
+            </div>
+        </div>
+        <main>
+            <div class="container">
+                <div class="product-detail">
+                    <div class="product-gallery">
+                        <div class="gallery__main">
+                            <img id="detail-main-img" src="" alt="" style="display: none;">
+                            <div class="img-placeholder">
+                                <span>Product Image</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <span class="product-info__brand" id="detail-brand">Maison de Parfum</span>
+                        <h1 class="product-info__name" id="detail-name">Velvet Rose<br>& Oud</h1>
+                        <div class="product-info__rating">
+                            <div class="stars">
+                                <span class="star star--filled">★</span>
+                                <span class="star star--filled">★</span>
+                                <span class="star star--filled">★</span>
+                                <span class="star star--filled">★</span>
+                                <span class="star">★</span>
+                            </div>
+                            <span class="product-info__rating-count">4.0 (3 reviews)</span>
+                        </div>
+                        <div class="product-info__meta">
+                            <span class="product-info__price" id="detail-price">$89.00</span>
+                            <span class="product-info__volume" id="detail-volume">50 ml</span>
+                        </div>
+                        <hr class="divider" style="margin: 0;">
+                        <p class="product-info__description" id="detail-description">A rich, opulent fragrance that opens with fresh bergamot and Bulgarian rose, settling into a warm base of oud, amber, and sandalwood. Long-lasting and deeply sensual — perfect for evening wear.</p>
+                        <div class="qty-row">
+                            <span class="qty-row__label">Qty</span>
+                            <div class="qty-control">
+                                <button onclick="changeQty(-1)">−</button>
+                                <span class="qty-control__num" id="qty">1</span>
+                                <button onclick="changeQty(1)">+</button>
+                            </div>
+                        </div>
+                        <div class="product-info__actions">
+                            <button class="btn btn--primary btn--full" id="btn-add-cart">Add to Cart</button>
+                            <button class="btn btn--secondary btn--full" id="btn-wishlist">Add to Wishlist</button>
+                        </div>
+                        <div class="product-accordion">
+                            <div class="accordion-item open">
+                                <button class="accordion-item__header" onclick="toggleAccordion(this)">Fragrance Notes <span class="accordion-item__icon">+</span>
+                            </button>
+                            <div class="accordion-item__body">
+                                <strong>Top:</strong>
+                                <span id="notes-top">Bergamot, Pink Pepper</span>
+                                <br>
+                                <strong>Heart:</strong>
+                                <span id="notes-middle">Bulgarian Rose, Jasmine</span>
+                                <br>
+                                <strong>Base:</strong>
+                                <span id="notes-base">Oud, Amber, Sandalwood, Musk</span>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-item__header" onclick="toggleAccordion(this)">How to Use <span class="accordion-item__icon">+</span>
+                        </button>
+                        <div class="accordion-item__body">Apply to pulse points — wrists, neck, and behind the ears. Hold 15–20 cm from skin. Layer over unscented moisturiser for longer lasting fragrance.</div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-item__header" onclick="toggleAccordion(this)">Shipping & Returns <span class="accordion-item__icon">+</span>
+                    </button>
+                    <div class="accordion-item__body">Free standard shipping on orders over $50. Express shipping available at checkout. Returns accepted within 30 days on unopened items.</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-  <!-- PRODUCT DETAIL -->
-  <main>
-    <div class="container">
-      <div class="product-detail">
-
-        <!-- LEFT: Gallery -->
-        <div class="product-gallery">
-          <div class="gallery__main">
-           <img id="detail-main-img" src="" alt="" style="display: none;">
-           <div class="img-placeholder"><span>Product Image</span></div>
-          </div>
-      
-        </div>
-
-       <!-- RIGHT: Info -->
-<div class="product-info">
-  <span class="product-info__brand" id="detail-brand">Maison de Parfum</span>
-
-  <h1 class="product-info__name" id="detail-name">Velvet Rose<br>& Oud</h1>
-
-  <div class="product-info__rating">
-    <div class="stars">
-      <span class="star star--filled">★</span>
-      <span class="star star--filled">★</span>
-      <span class="star star--filled">★</span>
-      <span class="star star--filled">★</span>
-      <span class="star">★</span>
-    </div>
-    <span class="product-info__rating-count">4.0 (3 reviews)</span>
-  </div>
-
-  <div class="product-info__meta">
-    <span class="product-info__price" id="detail-price">$89.00</span>
-    <span class="product-info__volume" id="detail-volume">50 ml</span>
-  </div>
-
-  <hr class="divider" style="margin: 0;">
-
-  <p class="product-info__description" id="detail-description">
-    A rich, opulent fragrance that opens with fresh bergamot and Bulgarian rose,
-    settling into a warm base of oud, amber, and sandalwood.
-    Long-lasting and deeply sensual — perfect for evening wear.
-  </p>
-
-  
-
-          <!-- Quantity -->
-          <div class="qty-row">
-            <span class="qty-row__label">Qty</span>
-            <div class="qty-control">
-              <button onclick="changeQty(-1)">−</button>
-              <span class="qty-control__num" id="qty">1</span>
-              <button onclick="changeQty(1)">+</button>
-            </div>
-          </div>
-
-         <!-- CTA Buttons -->
-          <div class="product-info__actions">
-            <button class="btn btn--primary btn--full" id="btn-add-cart">Add to Cart</button>
-            <button class="btn btn--secondary btn--full" id="btn-wishlist">Add to Wishlist</button>
-          </div>
-
-          <!-- Accordion details -->
-          <div class="product-accordion">
-            <div class="accordion-item open">
-              <button class="accordion-item__header" onclick="toggleAccordion(this)">
-                Fragrance Notes <span class="accordion-item__icon">+</span>
-              </button>
-              <div class="accordion-item__body">
-                <strong>Top:</strong> <span id="notes-top">Bergamot, Pink Pepper</span><br>
-                <strong>Heart:</strong> <span id="notes-middle">Bulgarian Rose, Jasmine</span><br>
-                <strong>Base:</strong> <span id="notes-base">Oud, Amber, Sandalwood, Musk</span>
-              </div>
-            </div>
-            <div class="accordion-item">
-              <button class="accordion-item__header" onclick="toggleAccordion(this)">
-                How to Use <span class="accordion-item__icon">+</span>
-              </button>
-              <div class="accordion-item__body">
-                Apply to pulse points — wrists, neck, and behind the ears. Hold 15–20 cm from skin. Layer over unscented moisturiser for longer lasting fragrance.
-              </div>
-            </div>
-            <div class="accordion-item">
-              <button class="accordion-item__header" onclick="toggleAccordion(this)">
-                Shipping & Returns <span class="accordion-item__icon">+</span>
-              </button>
-              <div class="accordion-item__body">
-                Free standard shipping on orders over $50. Express shipping available at checkout. Returns accepted within 30 days on unopened items.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-  </main>
-
-  
-<!-- Footer -->
-  <div id="footer-placeholder"></div>
-<!-- Footer -->
-  <div id="footer-placeholder"></div>
-
-  <!-- Bootstrap JS -->
-  <!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Load navbar and footer -->
-<!-- Core Scripts - ORDER IS IMPORTANT! -->
-<script src="/js/cart.js"></script>
-<script src="/js/toast.js"></script>
-<script src="/js/wishlist.js"></script>
-<script src="/js/details.js"></script>
-
-</body>
-</html>
-
+</main>
+<div id="footer-placeholder">
+</div>
+<div id="footer-placeholder">
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+<script src="/js/cart.js">
+</script>
+<script src="/js/toast.js">
+</script>
+<script src="/js/wishlist.js">
+</script>
+<script src="/js/details.js">
+</script>
 </body>
 </html>

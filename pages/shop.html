@@ -1,83 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Shop</title>
-
-    <link rel="stylesheet" href="../css/shared.css">
-    <link rel="stylesheet" href="/css/shop.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-</head>
-
-<body>
-
-    <div id="navbar"></div>
-
-    <div class="shop-wrapper">
-        <div class="shop-layout">
-
-            <!-- SIDEBAR -->
-            <div class="sidebar">
-
-               <button class="sidebar-toggle" onclick="toggleSidebar(this)">
-    Filters +
-</button>
-                </button>
-
-                <div class="sidebar-body">
-
-                    <div class="filter-section">
-                        <h4>Category</h4>
-                        <label><input type="checkbox" value="perfume"> Perfume</label>
-                        <label><input type="checkbox" value="cologne"> Cologne</label>
-                    </div>
-
-                    <div class="filter-section">
-                        <h4>Price</h4>
-                        <input type="number" id="price-min" placeholder="Min" min="1">
-                        <input type="number" id="price-max" placeholder="Max" min="1">
-                    </div>
-
-                <div class="filter-section">
-                   <h4>Gender</h4>
-                   <label><input type="radio" name="gender" value="" checked> Show All</label>
-                   <label><input type="radio" name="gender" value="men"> Men</label>
-                   <label><input type="radio" name="gender" value="women"> Women</label>
-                   <label><input type="radio" name="gender" value="unisex"> Unisex</label>
-                 </div>
-
-                </div>
-            </div>
-
-            <!-- MAIN -->
-            <div class="main">
-
-                <div class="top-bar">
-                    <div class="sort-bar">
-                        <select id="sort-select">
-                            <option value="">Default</option>
-                            <option value="price-asc">Price ↑</option>
-                            <option value="price-desc">Price ↓</option>
-                            <option value="newest">Newest</option>
-                        </select>
-                    </div>
-
-                    <div id="results-count"></div>
-
-                    <div class="pagination"></div>
-                </div>
-
-                <div class="products" id="products-grid"></div>
-
-            </div>
-
+    <head>
+        <meta charset="UTF-8">
+        <title>Shop</title>
+        <link rel="stylesheet" href="../css/shared.css">
+        <link rel="stylesheet" href="/css/shop.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <div id="navbar">
         </div>
-    </div>
-
-    <div id="footer"></div>
-
-
-    <script src="/js/shop.js"></script>
-    <script src="/js/cart.js"></script>
-</body>
-</html>
+        <div class="shop-wrapper">
+            <div class="shop-layout">
+                <div class="sidebar">
+                    <button class="sidebar-toggle" onclick="toggleSidebar(this)">Filters +</button>
+                    <div class="sidebar-body">
+                        <div class="filter-section">
+                            <h4>Category</h4>
+                            <label>
+                                <input type="checkbox" value="perfume"> Perfume</label>
+                                <label>
+                                    <input type="checkbox" value="cologne"> Cologne</label>
+                                </div>
+                                <div class="filter-section">
+                                    <h4>Price</h4>
+                                    <input type="number" id="price-min" placeholder="Min" min="1">
+                                    <input type="number" id="price-max" placeholder="Max" min="1">
+                                </div>
+                                <div class="filter-section">
+                                    <h4>Gender</h4>
+                                    <label>
+                                        <input type="radio" name="gender" value="" checked="checked"> Show All</label>
+                                        <label>
+                                            <input type="radio" name="gender" value="men"> Men</label>
+                                            <label>
+                                                <input type="radio" name="gender" value="women"> Women</label>
+                                                <label>
+                                                    <input type="radio" name="gender" value="unisex"> Unisex</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="main">
+                                            <div class="top-bar">
+                                                <div class="sort-bar">
+                                                    <select id="sort-select">
+                                                        <option value="">Default</option>
+                                                        <option value="price-asc">Price ↑</option>
+                                                        <option value="price-desc">Price ↓</option>
+                                                        <option value="newest">Newest</option>
+                                                    </select>
+                                                </div>
+                                                <div id="results-count">
+                                                </div>
+                                                <div class="pagination">
+                                                </div>
+                                            </div>
+                                            <div class="products" id="products-grid">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="footer">
+                                </div>
+                                <script src="/js/shop.js">
+                                </script>
+                                <script src="/js/cart.js">
+                                </script>
+                            </body>
+                        </html>

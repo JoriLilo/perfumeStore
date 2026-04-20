@@ -1,11 +1,6 @@
-// ============================================================
-// js/profile.js — Profile Page Logic
-// SCENTÉ · Handles profile form population, editing & password change
-// ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ── Auth guard — redirect to login if not signed in ──────
   const session = JSON.parse(sessionStorage.getItem("session"));
 
   if (!session || !session.loggedIn) {
@@ -13,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // ── DOM refs ─────────────────────────────────────────────
   const nameInput = document.getElementById("full-name");
   const emailInput = document.getElementById("email");
   const oldPwInput = document.getElementById("old-password");
@@ -22,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileForm = document.getElementById("profile-form");
   const avatarEl = document.getElementById("avatar-initials");
 
-  // ── Load user data from localStorage ─────────────────────
   function loadUserData() {
     const users = JSON.parse(localStorage.getItem("users")) || [];
     const currentUser = users.find(u => u.email === session.email);
@@ -30,42 +23,34 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Session:", session);
     console.log("Current user from localStorage:", currentUser);
     
-    // Build full name from user object
     let fullName = "";
     
     if (currentUser) {
-      // Try different possible name fields
       const firstName = currentUser.firstName || currentUser.firstname || currentUser.first_name || currentUser.name || "";
       const lastName = currentUser.lastName || currentUser.lastname || currentUser.last_name || currentUser.surname || "";
       
       fullName = `${firstName} ${lastName}`.trim();
       
-      // Fallback to session name
       if (!fullName && session.name) {
         fullName = session.name;
       }
       
-      // If still empty, use email username
       if (!fullName && session.email) {
         fullName = session.email.split('@')[0];
       }
     } else {
-      // Use session data if user not found in localStorage
       fullName = session.name || session.email?.split('@')[0] || "User";
     }
     
-    // Populate form
     nameInput.value = fullName;
     emailInput.value = session.email || "";
     
-    // Set avatar initials
     if (avatarEl) {
       const parts = fullName.trim().split(/\s+/);
       const initials = parts.map(p => p.charAt(0).toUpperCase()).slice(0, 2).join("");
       avatarEl.textContent = initials || "U";
     }
     
-    // Clear password fields
     oldPwInput.value = "";
     newPwInput.value = "";
     confirmPwInput.value = "";
@@ -73,7 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
   
   loadUserData();
 
-  // ── Password toggle ──────────────────────────────────────
   document.querySelectorAll(".toggle-password").forEach(btn => {
     btn.addEventListener("click", () => {
       const targetId = btn.getAttribute("data-target");
@@ -92,25 +76,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ── Form submit — save changes ───────────────────────────
   profileForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const newName = nameInput.value.trim();
 
-    // Basic validation
     if (!newName) {
       showToast("Name cannot be empty.", "error");
       nameInput.focus();
       return;
     }
 
-    // Get users array from localStorage
     let users = JSON.parse(localStorage.getItem("users")) || [];
     const userIndex = users.findIndex(u => u.email === session.email);
 
     if (userIndex === -1) {
-      // User not found in localStorage - create from session
       const newUser = {
         firstName: newName.split(' ')[0] || newName,
         lastName: newName.split(' ').slice(1).join(' ') || "",
@@ -121,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
       users.push(newUser);
     }
 
-    // Handle password change
     const oldPw = oldPwInput.value;
     const newPw = newPwInput.value;
     const confirmPw = confirmPwInput.value;
@@ -129,13 +108,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const wantsPasswordChange = oldPw || newPw || confirmPw;
 
     if (wantsPasswordChange) {
-      // All three fields must be filled
       if (!oldPw || !newPw || !confirmPw) {
         showToast("Fill in all password fields to change your password.", "error");
         return;
       }
 
-      // Verify current password
       if (userIndex !== -1) {
         if (oldPw !== users[userIndex].password) {
           showToast("Current password is incorrect.", "error");
@@ -144,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Validate new password strength
       const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
       if (!passwordPattern.test(newPw)) {
         showToast("Password needs 8+ chars, upper & lowercase, and a number.", "error");
@@ -152,20 +128,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Confirm match
       if (newPw !== confirmPw) {
         showToast("New passwords do not match.", "error");
         confirmPwInput.focus();
         return;
       }
 
-      // Update password
       if (userIndex !== -1) {
         users[userIndex].password = newPw;
       }
     }
 
-    // Update name
     if (userIndex !== -1) {
       const nameParts = newName.trim().split(/\s+/);
       users[userIndex].firstName = nameParts[0] || "";
@@ -173,26 +146,21 @@ document.addEventListener("DOMContentLoaded", () => {
       users[userIndex].name = newName;
     }
 
-    // Save to localStorage
     localStorage.setItem("users", JSON.stringify(users));
 
-    // Update session
     session.name = newName;
     sessionStorage.setItem("session", JSON.stringify(session));
 
-    // Update avatar initials
     if (avatarEl) {
       const parts = newName.trim().split(/\s+/);
       const initials = parts.map(p => p.charAt(0).toUpperCase()).slice(0, 2).join("");
       avatarEl.textContent = initials || "U";
     }
 
-    // Clear password fields
     oldPwInput.value = "";
     newPwInput.value = "";
     confirmPwInput.value = "";
 
-    // Reset password toggle icons
     document.querySelectorAll(".toggle-password i").forEach(icon => {
       icon.className = "bi bi-eye";
     });
@@ -205,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// ── Logout function ───────────────────────────────────────
 function logout() {
   sessionStorage.removeItem("session");
   showToast("You have been logged out", "info");
@@ -214,5 +181,4 @@ function logout() {
   }, 1000);
 }
 
-// Expose to global
 window.logout = logout;
