@@ -1,11 +1,17 @@
-// 1. Load the Footer
 fetch('/components/footer.html')
     .then(res => res.text())
     .then(html => {
         document.getElementById('footer-placeholder').innerHTML = html;
     });
 
+
 document.addEventListener('DOMContentLoaded', () => {
+
+    const session = JSON.parse(sessionStorage.getItem('session'));
+    if (!session || !session.loggedIn) {
+        window.location.href = '/pages/login.html';
+        return;
+    }
 
     // --- 1. DYNAMIC CART RENDERING ---
     const cartContainer = document.getElementById('cartItemsContainer');
@@ -25,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        cartContainer.innerHTML = ''; // Clear container
+        cartContainer.innerHTML = ''; 
         let subtotal = 0;
 
         // Loop through each product and create the HTML structure
@@ -38,11 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemHTML = `
                 <div class="cart-item">
                     <div class="item-image">
-                        <img src="${item.image || '/images/terroni.avif'}" alt="${item.name}">
+                        <img src="${item.image}" alt="${item.name}">
                     </div>
                     <div class="item-details">
                         <h3 class="heading-md">${item.name}</h3>
-                        <p class="text-sm text-secondary">Size: ${item.size || '50ml'}</p>
+                        <p class="text-sm text-secondary">Size: ${item.size}</p>
                         <p class="text-sm text-secondary">Qty: ${qty}</p>
                     </div>
                     <div class="item-price text-lg font-medium">$${itemTotal.toFixed(2)}</div>
@@ -56,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         grandTotalDisplay.textContent = `$${(subtotal + shippingCost).toFixed(2)}`;
     }
 
-    // Run this immediately when page loads
+    
     loadCartItems();
 
 
@@ -88,17 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const orderCredentials = Object.fromEntries(formData.entries());
 
         // Get the current user's email from session
-        const session = JSON.parse(sessionStorage.getItem('session'));
-        const userEmail = session?.email || orderCredentials.email || 'guest@example.com';
+        const userEmail = session.email;
 
         const completedOrder = {
             orderNumber: newCode,
             date: new Date().toISOString(),
-            status: 'pending',  // Add default status
+            status: 'pending',
             payment: cardRadio.checked ? 'Paid' : 'COD',
             customerDetails: {
                 name: orderCredentials.fullName || session?.name || 'Customer',
-                email: userEmail,  // IMPORTANT: Save email here
+                email: userEmail,
                 address: orderCredentials.addressLine1,
                 city: orderCredentials.city,
                 country: orderCredentials.country,
@@ -108,13 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
             totalPaid: document.getElementById('grandTotalDisplay').textContent
         };
 
-        // Save to localStorage with user email as part of the key for easier lookup
+        // Save to localStorage
         localStorage.setItem(`scente_order_${newCode}`, JSON.stringify(completedOrder));
-
-        // Also add to a global orders array for easier querying
-        const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-        allOrders.push(completedOrder);
-        localStorage.setItem('orders', JSON.stringify(allOrders));
 
         console.log('Order saved:', completedOrder);
         //Delete cart

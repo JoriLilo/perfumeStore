@@ -6,14 +6,13 @@ let deleteIndex = null;
 let searchQuery = "";
 let orderSearchQuery = "";
 let userSearchQuery = "";
-let allOrders = [];
 let currentOrderKey = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
   renderOrders();
-  renderUsers();
-  updateDashboard();
+  const metrics = updateDashboard();
+  renderUsers(metrics);
 
   const orderModal = document.getElementById("viewOrderModal");
   if (orderModal) {
@@ -37,26 +36,59 @@ links.forEach(link => {
   });
 });
 
+function buildOrderAnalytics() {
+  const orderCounts = {};
+  const seenOrderNumbers = new Set();
+  let totalOrders = 0;
+  let totalRevenue = 0;
+
+  const registerOrder = (order) => {
+    if (!order) return;
+
+    const orderNumber = String(order.orderNumber || '').trim();
+    if (orderNumber && seenOrderNumbers.has(orderNumber)) return;
+    if (orderNumber) seenOrderNumbers.add(orderNumber);
+
+    totalOrders += 1;
+    const amount = parseFloat(String(order.totalPaid || '').replace('$', '')) || 0;
+    totalRevenue += amount;
+
+    const email = order.customerDetails?.email || order.email || order.userEmail;
+    if (email) {
+      const normalizedEmail = email.toLowerCase().trim();
+      orderCounts[normalizedEmail] = (orderCounts[normalizedEmail] || 0) + 1;
+    }
+  };
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('scente_order_')) {
+      try {
+        registerOrder(JSON.parse(localStorage.getItem(key)));
+      } catch (e) {
+        console.warn('Failed to parse order:', key);
+      }
+    }
+  }
+
+  const globalOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+  globalOrders.forEach(registerOrder);
+
+  return { totalOrders, totalRevenue, orderCounts };
+}
+
 function updateDashboard() {
   const products = JSON.parse(localStorage.getItem("products")) || [];
   document.getElementById("total-products").textContent = products.length;
 
-  let totalOrders = 0;
-  let totalRevenue = 0;
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith("scente_order_")) {
-      totalOrders++;
-      const order = JSON.parse(localStorage.getItem(key));
-      const amount = parseFloat(order.totalPaid?.replace("$", "")) || 0;
-      totalRevenue += amount;
-    }
-  }
-  document.getElementById("total-orders").textContent = totalOrders;
-  document.getElementById("total-revenue").textContent = "$" + totalRevenue.toFixed(2);
+  const metrics = buildOrderAnalytics();
+  document.getElementById("total-orders").textContent = metrics.totalOrders;
+  document.getElementById("total-revenue").textContent = "$" + metrics.totalRevenue.toFixed(2);
 
   const users = JSON.parse(localStorage.getItem("users")) || [];
   document.getElementById("total-users").textContent = users.length;
+
+  return metrics;
 }
 
 const searchInput = document.getElementById("search-input");
@@ -274,7 +306,7 @@ if (deleteModal) {
 }
 
 function renderOrders() {
-  allOrders = [];
+  const allOrders = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith("scente_order_")) {
@@ -304,7 +336,7 @@ function renderOrders() {
     return;
   }
 
-  filtered.forEach((order, index) => {
+  filtered.forEach(order => {
     const customer = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
     const date = new Date(order.date).toLocaleDateString("en-US");
     const status = order.status || "pending";
@@ -318,14 +350,16 @@ function renderOrders() {
       <td>
         <span class="status-badge ${status}">${status.toUpperCase()}</span>
       </td>
-      <td><a href="#" class="action-link edit" onclick="viewOrder(${index})">View</a></td>
+     <td><a href="#" class="action-link edit" onclick="viewOrder('${order.orderNumber}')">View</a></td>
     `;
     tableBody.appendChild(row);
   });
 }
 
-function viewOrder(index) {
-  const order = allOrders[index];
+function viewOrder(orderNumber) {
+  const order = JSON.parse(localStorage.getItem(`scente_order_${orderNumber}`));
+  if (!order) return;
+  
   currentOrderKey = order.orderNumber;
 
   const customer = order.customerDetails?.name ||
@@ -382,45 +416,13 @@ function closeOrderModal() {
   document.getElementById("viewOrderModal").classList.remove("active");
 }
 
-function renderUsers() {
+function renderUsers(metrics = null) {
   let users = JSON.parse(localStorage.getItem("users")) || [];
   const tableBody = document.getElementById("users-table-body");
   tableBody.innerHTML = "";
 
-  // First, collect all orders and group by email
-  const orderCounts = {};
-  
-  // Check individual order keys
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith("scente_order_")) {
-      try {
-        const order = JSON.parse(localStorage.getItem(key));
-        const email = order.customerDetails?.email || order.email || order.userEmail;
-        
-        if (email) {
-          const normalizedEmail = email.toLowerCase().trim();
-          orderCounts[normalizedEmail] = (orderCounts[normalizedEmail] || 0) + 1;
-        }
-      } catch (e) {
-        console.warn('Failed to parse order:', key);
-      }
-    }
-  }
-  
-  // Also check the global orders array if it exists
-  const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-  allOrders.forEach(order => {
-    const email = order.customerDetails?.email || order.email || order.userEmail;
-    if (email) {
-      const normalizedEmail = email.toLowerCase().trim();
-      // Only count if not already counted from individual keys
-      // (the orders array might have duplicates)
-      if (!orderCounts[normalizedEmail]) {
-        orderCounts[normalizedEmail] = 1;
-      }
-    }
-  });
+  const resolvedMetrics = metrics || buildOrderAnalytics();
+  const orderCounts = resolvedMetrics.orderCounts;
 
   const processed = users.map((user, index) => ({ user, index }));
 

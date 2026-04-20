@@ -29,17 +29,17 @@ function addToCart(product, size = null) {
     existing.qty += 1;
   } else {
     cart.push({
-      name:  product.name,
+      name: product.name,
       brand: product.brand,
       price: Number(product.price),
-      qty:   1,
+      qty: 1,
       image: product.image || null,
-      size:  size
+      size
     });
   }
 
   saveCart(cart);
-  showCartToast(product.name + ' added to cart');
+  showCartToast(`${product.name} added to cart`);
 }
 
 function removeFromCart(index) {
@@ -51,10 +51,12 @@ function removeFromCart(index) {
 function updateQty(index, delta) {
   const cart = getCart();
   if (!cart[index]) return;
+
   cart[index].qty += delta;
   if (cart[index].qty <= 0) {
     cart.splice(index, 1);
   }
+
   saveCart(cart);
 }
 
@@ -84,9 +86,13 @@ function updateCartBadge() {
   });
 }
 
-function showCartToast(msg) {
-  let toast = document.getElementById('scente-toast');
+function showCartToast(message) {
+  if (typeof showToast === 'function') {
+    showToast(message, 'success');
+    return;
+  }
 
+  let toast = document.getElementById('scente-toast');
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'scente-toast';
@@ -112,93 +118,54 @@ function showCartToast(msg) {
     document.body.appendChild(toast);
   }
 
-  toast.textContent = msg;
+  toast.textContent = message;
   toast.style.opacity = '1';
-  setTimeout(() => { toast.style.opacity = '0'; }, 2200);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+  }, 2200);
 }
 
 function toggleSearch() {
   const bar = document.getElementById('scente-search-bar');
-  if (bar) bar.classList.toggle('open');
+  if (!bar) return;
+
+  bar.classList.toggle('open');
+  if (bar.classList.contains('open')) {
+    const input = document.getElementById('scente-search-input');
+    if (input) {
+      setTimeout(() => input.focus(), 100);
+    }
+  }
 }
 
 function closeAnn() {
   const ann = document.getElementById('scente-announcement');
   if (ann) ann.style.display = 'none';
+  sessionStorage.setItem('ann_closed', 'true');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const navbarEl = document.getElementById('navbar-placeholder');
-  if (navbarEl) {
-    fetch('/components/navbar.html')
-      .then(res => res.text())
-      .then(html => {
-        navbarEl.innerHTML = html;
-        updateCartBadge();
-      });
-  }
-
-  const footerEl = document.getElementById('footer-placeholder');
-  if (footerEl) {
-    fetch('/components/footer.html')
-      .then(res => res.text())
-      .then(html => {
-        footerEl.innerHTML = html;
-      });
-  }
-
-  window.addEventListener('scroll', () => {
-    const header = document.getElementById('scente-header');
-    if (header) header.classList.toggle('scrolled', window.scrollY > 10);
-  });
-
-  updateCartBadge();
-});
-
-function toggleSearch() {
-  const bar = document.getElementById('scente-search-bar');
-  if (bar) {
-    bar.classList.toggle('open');
-    if (bar.classList.contains('open')) {
-      const input = document.getElementById('scente-search-input');
-      if (input) setTimeout(() => input.focus(), 100);
-    }
-  }
-}
-
-// ── Search functionality ─────────────────────────────────
 function performSearch() {
   const input = document.getElementById('scente-search-input');
   if (!input) return;
-  
+
   const query = input.value.trim();
   if (query.length === 0) return;
-  
-  // Get all products from localStorage
+
   const products = JSON.parse(localStorage.getItem('products')) || [];
-  
-  // Search in product names and brands
   const searchResults = products.filter(product => {
     const searchableText = `${product.name} ${product.brand} ${product.category || ''} ${product.description || ''}`.toLowerCase();
     return searchableText.includes(query.toLowerCase());
   });
-  
-  // Store search results in sessionStorage for the shop page to use
+
   sessionStorage.setItem('searchQuery', query);
   sessionStorage.setItem('searchResults', JSON.stringify(searchResults.map(p => p.id)));
-  
-  // Redirect to shop page with search parameter
   window.location.href = `/pages/shop.html?search=${encodeURIComponent(query)}`;
 }
 
-// Make it globally available
-window.performSearch = performSearch;
-// ── Update navbar based on session ─────────────────────────
 function updateNavbarSession() {
   const session = JSON.parse(sessionStorage.getItem('session'));
   const isLoggedIn = session && session.loggedIn;
-  
-  // Desktop profile link
+
   const profileLink = document.getElementById('profile-link');
   if (profileLink) {
     if (isLoggedIn) {
@@ -211,8 +178,7 @@ function updateNavbarSession() {
       profileLink.setAttribute('title', 'Sign In');
     }
   }
-  
-  // Mobile account link
+
   const mobAccountLink = document.getElementById('mob-account-link');
   if (mobAccountLink) {
     if (isLoggedIn) {
@@ -225,21 +191,41 @@ function updateNavbarSession() {
   }
 }
 
-// Update the navbar load fetch calls
-document.addEventListener('DOMContentLoaded', () => {
-  const navbarEl = document.getElementById('navbar-placeholder');
-  if (navbarEl) {
-    fetch('/components/navbar.html')
-      .then(res => res.text())
-      .then(html => {
-        navbarEl.innerHTML = html;
-        updateCartBadge();
-        updateNavbarSession(); // ADD THIS LINE
-      });
+function restoreAnnouncementBar() {
+  if (sessionStorage.getItem('ann_closed') === 'true') {
+    const bar = document.getElementById('scente-announcement');
+    if (bar) bar.style.display = 'none';
   }
-  
-  // Also update existing navbar if already loaded
+}
+
+function loadLayoutComponent(primaryId, fallbackId, componentPath, afterLoad) {
+  const host = document.getElementById(primaryId) || document.getElementById(fallbackId);
+  if (!host) return;
+
+  fetch(componentPath)
+    .then(res => res.text())
+    .then(html => {
+      host.innerHTML = html;
+      if (typeof afterLoad === 'function') afterLoad();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadLayoutComponent('navbar-placeholder', 'navbar', '/components/navbar.html', () => {
+    restoreAnnouncementBar();
+    updateCartBadge();
+    updateNavbarSession();
+  });
+
+  loadLayoutComponent('footer-placeholder', 'footer', '/components/footer.html');
+
+  window.addEventListener('scroll', () => {
+    const header = document.getElementById('scente-header');
+    if (header) header.classList.toggle('scrolled', window.scrollY > 10);
+  });
+
+  updateCartBadge();
   setTimeout(updateNavbarSession, 100);
 });
 
-  
+window.performSearch = performSearch;
