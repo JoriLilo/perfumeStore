@@ -76,21 +76,6 @@
 
     <div id="footer"></div>
 
-    <script>
-        fetch('/components/navbar.html')
-            .then(res => res.text())
-            .then(html => { document.getElementById('navbar').innerHTML = html; 
-                    setTimeout(() => {
-            if (typeof updateCartBadge === 'function') {
-                updateCartBadge();
-            }
-            }, 50);
-            });
-
-        fetch('/components/footer.html')
-            .then(res => res.text())
-            .then(html => { document.getElementById('footer').innerHTML = html; });
-    </script>
 
     <script src="/js/shop.js"></script>
     <script src="/js/cart.js"></script>

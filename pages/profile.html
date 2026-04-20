@@ -168,26 +168,6 @@
     <script src="/js/toast.js"></script>
     <script src="/js/profile.js"></script>
     
-    <script>
-        // Load navbar and footer
-        fetch('/components/navbar.html')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('navbar-placeholder').innerHTML = html;
-                // Update cart badge after navbar loads
-                setTimeout(() => {
-                    if (typeof updateCartBadge === 'function') {
-                        updateCartBadge();
-                    }
-                }, 100);
-            });
-
-        fetch('/components/footer.html')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('footer-placeholder').innerHTML = html;
-            });
-    </script>
 
 </body>
 </html>
