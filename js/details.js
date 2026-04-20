@@ -1,221 +1,213 @@
 // ============================================================
-// js/details.js — Product Detail Page Logic
-// SCENTÉ · Handles product display, add to cart, and wishlist
+// details.js — Product Detail Page
+// Shows a single product's info, lets user add to cart/wishlist
 // ============================================================
 
-// ── 1. Read ?id= from URL ─────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// STEP 1: Get the product ID from the URL
+// Example URL: /details.html?id=3  →  id = "3"
+// ─────────────────────────────────────────────────────────────
 function getProductIdFromURL() {
   const params = new URLSearchParams(window.location.search);
   return params.get('id');
 }
 
-// ── 2. Find product (localStorage first, then JSON fallback) ─
-async function getProduct(id) {
-  // Try localStorage first
-  const stored = JSON.parse(localStorage.getItem('products') || '[]');
-  const found = stored.find(p => String(p.id) === String(id));
-  if (found) return found;
 
-  // Fallback to JSON file
-  try {
-    const res = await fetch('/data/Perfume.json');
-    const all = await res.json();
-    return all.find(p => String(p.id) === String(id)) || null;
-  } catch {
-    return null;
-  }
+// ─────────────────────────────────────────────────────────────
+// STEP 2: Find the product in localStorage using its ID
+// ─────────────────────────────────────────────────────────────
+function getProduct(id) {
+  const products = JSON.parse(localStorage.getItem('products') || '[]');
+  return products.find(p => String(p.id) === String(id)) || null;
 }
 
-// ── 3. Populate the page ─────────────────────────────────
-let currentProduct = null;
+
+// ─────────────────────────────────────────────────────────────
+// STEP 3: Fill the page with the product's information
+// ─────────────────────────────────────────────────────────────
+let currentProduct = null; // We save this so other functions can use it
 
 function populatePage(product) {
   currentProduct = product;
-  
+
+  // Set the browser tab title
   document.title = `${product.name} — SCENTÉ`;
 
-  // Breadcrumb
-  const breadcrumbName = document.getElementById('breadcrumb-name');
-  if (breadcrumbName) breadcrumbName.textContent = product.name;
+  // Fill in each element by its ID
+  setElementText('breadcrumb-name', product.name);
+  setElementText('detail-brand',    product.brand    || '');
+  setElementText('detail-name',     product.name);
+  setElementText('detail-gender',   `${product.gender || 'Unisex'} · ${product.category || 'Perfume'}`);
+  setElementText('detail-description', product.description || 'A luxurious fragrance from SCENTÉ.');
 
-  // Main image
-  const mainImg = document.getElementById('detail-main-img');
-  if (mainImg) {
-    mainImg.src = product.image || 'https://via.placeholder.com/375x500?text=No+Image';
-    mainImg.alt = product.name;
-    mainImg.style.display = 'block';
-  }
-  
-  const imgPlaceholder = document.querySelector('.img-placeholder');
-  if (imgPlaceholder && product.image) imgPlaceholder.style.display = 'none';
+  // Show the price (use salePrice if available, otherwise regular price)
+  const price = product.salePrice ?? product.price;
+  setElementText('detail-price', `$${Number(price).toFixed(2)}`);
 
-  // Brand
-  const brandEl = document.getElementById('detail-brand');
-  if (brandEl) brandEl.textContent = product.brand || '';
-
-  // Name
-  const nameEl = document.getElementById('detail-name');
-  if (nameEl) nameEl.textContent = product.name;
-
-  // Price
-  const priceEl = document.getElementById('detail-price');
-  if (priceEl) {
-    const price = product.salePrice ?? product.price;
-    priceEl.textContent = `$${Number(price).toFixed(2)}`;
+  // Show the product image
+  const img = document.getElementById('detail-main-img');
+  if (img) {
+    img.src = product.image || 'https://via.placeholder.com/375x500?text=No+Image';
+    img.alt = product.name;
+    img.style.display = 'block';
   }
 
-  // Description
-  const descEl = document.getElementById('detail-description');
-  if (descEl) descEl.textContent = product.description || 'A luxurious fragrance from SCENTÉ.';
+  // Hide the placeholder box once the real image loads
+  const placeholder = document.querySelector('.img-placeholder');
+  if (placeholder && product.image) placeholder.style.display = 'none';
 
-  // Volume selector
-  const volumeWrap = document.getElementById('detail-volumes');
-  if (volumeWrap && product.volumes && product.volumes.length) {
-    volumeWrap.innerHTML = product.volumes.map((v, i) => {
-      const price = product.volumePrices?.[v] || product.price;
-      return `<button class="volume-option ${i === 0 ? 'active' : ''}" data-volume="${v}" data-price="${price}" onclick="selectVolume(this)">${v}</button>`;
-    }).join('');
-  }
+  // Show fragrance notes (top / middle / base)
+  setElementText('notes-top',    formatNotes(product.topNotes));
+  setElementText('notes-middle', formatNotes(product.middleNotes));
+  setElementText('notes-base',   formatNotes(product.baseNotes));
 
-  // Fragrance notes
-  const topEl = document.getElementById('notes-top');
-  const midEl = document.getElementById('notes-middle');
-  const baseEl = document.getElementById('notes-base');
-  if (topEl && product.topNotes) topEl.textContent = Array.isArray(product.topNotes) ? product.topNotes.join(', ') : product.topNotes;
-  if (midEl && product.middleNotes) midEl.textContent = Array.isArray(product.middleNotes) ? product.middleNotes.join(', ') : product.middleNotes;
-  if (baseEl && product.baseNotes) baseEl.textContent = Array.isArray(product.baseNotes) ? product.baseNotes.join(', ') : product.baseNotes;
+ 
 
-  // Gender/Category
-  const genderEl = document.getElementById('detail-gender');
-  if (genderEl) genderEl.textContent = `${product.gender || 'Unisex'} · ${product.category || 'Perfume'}`;
+  // Set up the Add to Cart button
+  setupAddToCartButton(product);
 
-  // ── ADD TO CART BUTTON ─────────────────────────────────
-  const addCartBtn = document.getElementById('btn-add-cart');
-  if (addCartBtn) {
-    // Remove any existing listeners
-    const newBtn = addCartBtn.cloneNode(true);
-    addCartBtn.parentNode.replaceChild(newBtn, addCartBtn);
-    
-    newBtn.addEventListener('click', () => {
-      const activeVol = document.querySelector('.volume-option.active');
-      const size = activeVol ? activeVol.dataset.volume : (product.volumes?.[0] || '50ml');
-      const price = activeVol ? Number(activeVol.dataset.price) : product.price;
-      const qty = parseInt(document.getElementById('qty')?.textContent || '1', 10);
-      
-      // Add to cart multiple times based on quantity
-      for (let i = 0; i < qty; i++) {
-        if (typeof addToCart === 'function') {
-          addToCart({ ...product, price }, size);
-        } else {
-          console.error('addToCart function not found! Make sure cart.js is loaded.');
-          alert('Cart functionality not available. Please refresh the page.');
-        }
-      }
-    });
-  }
+  // Set up the Wishlist button
+  setupWishlistButton(product);
+}
 
-  // ── WISHLIST BUTTON ─────────────────────────────────────
-  const wishBtn = document.getElementById('btn-wishlist');
-  if (wishBtn) {
-    // Remove any existing listeners
-    const newWishBtn = wishBtn.cloneNode(true);
-    wishBtn.parentNode.replaceChild(newWishBtn, wishBtn);
-    
-    // Check if already in wishlist
-    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    const isWished = wishlist.includes(String(product.id));
-    newWishBtn.textContent = isWished ? 'Remove from Wishlist' : 'Add to Wishlist';
+// Helper: sets an element's text if it exists on the page
+function setElementText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
 
-    newWishBtn.addEventListener('click', () => {
-      let wl = JSON.parse(localStorage.getItem('wishlist') || '[]');
-      const id = String(product.id);
-      
-      if (wl.includes(id)) {
-        // Remove from wishlist
-        wl = wl.filter(w => w !== id);
-        newWishBtn.textContent = 'Add to Wishlist';
-        if (typeof showToast === 'function') {
-          showToast('Removed from wishlist', 'info');
-        }
+// Helper: turns an array like ["Rose","Oud"] into "Rose, Oud"
+function formatNotes(notes) {
+  if (!notes) return '';
+  return Array.isArray(notes) ? notes.join(', ') : notes;
+}
+
+
+
+
+
+
+
+// ─────────────────────────────────────────────────────────────
+// STEP 5: Add to Cart button
+// ─────────────────────────────────────────────────────────────
+function setupAddToCartButton(product) {
+  const btn = document.getElementById('btn-add-cart');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    // Find which size is selected
+    const activeSize = document.querySelector('.volume-option.active');
+    const size  = activeSize?.dataset.volume || product.volumes?.[0] || '50ml';
+    const price = activeSize ? Number(activeSize.dataset.price) : product.price;
+
+    // Read how many the user wants
+    const qty = parseInt(document.getElementById('qty')?.textContent || '1', 10);
+
+    // Add to cart once per quantity
+    for (let i = 0; i < qty; i++) {
+      if (typeof addToCart === 'function') {
+        addToCart({ ...product, price }, size);
       } else {
-        // Add to wishlist
-        wl.push(id);
-        newWishBtn.textContent = 'Remove from Wishlist';
-        if (typeof showToast === 'function') {
-          showToast('Added to wishlist', 'success');
-        }
-        
-        // Save product data for wishlist page
-        const saved = JSON.parse(localStorage.getItem('wishlistProducts') || '{}');
-        saved[id] = product;
-        localStorage.setItem('wishlistProducts', JSON.stringify(saved));
+        alert('Cart is not available. Please refresh the page.');
       }
-      
-      localStorage.setItem('wishlist', JSON.stringify(wl));
-    });
-  }
-}
-
-// ── 4. Volume selection ───────────────────────────────────
-function selectVolume(btn) {
-  document.querySelectorAll('.volume-option').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-  const priceEl = document.getElementById('detail-price');
-  if (priceEl && btn.dataset.price) {
-    priceEl.textContent = `$${Number(btn.dataset.price).toFixed(2)}`;
-  }
-}
-
-// ── 5. Quantity control ───────────────────────────────────
-function changeQty(delta) {
-  const el = document.getElementById('qty');
-  if (!el) return;
-  const next = Math.max(1, parseInt(el.textContent, 10) + delta);
-  el.textContent = next;
-}
-
-// ── 6. Accordion ─────────────────────────────────────────
-function toggleAccordion(btn) {
-  const item = btn.closest('.accordion-item');
-  const isOpen = item.classList.contains('open');
-  
-  document.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('open'));
-  if (!isOpen) item.classList.add('open');
-  
-  document.querySelectorAll('.accordion-item__icon').forEach(icon => {
-    icon.textContent = icon.closest('.accordion-item').classList.contains('open') ? '−' : '+';
+    }
   });
 }
 
-// ── 7. Initialize page ───────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  const id = getProductIdFromURL();
-  
-  if (!id) {
-    document.querySelector('main').innerHTML = `
-      <div class="container" style="padding:4rem 0; text-align:center;">
-        <p>No product selected.</p>
-        <a href="/pages/shop.html" class="btn btn--primary" style="margin-top:20px;">Browse our shop</a>
-      </div>`;
-    return;
+
+// ─────────────────────────────────────────────────────────────
+// STEP 6: Wishlist button
+// ─────────────────────────────────────────────────────────────
+function setupWishlistButton(product) {
+  const btn = document.getElementById('btn-wishlist');
+  if (!btn) return;
+
+  const productId = String(product.id);
+
+  // Check if this product is already wishlisted
+  const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+  btn.textContent = wishlist.includes(productId) ? 'Remove from Wishlist' : 'Add to Wishlist';
+
+  btn.addEventListener('click', () => {
+    let wl = JSON.parse(localStorage.getItem('wishlist') || '[]');
+
+    if (wl.includes(productId)) {
+      // Remove it
+      wl = wl.filter(id => id !== productId);
+      btn.textContent = 'Add to Wishlist';
+      showToast?.('Removed from wishlist', 'info');
+    } else {
+      // Add it
+      wl.push(productId);
+      btn.textContent = 'Remove from Wishlist';
+      showToast?.('Added to wishlist', 'success');
+
+      // Also save full product data so the wishlist page can display it
+      const savedProducts = JSON.parse(localStorage.getItem('wishlistProducts') || '{}');
+      savedProducts[productId] = product;
+      localStorage.setItem('wishlistProducts', JSON.stringify(savedProducts));
+    }
+
+    localStorage.setItem('wishlist', JSON.stringify(wl));
+  });
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// STEP 7: Quantity +/- buttons
+// ─────────────────────────────────────────────────────────────
+function changeQty(delta) {
+  const el = document.getElementById('qty');
+  if (!el) return;
+
+  const newQty = Math.max(1, parseInt(el.textContent, 10) + delta); // never below 1
+  el.textContent = newQty;
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// STEP 8: Accordion (expandable sections like "How to use")
+// ─────────────────────────────────────────────────────────────
+function toggleAccordion(btn) {
+  const item   = btn.closest('.accordion-item');
+  const isOpen = item.classList.contains('open');
+
+  // Close all sections first
+  document.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('open'));
+  document.querySelectorAll('.accordion-item__icon').forEach(icon => icon.textContent = '+');
+
+  // If it wasn't open, open it now
+  if (!isOpen) {
+    item.classList.add('open');
+    item.querySelector('.accordion-item__icon').textContent = '−';
   }
-  
-  const product = await getProduct(id);
-  
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// START: Run everything once the page has loaded
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const id      = getProductIdFromURL();
+  const product = id ? getProduct(id) : null;
+
   if (!product) {
+    // Show a friendly error if the product wasn't found
     document.querySelector('main').innerHTML = `
       <div class="container" style="padding:4rem 0; text-align:center;">
-        <p>Product not found.</p>
+        <p>${id ? 'Product not found.' : 'No product selected.'}</p>
         <a href="/pages/shop.html" class="btn btn--primary" style="margin-top:20px;">Browse our shop</a>
       </div>`;
     return;
   }
-  
+
   populatePage(product);
 });
 
-// Expose functions globally
-window.selectVolume = selectVolume;
-window.changeQty = changeQty;
+
+// Make functions available to inline HTML (onclick="...")
+window.selectVolume    = selectVolume;
+window.changeQty       = changeQty;
 window.toggleAccordion = toggleAccordion;

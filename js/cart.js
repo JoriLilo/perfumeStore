@@ -48,11 +48,11 @@ function removeFromCart(index) {
   saveCart(cart);
 }
 
-function updateQty(index, delta) {
+function updateQty(index, addedQty) {
   const cart = getCart();
   if (!cart[index]) return;
 
-  cart[index].qty += delta;
+  cart[index].qty += addedQty;
   if (cart[index].qty <= 0) {
     cart.splice(index, 1);
   }
