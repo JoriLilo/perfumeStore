@@ -1,156 +1,135 @@
-const modal = document.getElementById("addProductModal");
-const deleteModal = document.getElementById("deleteConfirmModal");
+// ─────────────────────────────────────────────
+//  STATE  –  variables shared across functions
+// ─────────────────────────────────────────────
+let editingIndex    = null;  // index of product being edited (null = adding new)
+let deleteIndex     = null;  // index of product pending deletion
+let currentOrderKey = null;  // order number of the order open in the modal
 
-let editingIndex = null;
-let deleteIndex = null;
-let searchQuery = "";
-let orderSearchQuery = "";
-let userSearchQuery = "";
-let currentOrderKey = null;
+let searchQuery      = "";   // filter text for Products tab
+let orderSearchQuery = "";   // filter text for Orders tab
+let userSearchQuery  = "";   // filter text for Users tab
 
+
+// ─────────────────────────────────────────────
+//  INIT  –  runs once the page is ready
+// ─────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
   renderOrders();
   const metrics = updateDashboard();
   renderUsers(metrics);
 
-  const orderModal = document.getElementById("viewOrderModal");
-  if (orderModal) {
-    orderModal.addEventListener("click", function (e) {
-      if (e.target === orderModal) closeOrderModal();
-    });
-  }
+  // close the "View Order" modal when clicking the backdrop
+  document.getElementById("viewOrderModal")
+    ?.addEventListener("click", e => { if (e.target.id === "viewOrderModal") closeOrderModal(); });
 });
 
-const links = document.querySelectorAll(".nav-link");
-links.forEach(link => {
+
+// ─────────────────────────────────────────────
+//  NAVIGATION  –  show/hide tabs
+// ─────────────────────────────────────────────
+document.querySelectorAll(".nav-link").forEach(link => {
   link.addEventListener("click", function () {
-    links.forEach(l => l.classList.remove("active"));
+    document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
     this.classList.add("active");
 
-    const sectionId = this.textContent.trim().toLowerCase();
-    const sections = document.querySelectorAll(".section");
-    sections.forEach(section => {
-      section.classList.toggle("active", section.id === sectionId);
+    const target = this.textContent.trim().toLowerCase();
+    document.querySelectorAll(".section").forEach(section => {
+      section.classList.toggle("active", section.id === target);
     });
   });
 });
 
-function buildOrderAnalytics() {
-  const orderCounts = {};
-  const seenOrderNumbers = new Set();
-  let totalOrders = 0;
-  let totalRevenue = 0;
 
-  const registerOrder = (order) => {
-    if (!order) return;
+// ─────────────────────────────────────────────
+//  SEARCH  –  filter tables on type
+// ─────────────────────────────────────────────
+document.getElementById("search-input")
+  ?.addEventListener("input", function () { searchQuery = this.value.toLowerCase(); renderProducts(); });
 
-    const orderNumber = String(order.orderNumber || '').trim();
-    if (orderNumber && seenOrderNumbers.has(orderNumber)) return;
-    if (orderNumber) seenOrderNumbers.add(orderNumber);
+document.getElementById("order-search-input")
+  ?.addEventListener("input", function () { orderSearchQuery = this.value.toLowerCase(); renderOrders(); });
 
-    totalOrders += 1;
-    const amount = parseFloat(String(order.totalPaid || '').replace('$', '')) || 0;
-    totalRevenue += amount;
+document.getElementById("user-search-input")
+  ?.addEventListener("input", function () { userSearchQuery = this.value.toLowerCase(); renderUsers(); });
 
-    const email = order.customerDetails?.email || order.email || order.userEmail;
-    if (email) {
-      const normalizedEmail = email.toLowerCase().trim();
-      orderCounts[normalizedEmail] = (orderCounts[normalizedEmail] || 0) + 1;
-    }
-  };
 
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('scente_order_')) {
-      try {
-        registerOrder(JSON.parse(localStorage.getItem(key)));
-      } catch (e) {
-        console.warn('Failed to parse order:', key);
-      }
-    }
-  }
-
-  const globalOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-  globalOrders.forEach(registerOrder);
-
-  return { totalOrders, totalRevenue, orderCounts };
-}
-
+// ─────────────────────────────────────────────
+//  DASHBOARD  –  update the summary cards
+// ─────────────────────────────────────────────
 function updateDashboard() {
   const products = JSON.parse(localStorage.getItem("products")) || [];
+  const users    = JSON.parse(localStorage.getItem("users"))    || [];
+  const metrics  = buildOrderMetrics();
+
   document.getElementById("total-products").textContent = products.length;
-
-  const metrics = buildOrderAnalytics();
-  document.getElementById("total-orders").textContent = metrics.totalOrders;
-  document.getElementById("total-revenue").textContent = "$" + metrics.totalRevenue.toFixed(2);
-
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  document.getElementById("total-users").textContent = users.length;
+  document.getElementById("total-users").textContent    = users.length;
+  document.getElementById("total-orders").textContent   = metrics.totalOrders;
+  document.getElementById("total-revenue").textContent  = "$" + metrics.totalRevenue.toFixed(2);
 
   return metrics;
 }
 
-const searchInput = document.getElementById("search-input");
-if (searchInput) {
-  searchInput.addEventListener("input", function () {
-    searchQuery = this.value.toLowerCase();
-    renderProducts();
-  });
+
+// ─────────────────────────────────────────────
+//  ORDER METRICS  –  count orders & revenue
+// ─────────────────────────────────────────────
+function buildOrderMetrics() {
+  const orderCounts = {};  // { email: number of orders }
+  let totalOrders   = 0;
+  let totalRevenue  = 0;
+
+  // orders are saved as individual keys: "scente_order_XXXX"
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key?.startsWith("scente_order_")) continue;
+
+    try {
+      const order = JSON.parse(localStorage.getItem(key));
+      if (!order) continue;
+
+      totalOrders++;
+      totalRevenue += parseFloat(String(order.totalPaid || "").replace("$", "")) || 0;
+
+      const email = (order.customerDetails?.email || "").toLowerCase().trim();
+      if (email) orderCounts[email] = (orderCounts[email] || 0) + 1;
+
+    } catch {
+      console.warn("Could not parse order:", key);
+    }
+  }
+
+  return { totalOrders, totalRevenue, orderCounts };
 }
 
-const orderSearchInput = document.getElementById("order-search-input");
-if (orderSearchInput) {
-  orderSearchInput.addEventListener("input", function () {
-    orderSearchQuery = this.value.toLowerCase();
-    renderOrders();
-  });
-}
 
-const userSearchInput = document.getElementById("user-search-input");
-if (userSearchInput) {
-  userSearchInput.addEventListener("input", function () {
-    userSearchQuery = this.value.toLowerCase();
-    renderUsers();
-  });
-}
-
+// ─────────────────────────────────────────────
+//  PRODUCTS  –  render, add, edit, delete
+// ─────────────────────────────────────────────
 function renderProducts() {
-  let products = JSON.parse(localStorage.getItem("products")) || [];
+  const products  = JSON.parse(localStorage.getItem("products")) || [];
   const tableBody = document.getElementById("products-table-body");
   tableBody.innerHTML = "";
 
-  const processed = products.map((product, index) => ({ product, index }));
-  processed.sort((a, b) => b.product.id - a.product.id);
-
-  const filteredProducts = processed.filter(item => {
-    const p = item.product;
-    return (
-      p.name.toLowerCase().includes(searchQuery) ||
+  // sort newest first, then apply search filter
+  const filtered = products
+    .map((product, index) => ({ product, index }))
+    .sort((a, b) => b.product.id - a.product.id)
+    .filter(({ product: p }) =>
+      p.name.toLowerCase().includes(searchQuery)  ||
       p.brand.toLowerCase().includes(searchQuery) ||
       String(p.id).includes(searchQuery)
     );
-  });
 
-  if (filteredProducts.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="9" style="text-align:center; padding:20px; color:#888;">
-          No results found
-        </td>
-      </tr>`;
+  if (filtered.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
     updateDashboard();
     return;
   }
 
-  filteredProducts.forEach(item => {
-    const product = item.product;
-    const index = item.index;
-
-    let stockClass = "";
-    if (product.stock < 5) stockClass = "stock-danger";
-    else if (product.stock < 10) stockClass = "stock-warning";
-    else stockClass = "stock-good";
+  filtered.forEach(({ product, index }) => {
+    const stockClass = product.stock < 5 ? "stock-danger" : product.stock < 10 ? "stock-warning" : "stock-good";
+    const status     = product.status || "active";
 
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -162,14 +141,10 @@ function renderProducts() {
       <td>$${product.price}</td>
       <td class="${stockClass}">${product.stock}</td>
       <td>
-        <a href="#" class="action-link edit" onclick="editProduct(${index})">Edit</a>
+        <a href="#" class="action-link edit"   onclick="editProduct(${index})">Edit</a>
         <a href="#" class="action-link delete" onclick="deleteProduct(${index})">Delete</a>
       </td>
-      <td>
-        <span class="status-badge ${product.status || "active"}">
-          ${product.status || "active"}
-        </span>
-      </td>
+      <td><span class="status-badge ${status}">${status}</span></td>
     `;
     tableBody.appendChild(row);
   });
@@ -177,112 +152,110 @@ function renderProducts() {
   updateDashboard();
 }
 
+// ── Product modal ──────────────────────────────
 function openModal() {
   editingIndex = null;
-  const form = document.getElementById("add-product-form");
-  form.reset();
+  document.getElementById("add-product-form").reset();
   document.getElementById("modal-title").textContent = "Add New Product";
-  document.querySelector(".btn-submit").textContent = "Add Product";
-  modal.classList.add("active");
+  document.querySelector(".btn-submit").textContent  = "Add Product";
+  document.getElementById("addProductModal").classList.add("active");
 }
 
 function closeModal() {
-  modal.classList.remove("active");
-  document.getElementById("modal-title").textContent = "Add New Product";
-  document.querySelector(".btn-submit").textContent = "Add Product";
   editingIndex = null;
+  document.getElementById("modal-title").textContent = "Add New Product";
+  document.querySelector(".btn-submit").textContent  = "Add Product";
+  document.getElementById("addProductModal").classList.remove("active");
 }
 
-if (modal) {
-  modal.addEventListener("click", function (event) {
-    if (event.target === modal) closeModal();
-  });
-}
+document.getElementById("addProductModal")
+  ?.addEventListener("click", e => { if (e.target.id === "addProductModal") closeModal(); });
 
+// ── Save product (add or update) ──────────────
 function handleSubmit(e) {
   e.preventDefault();
   const form = document.getElementById("add-product-form");
+
+  // validate required fields
   const requiredFields = ["name", "brand", "price", "stock", "category", "gender"];
   let hasErrors = false;
 
   requiredFields.forEach(field => {
-    const input = form.elements[field];
+    const input   = form.elements[field];
     const errorEl = document.getElementById("err-" + field);
-    if (input.value.trim() === "") {
-      input.classList.add("input-error");
-      if (errorEl) errorEl.classList.add("visible");
-      hasErrors = true;
-    } else {
-      input.classList.remove("input-error");
-      if (errorEl) errorEl.classList.remove("visible");
-    }
+    const empty   = input.value.trim() === "";
+
+    input.classList.toggle("input-error", empty);
+    errorEl?.classList.toggle("visible", empty);
+    if (empty) hasErrors = true;
   });
 
   if (hasErrors) return;
 
-  const products = JSON.parse(localStorage.getItem("products")) || [];
+  const products    = JSON.parse(localStorage.getItem("products")) || [];
   const productData = {
-    id: Date.now(),
-    name: form.elements["name"].value,
-    brand: form.elements["brand"].value,
-    gender: form.elements["gender"].value,
-    status: form.elements["status"].value || "active",
-    price: Number(form.elements["price"].value),
-    stock: Number(form.elements["stock"].value),
-    category: form.elements["category"].value,
-    image: form.elements["image"].value,
-    description: form.elements["description"].value
+    id:          Date.now(),
+    name:        form.elements["name"].value,
+    brand:       form.elements["brand"].value,
+    gender:      form.elements["gender"].value,
+    status:      form.elements["status"].value || "active",
+    price:       Number(form.elements["price"].value),
+    stock:       Number(form.elements["stock"].value),
+    category:    form.elements["category"].value,
+    image:       form.elements["image"].value,
+    description: form.elements["description"].value,
   };
 
   if (editingIndex !== null) {
-    productData.id = products[editingIndex].id;
+    productData.id         = products[editingIndex].id;  // keep the original id
     products[editingIndex] = productData;
-    editingIndex = null;
   } else {
     products.push(productData);
   }
 
   localStorage.setItem("products", JSON.stringify(products));
   renderProducts();
-  form.reset();
   closeModal();
 }
 
+// ── Edit ──────────────────────────────────────
 function editProduct(index) {
   const products = JSON.parse(localStorage.getItem("products")) || [];
-  const product = products[index];
-  editingIndex = index;
+  const product  = products[index];
+  editingIndex   = index;
 
   const form = document.getElementById("add-product-form");
-  form.elements["name"].value = product.name;
-  form.elements["brand"].value = product.brand;
-  form.elements["price"].value = product.price;
-  form.elements["stock"].value = product.stock;
-  form.elements["category"].value = product.category;
-  form.elements["gender"].value = product.gender || "";
-  form.elements["status"].value = product.status || "active";
-  form.elements["image"].value = product.image || "";
+  form.elements["name"].value        = product.name;
+  form.elements["brand"].value       = product.brand;
+  form.elements["price"].value       = product.price;
+  form.elements["stock"].value       = product.stock;
+  form.elements["category"].value    = product.category;
+  form.elements["gender"].value      = product.gender      || "";
+  form.elements["status"].value      = product.status      || "active";
+  form.elements["image"].value       = product.image       || "";
   form.elements["description"].value = product.description || "";
 
   document.getElementById("modal-title").textContent = "Edit Product";
-  document.querySelector(".btn-submit").textContent = "Update Product";
-  modal.classList.add("active");
+  document.querySelector(".btn-submit").textContent  = "Update Product";
+  document.getElementById("addProductModal").classList.add("active");
 }
 
-function deleteProduct(index) {
-  const products = JSON.parse(localStorage.getItem("products")) || [];
-  const product = products[index];
-  deleteIndex = index;
+// ── Delete ────────────────────────────────────
+const deleteModal = document.getElementById("deleteConfirmModal");
 
-  document.getElementById("delete-product-id").textContent = product.id;
-  document.getElementById("delete-product-name").textContent = product.name;
-  document.getElementById("delete-product-brand").textContent = product.brand;
-  document.getElementById("delete-product-category").textContent = product.category;
-  document.getElementById("delete-product-stock").textContent = product.stock;
-  document.getElementById("delete-product-price").textContent = `$${product.price}`;
+function deleteProduct(index) {
+  const product = (JSON.parse(localStorage.getItem("products")) || [])[index];
+  deleteIndex   = index;
+
+  document.getElementById("delete-product-id").textContent          = product.id;
+  document.getElementById("delete-product-name").textContent        = product.name;
+  document.getElementById("delete-product-brand").textContent       = product.brand;
+  document.getElementById("delete-product-category").textContent    = product.category;
+  document.getElementById("delete-product-stock").textContent       = product.stock;
+  document.getElementById("delete-product-price").textContent       = `$${product.price}`;
   document.getElementById("delete-product-description").textContent = product.description || "—";
-  document.getElementById("delete-product-image").textContent = product.image || "No image";
-  document.getElementById("delete-product-status").textContent = product.status || "active";
+  document.getElementById("delete-product-image").textContent       = product.image       || "No image";
+  document.getElementById("delete-product-status").textContent      = product.status      || "active";
 
   deleteModal.classList.add("active");
 }
@@ -299,47 +272,42 @@ function cancelDeletion() {
   deleteModal.classList.remove("active");
 }
 
-if (deleteModal) {
-  deleteModal.addEventListener("click", function (event) {
-    if (event.target === deleteModal) cancelDeletion();
-  });
-}
+deleteModal?.addEventListener("click", e => { if (e.target === deleteModal) cancelDeletion(); });
 
+
+// ─────────────────────────────────────────────
+//  ORDERS  –  render list and view details
+// ─────────────────────────────────────────────
 function renderOrders() {
   const allOrders = [];
+
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith("scente_order_")) {
-      const order = JSON.parse(localStorage.getItem(key));
-      allOrders.push(order);
+    if (key?.startsWith("scente_order_")) {
+      allOrders.push(JSON.parse(localStorage.getItem(key)));
     }
   }
 
   const tableBody = document.getElementById("orders-table-body");
   tableBody.innerHTML = "";
 
-  const filtered = allOrders.filter(o => {
-    const customer = o.customerDetails?.name || o.customerDetails?.fullName || "Guest";
+  const filtered = allOrders.filter(order => {
+    const customer = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
     return (
-      o.orderNumber.toLowerCase().includes(orderSearchQuery) ||
+      order.orderNumber.toLowerCase().includes(orderSearchQuery) ||
       customer.toLowerCase().includes(orderSearchQuery)
     );
   });
 
   if (filtered.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align:center; padding:20px; color:#888;">
-          No results found
-        </td>
-      </tr>`;
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
     return;
   }
 
   filtered.forEach(order => {
     const customer = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
-    const date = new Date(order.date).toLocaleDateString("en-US");
-    const status = order.status || "pending";
+    const status   = order.status || "pending";
+    const date     = new Date(order.date).toLocaleDateString("en-US");
 
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -347,10 +315,8 @@ function renderOrders() {
       <td>${customer}</td>
       <td>${date}</td>
       <td>${order.totalPaid}</td>
-      <td>
-        <span class="status-badge ${status}">${status.toUpperCase()}</span>
-      </td>
-     <td><a href="#" class="action-link edit" onclick="viewOrder('${order.orderNumber}')">View</a></td>
+      <td><span class="status-badge ${status}">${status.toUpperCase()}</span></td>
+      <td><a href="#" class="action-link edit" onclick="viewOrder('${order.orderNumber}')">View</a></td>
     `;
     tableBody.appendChild(row);
   });
@@ -359,54 +325,45 @@ function renderOrders() {
 function viewOrder(orderNumber) {
   const order = JSON.parse(localStorage.getItem(`scente_order_${orderNumber}`));
   if (!order) return;
-  
+
   currentOrderKey = order.orderNumber;
+  const customer  = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
+  const status    = order.status || "pending";
 
-  const customer = order.customerDetails?.name ||
-                   order.customerDetails?.fullName || "Guest";
-
-  document.getElementById("order-id").textContent = "#" + order.orderNumber;
+  document.getElementById("order-id").textContent       = "#" + order.orderNumber;
   document.getElementById("order-customer").textContent = customer;
-  document.getElementById("order-date").textContent = new Date(order.date).toLocaleDateString("en-US");
-  document.getElementById("order-total").textContent = order.totalPaid;
+  document.getElementById("order-date").textContent     = new Date(order.date).toLocaleDateString("en-US");
+  document.getElementById("order-total").textContent    = order.totalPaid;
 
+  // status badge with a dropdown to change it
   const statusEl = document.getElementById("order-status");
-  const currentStatus = order.status || "pending";
-  statusEl.className = `status-badge ${currentStatus}`;
+  statusEl.className = `status-badge ${status}`;
   statusEl.innerHTML = `
     <select id="order-status-select" onchange="updateOrderStatus(this.value)">
-      <option value="pending"   ${currentStatus === "pending"   ? "selected" : ""}>Pending</option>
-      <option value="shipped"   ${currentStatus === "shipped"   ? "selected" : ""}>Shipped</option>
-      <option value="delivered" ${currentStatus === "delivered" ? "selected" : ""}>Delivered</option>
+      <option value="pending"   ${status === "pending"   ? "selected" : ""}>Pending</option>
+      <option value="shipped"   ${status === "shipped"   ? "selected" : ""}>Shipped</option>
+      <option value="delivered" ${status === "delivered" ? "selected" : ""}>Delivered</option>
     </select>
   `;
 
+  // list items in the order
   const itemsList = document.getElementById("order-items");
-  itemsList.innerHTML = "";
-
-  if (order.items && order.items.length > 0) {
-    order.items.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = `${item.name} - ${item.qty || item.quantity} x $${item.price}`;
-      itemsList.appendChild(li);
-    });
-  } else {
-    itemsList.innerHTML = "<li>No items</li>";
-  }
+  itemsList.innerHTML = order.items?.length > 0
+    ? order.items.map(item => `<li>${item.name} — ${item.qty || item.quantity} × $${item.price}</li>`).join("")
+    : "<li>No items</li>";
 
   document.getElementById("viewOrderModal").classList.add("active");
 }
 
 function updateOrderStatus(newStatus) {
-  const key = `scente_order_${currentOrderKey}`;
+  const key   = `scente_order_${currentOrderKey}`;
   const order = JSON.parse(localStorage.getItem(key));
   if (!order) return;
 
   order.status = newStatus;
   localStorage.setItem(key, JSON.stringify(order));
 
-  const statusEl = document.getElementById("order-status");
-  statusEl.className = `status-badge ${newStatus}`;
+  document.getElementById("order-status").className = `status-badge ${newStatus}`;
 
   renderOrders();
   updateDashboard();
@@ -416,40 +373,30 @@ function closeOrderModal() {
   document.getElementById("viewOrderModal").classList.remove("active");
 }
 
+
+// ─────────────────────────────────────────────
+//  USERS  –  render list with order counts
+// ─────────────────────────────────────────────
 function renderUsers(metrics = null) {
-  let users = JSON.parse(localStorage.getItem("users")) || [];
-  const tableBody = document.getElementById("users-table-body");
+  const users       = JSON.parse(localStorage.getItem("users")) || [];
+  const tableBody   = document.getElementById("users-table-body");
+  const orderCounts = (metrics || buildOrderMetrics()).orderCounts;
+
   tableBody.innerHTML = "";
 
-  const resolvedMetrics = metrics || buildOrderAnalytics();
-  const orderCounts = resolvedMetrics.orderCounts;
-
-  const processed = users.map((user, index) => ({ user, index }));
-
-  const filtered = processed.filter(item => {
-    const u = item.user;
-    const fullName = (u.firstName + " " + u.lastName).toLowerCase();
-    return (
-      fullName.includes(userSearchQuery) ||
-      u.email.toLowerCase().includes(userSearchQuery)
-    );
+  const filtered = users.filter(user => {
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+    return fullName.includes(userSearchQuery) || user.email.toLowerCase().includes(userSearchQuery);
   });
 
   if (filtered.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center; padding:20px; color:#888;">
-          No results found
-        </td>
-      </tr>`;
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
     return;
   }
 
-  filtered.forEach((item, i) => {
-    const user = item.user;
-    const normalizedEmail = user.email.toLowerCase().trim();
-    const orderCount = orderCounts[normalizedEmail] || 0;
-    
+  filtered.forEach((user, i) => {
+    const orderCount = orderCounts[user.email.toLowerCase().trim()] || 0;
+
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${i + 1}</td>
