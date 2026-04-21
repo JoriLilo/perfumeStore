@@ -20,10 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
   renderUsers(metrics);
 
   // close the "View Order" modal when clicking the backdrop
-  document.getElementById("viewOrderModal")
-    ?.addEventListener("click", e => { if (e.target.id === "viewOrderModal") closeOrderModal(); });
+  const modal = document.getElementById("viewOrderModal");
+  if (modal) modal.addEventListener("click", e => {
+    if (e.target.id === "viewOrderModal") closeOrderModal();
+  });
 });
-
 
 // ─────────────────────────────────────────────
 //  NAVIGATION  –  show/hide tabs
@@ -173,7 +174,7 @@ document.getElementById("addProductModal")
 
 // ── Save product (add or update) ──────────────
 function handleSubmit(e) {
-  e.preventDefault();
+  e.preventDefault();//the page does NOT reload when the form is submitted, allowing us to handle the data with JavaScript instead of sending it to a server.
   const form = document.getElementById("add-product-form");
 
   // validate required fields
@@ -348,11 +349,23 @@ function viewOrder(orderNumber) {
 
   // list items in the order
   const itemsList = document.getElementById("order-items");
-  itemsList.innerHTML = order.items?.length > 0
-    ? order.items.map(item => `<li>${item.name} — ${item.qty || item.quantity} × $${item.price}</li>`).join("")
-    : "<li>No items</li>";
 
-  document.getElementById("viewOrderModal").classList.add("active");
+// Check if there are items
+if (order.items && order.items.length > 0) {
+  let html = "";
+
+  order.items.forEach(item => {
+    const qty = item.qty || item.quantity;
+    html += `<li>${item.name} — ${qty} × $${item.price}</li>`;
+  });
+
+  itemsList.innerHTML = html;
+} else {
+  itemsList.innerHTML = "<li>No items</li>";
+}
+
+// Show modal
+document.getElementById("viewOrderModal").classList.add("active");
 }
 
 function updateOrderStatus(newStatus) {

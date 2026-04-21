@@ -1,17 +1,17 @@
 let currentPage = 1;
 const itemsPerPage = 6;
 
-// -- 1. Get products from localStorage --
+// Get products from localStorage
 function getProducts() {
     return JSON.parse(localStorage.getItem('products')) || [];
 }
 
-// -- 2. Get wishlist --
+//  Get wishlist 
 function getWishlist() {
     return JSON.parse(localStorage.getItem('wishlist')) || [];
 }
 
-// -- 3. Build product card --
+//  Build product card 
 function buildCard(product) {
     const wishlist = getWishlist();
     const isWishlisted = wishlist.includes(String(product.id));
@@ -43,7 +43,7 @@ function buildCard(product) {
     `;
 }
 
-// -- 4. Render products --
+// Render products 
 function renderProducts(products) {
     const grid = document.getElementById('products-grid');
     const count = document.getElementById('results-count');
@@ -89,13 +89,13 @@ function renderPagination(totalItems) {
     }
 }
 
-// -- 5. Apply filters + sorting --
-// -- 5. Apply filters + sorting --
+
+//  Apply filters + sorting 
 function applyFilters(resetPage = true) {
     if (resetPage) currentPage = 1;
     let products = getProducts();
 
-    // CHECK FOR SEARCH QUERY FROM URL OR SESSION
+    
     const urlParams = new URLSearchParams(window.location.search);
     const searchQuery = urlParams.get('search');
     
@@ -106,29 +106,7 @@ function applyFilters(resetPage = true) {
             return searchableText.includes(query);
         });
         
-        // Update the page title or heading to show search results
-        const resultsCount = document.getElementById('results-count');
-        if (resultsCount) {
-            resultsCount.textContent = `Search results for "${searchQuery}"`;
-        }
-    } else {
-        // Check sessionStorage for recent search
-        const recentQuery = sessionStorage.getItem('searchQuery');
-        const recentResults = sessionStorage.getItem('searchResults');
         
-        if (recentQuery && recentResults) {
-            const resultIds = JSON.parse(recentResults);
-            products = products.filter(p => resultIds.includes(String(p.id)));
-            
-            const resultsCount = document.getElementById('results-count');
-            if (resultsCount) {
-                resultsCount.textContent = `Search results for "${recentQuery}"`;
-            }
-            
-            // Clear after using
-            sessionStorage.removeItem('searchQuery');
-            sessionStorage.removeItem('searchResults');
-        }
     }
 
     // CATEGORY
@@ -183,7 +161,7 @@ function applyFilters(resetPage = true) {
     renderProducts(products);
 }
 
-// -- 6. Wishlist toggle --
+//  Wishlist toggle 
 function toggleWishlist(id, btn) {
     let wishlist = getWishlist();
 
@@ -197,7 +175,7 @@ function toggleWishlist(id, btn) {
     applyFilters();
 }
 
-// -- 7. Add to cart --
+//  Add to cart 
 function addProductToCart(id) {
     const products = getProducts();
     const product = products.find(p => String(p.id) === id);
@@ -211,7 +189,7 @@ function addProductToCart(id) {
     }
 }
 
-// -- 8. Event listeners --
+// Event listeners 
 function attachListeners() {
     document.querySelectorAll('.sidebar input').forEach(input => {
         input.addEventListener('change', applyFilters);
@@ -222,7 +200,7 @@ function attachListeners() {
     document.getElementById('sort-select').addEventListener('change', applyFilters);
 }
 
-// -- 9. Init --
+
 document.addEventListener('DOMContentLoaded', () => {
     attachListeners();
     applyFilters();
