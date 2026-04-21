@@ -1,8 +1,4 @@
-// ============================================================
-// js/details.js — Product Detail Page Logic
-// SCENTÉ · Handles product display, add to cart, and wishlist
-// ============================================================
-
+ 
 // ── 1. Read ?id= from URL ─────────────────────────────────
 function getProductIdFromURL() {
   const params = new URLSearchParams(window.location.search);
