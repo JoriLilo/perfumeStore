@@ -1,13 +1,5 @@
-// ============================================================
-// details.js — Product Detail Page
-// Shows a single product's info, lets user add to cart/wishlist
-// ============================================================
-
-
-// ─────────────────────────────────────────────────────────────
-// STEP 1: Get the product ID from the URL
-// Example URL: /details.html?id=3  →  id = "3"
-// ─────────────────────────────────────────────────────────────
+ 
+// ── 1. Read ?id= from URL ─────────────────────────────────
 function getProductIdFromURL() {
   const params = new URLSearchParams(window.location.search);
   return params.get('id');
