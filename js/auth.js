@@ -41,63 +41,51 @@ if (!lastName) {
   valid = false;
 }
 
-  if (!email) {
-    document.getElementById("emailError").textContent = "Email is required";
-    document.getElementById("email").classList.add("input-error");
-    valid = false;
-  }
+        document.getElementById("email").classList.add("input-error");
+        valid = false;
+      }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!password) {
+        document.getElementById("passwordError").textContent = "Password is required";
+        document.getElementById("password").classList.add("input-error");
+        valid = false;
+      }
 
-  if (email && !emailPattern.test(email)) {
-  document.getElementById("emailError").innerHTML =
-    `<i class="bi bi-exclamation-circle-fill error-icon"></i> Enter a valid email address (example: email@email.com).`;
+      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  document.getElementById("email").classList.add("input-error");
-  valid = false;
-}
-
-  if (!password) {
-    document.getElementById("passwordError").textContent = "Password is required";
-    document.getElementById("password").classList.add("input-error");
-    valid = false;
-  }
-
-  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-    if (password && !passwordPattern.test(password)) {
-    document.getElementById("passwordError").innerHTML =
+      if (password && !passwordPattern.test(password)) {
+        document.getElementById("passwordError").innerHTML =
         `<i class="bi bi-exclamation-circle-fill error-icon"></i>Enter a secure password: at least 8 characters, including upper-case and lower-case letters and numbers.`;
 
-    document.getElementById("password").classList.add("input-error");
-    valid = false;
-    }
+        document.getElementById("password").classList.add("input-error");
+        valid = false;
+      } 
 
-  if (!confirmPassword) {
-    document.getElementById("confirmError").textContent = "Confirm your password";
-    document.getElementById("confirmPassword").classList.add("input-error");
-    valid = false;
-  }
+      if (!confirmPassword) {
+        document.getElementById("confirmError").textContent = "Confirm your password";
+        document.getElementById("confirmPassword").classList.add("input-error");
+        valid = false;
+      }
 
-  if (password && confirmPassword && password !== confirmPassword) {
-    document.getElementById("confirmError").textContent = "Passwords do not match";
-    document.getElementById("confirmPassword").classList.add("input-error");
-    valid = false;
-  }
+      if (password && confirmPassword && password !== confirmPassword) {
+        document.getElementById("confirmError").textContent = "Passwords do not match";
+        document.getElementById("confirmPassword").classList.add("input-error");
+        valid = false;
+      }
 
-  if (!valid) return;
+      if (!valid) return;
 
       let users = JSON.parse(localStorage.getItem("users")) || [];
 
       const exists = users.find(user => user.email === email);
 
-if (exists) {
-  document.getElementById("emailError").innerHTML =
-    `<i class="bi bi-exclamation-circle-fill error-icon"></i> This email is already registered. Try logging in.`;
+      if (exists) {
+        document.getElementById("emailError").innerHTML =
+        `<i class="bi bi-exclamation-circle-fill error-icon"></i> This email is already registered. Try logging in.`;
 
-  document.getElementById("email").classList.add("input-error");
-  return;
-}
+        document.getElementById("email").classList.add("input-error");
+        return;
+      }
 
       const newUser = {
         firstName,
@@ -116,17 +104,17 @@ if (exists) {
 
   const loginForm = document.getElementById("login-form");
 
-    if (loginForm) {
-      loginForm.addEventListener("submit", function (e) {
+  if (loginForm) {
+    loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
 
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
 
     document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
     document.querySelectorAll(".form-input").forEach(i => i.classList.remove("input-error"));
 
-    let valid = true;
+      let valid = true;
 
     if (!email) {
       document.getElementById("loginEmailError").textContent = "Email is required";
@@ -136,13 +124,13 @@ if (exists) {
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (email && !emailPattern.test(email)) {
-      document.getElementById("loginEmailError").innerHTML =
+      if (email && !emailPattern.test(email)) {
+        document.getElementById("loginEmailError").innerHTML =
         `<i class="bi bi-exclamation-circle-fill error-icon"></i> Enter a valid email address (example: email@email.com).`;
 
-      document.getElementById("loginEmail").classList.add("input-error");
-      valid = false;
-    }
+        document.getElementById("loginEmail").classList.add("input-error");
+        valid = false;
+      }
 
     if (!password) {
       document.getElementById("loginPasswordError").textContent = "Password is required";
@@ -150,19 +138,19 @@ if (exists) {
       valid = false;
     }
 
-    if (!valid) return;
+      if (!valid) return;
 
     let users = JSON.parse(localStorage.getItem("users")) || [];
 
-    const user = users.find(u => u.email === email && u.password === password);
+      const user = users.find(u => u.email === email && u.password === password);
 
-    if (!user) {
-      document.getElementById("loginPasswordError").innerHTML =
+      if (!user) {
+        document.getElementById("loginPasswordError").innerHTML =
         `<i class="bi bi-exclamation-circle-fill error-icon"></i> Invalid email or password`;
 
-      document.getElementById("loginPassword").classList.add("input-error");
-      return;
-    }
+        document.getElementById("loginPassword").classList.add("input-error");
+        return;
+      } 
 
     const session = {
       name: user.firstName,
@@ -170,11 +158,11 @@ if (exists) {
       loggedIn: true
     };
 
-    sessionStorage.setItem("session", JSON.stringify(session));
+      sessionStorage.setItem("session", JSON.stringify(session));
 
-    window.location.href = "/index.html";
-  });
-}
+      window.location.href = "/index.html";
+    });
+  }
 
   if (window.location.pathname.includes("login.html")) {
     const params = new URLSearchParams(window.location.search);
@@ -182,7 +170,7 @@ if (exists) {
     if (params.get("registered") === "true") {
         showToast("Account created successfully!");  
     }
-};
+  };
 
 
 const loginPassword = document.getElementById("loginPassword");
@@ -225,16 +213,7 @@ if (confirmPassword && toggleConfirm) {
 
 }
 
-function showToast(message) {
-  const toast = document.getElementById("toast");
-  toast.textContent = message;
-  toast.classList.add("show");
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-  }, 3000);
-}
-
+// Join Date Patch
 let users = JSON.parse(localStorage.getItem("users")) || [];
 
 let updated = false;
@@ -255,6 +234,7 @@ if (updated) {
 }
 })
 
+// Profile Link Guard
 const profileLink = document.getElementById("profile-link");
 
 if (profileLink) {

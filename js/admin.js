@@ -147,7 +147,7 @@ document.getElementById("addProductModal")
   ?.addEventListener("click", e => { if (e.target.id === "addProductModal") closeModal(); });
 
 function handleSubmit(e) {
-  e.preventDefault();
+  e.preventDefault();//the page does NOT reload when the form is submitted, allowing us to handle the data with JavaScript instead of sending it to a server.
   const form = document.getElementById("add-product-form");
 
   const requiredFields = ["name", "brand", "price", "stock", "category", "gender"];
@@ -314,11 +314,23 @@ function viewOrder(orderNumber) {
   `;
 
   const itemsList = document.getElementById("order-items");
-  itemsList.innerHTML = order.items?.length > 0
-    ? order.items.map(item => `<li>${item.name} — ${item.qty || item.quantity} × $${item.price}</li>`).join("")
-    : "<li>No items</li>";
 
-  document.getElementById("viewOrderModal").classList.add("active");
+// Check if there are items
+if (order.items && order.items.length > 0) {
+  let html = "";
+
+  order.items.forEach(item => {
+    const qty = item.qty || item.quantity;
+    html += `<li>${item.name} — ${qty} × $${item.price}</li>`;
+  });
+
+  itemsList.innerHTML = html;
+} else {
+  itemsList.innerHTML = "<li>No items</li>";
+}
+
+// Show modal
+document.getElementById("viewOrderModal").classList.add("active");
 }
 
 function updateOrderStatus(newStatus) {
