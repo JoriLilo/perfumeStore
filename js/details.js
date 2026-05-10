@@ -1,24 +1,15 @@
- 
-// ── 1. Read ?id= from URL ─────────────────────────────────
+
 function getProductIdFromURL() {
   const params = new URLSearchParams(window.location.search);
   return params.get('id');
 }
 
-
-// ─────────────────────────────────────────────────────────────
-// STEP 2: Find the product in localStorage using its ID
-// ─────────────────────────────────────────────────────────────
 function getProduct(id) {
   const products = JSON.parse(localStorage.getItem('products') || '[]');
   return products.find(p => String(p.id) === String(id)) || null;
 }
 
-
-// ─────────────────────────────────────────────────────────────
-// STEP 3: Fill the page with the product's information
-// ─────────────────────────────────────────────────────────────
-let currentProduct = null; // We save this so other functions can use it
+let currentProduct = null;
 
 function populatePage(product) {
   currentProduct = product;
@@ -54,7 +45,8 @@ function populatePage(product) {
   setElementText('notes-middle', formatNotes(product.middleNotes));
   setElementText('notes-base',   formatNotes(product.baseNotes));
 
- 
+  // Show size buttons (e.g. 30ml, 50ml, 100ml)
+  buildVolumePicker(product);
 
   // Set up the Add to Cart button
   setupAddToCartButton(product);
