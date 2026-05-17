@@ -132,6 +132,4 @@ The REST API is being built in a separate repository using ASP.NET Core. `js/api
 
 ---
 
-## Author
 
-Jori — [github.com/JoriLilo](https://github.com/JoriLilo)
