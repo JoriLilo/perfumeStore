@@ -151,14 +151,6 @@ function performSearch() {
   const query = input.value.trim();
   if (query.length === 0) return;
 
-  const products = JSON.parse(localStorage.getItem('products')) || [];
-  const searchResults = products.filter(product => {
-    const searchableText = `${product.name} ${product.brand} ${product.category || ''} ${product.description || ''}`.toLowerCase();
-    return searchableText.includes(query.toLowerCase());
-  });
-
-  sessionStorage.setItem('searchQuery', query);
-  sessionStorage.setItem('searchResults', JSON.stringify(searchResults.map(p => p.id)));
   window.location.href = `/pages/shop.html?search=${encodeURIComponent(query)}`;
 }
 
