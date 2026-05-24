@@ -1,329 +1,223 @@
+// ============================================================
+// js/auth.js — Authentication Logic
+// SCENTÉ · Updated Week 2
+//
+// Changes from Week 1:
+//   • Register & Login now call real API endpoints via api.js
+//   • JWT token from API response is stored in sessionStorage
+//   • session object now includes { token, name, email, loggedIn }
+//   • Kept same validation UX (inline errors, password toggles)
+// ============================================================
+
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Register
-  const registerForm = document.getElementById("register-form");
+  // ── REGISTER ─────────────────────────────────────────────
+  const registerForm = document.getElementById('register-form');
 
   if (registerForm) {
-    registerForm.addEventListener("submit", async function (e) {
+    registerForm.addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const firstName = document.getElementById("firstName").value.trim();
-      const lastName = document.getElementById("lastName").value.trim();      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
+      const firstName       = document.getElementById('firstName').value.trim();
+      const lastName        = document.getElementById('lastName').value.trim();
+      const email           = document.getElementById('email').value.trim();
+      const password        = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
 
-      // Clears previous error messages
-      document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
-      document.querySelectorAll(".form-input").forEach(i => i.classList.remove("input-error"));
+      // Clear previous errors
+      document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+      document.querySelectorAll('.form-input').forEach(i => i.classList.remove('input-error'));
 
       const nameRegex = /^[A-Za-z]+$/;
-
       let valid = true;
-      
+
       if (!firstName) {
-        document.getElementById("firstNameError").textContent = "Name is required";
-        document.getElementById("firstName").classList.add("input-error");
+        showFieldError('firstNameError', 'firstName', 'Name is required');
         valid = false;
       } else if (!nameRegex.test(firstName)) {
-          document.getElementById("firstNameError").innerHTML =
-          `<i class="bi bi-exclamation-circle-fill error-icon"></i> Only letters allowed`;
-          document.getElementById("firstName").classList.add("input-error");
-          valid = false;
+        showFieldError('firstNameError', 'firstName', 'Only letters allowed', true);
+        valid = false;
       }
 
       if (!lastName) {
-        document.getElementById("lastNameError").textContent = "Surname is required";
-        document.getElementById("lastName").classList.add("input-error");
+        showFieldError('lastNameError', 'lastName', 'Surname is required');
         valid = false;
       } else if (!nameRegex.test(lastName)) {
-          document.getElementById("lastNameError").innerHTML =
-          `<i class="bi bi-exclamation-circle-fill error-icon"></i> Only letters allowed`;
-          document.getElementById("lastName").classList.add("input-error");
-          valid = false;
-        }
-
-      if (!email) {
-        document.getElementById("emailError").textContent = "Email is required";
-        document.getElementById("email").classList.add("input-error");
+        showFieldError('lastNameError', 'lastName', 'Only letters allowed', true);
         valid = false;
       }
 
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (email && !emailPattern.test(email)) {
-        document.getElementById("emailError").innerHTML =
-        `<i class="bi bi-exclamation-circle-fill error-icon"></i> Enter a valid email address (example: email@email.com).`;
-
-        document.getElementById("email").classList.add("input-error");
+      if (!email) {
+        showFieldError('emailError', 'email', 'Email is required');
+        valid = false;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError('emailError', 'email', 'Enter a valid email address (example: email@email.com).', true);
         valid = false;
       }
 
       if (!password) {
-        document.getElementById("passwordError").textContent = "Password is required";
-        document.getElementById("password").classList.add("input-error");
+        showFieldError('passwordError', 'password', 'Password is required');
+        valid = false;
+      } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+        showFieldError('passwordError', 'password', 'Enter a secure password: at least 8 characters, including upper-case and lower-case letters and numbers.', true);
         valid = false;
       }
-
-      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-      if (password && !passwordPattern.test(password)) {
-        document.getElementById("passwordError").innerHTML =
-        `<i class="bi bi-exclamation-circle-fill error-icon"></i>Enter a secure password: at least 8 characters, including upper-case and lower-case letters and numbers.`;
-
-        document.getElementById("password").classList.add("input-error");
-        valid = false;
-      } 
 
       if (!confirmPassword) {
-        document.getElementById("confirmError").textContent = "Confirm your password";
-        document.getElementById("confirmPassword").classList.add("input-error");
+        showFieldError('confirmError', 'confirmPassword', 'Confirm your password');
         valid = false;
-      }
-
-      if (password && confirmPassword && password !== confirmPassword) {
-        document.getElementById("confirmError").textContent = "Passwords do not match";
-        document.getElementById("confirmPassword").classList.add("input-error");
+      } else if (password && confirmPassword && password !== confirmPassword) {
+        showFieldError('confirmError', 'confirmPassword', 'Passwords do not match');
         valid = false;
       }
 
       if (!valid) return;
 
+      // ── Call API ────────────────────────────────────────
       try {
+        const data = await api.post('api/auth/register', {
+          firstName,
+          lastName,
+          email,
+          password
+        });
 
-  const response = await fetch("http://localhost:5123/api/auth/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      firstName,
-      lastName,
-      email,
-      password
-    })
-  });
+        // Save session with JWT token
+        const session = {
+          token:    data.token,
+          name:     data.name,
+          email:    data.email,
+          loggedIn: true
+        };
+        sessionStorage.setItem('session', JSON.stringify(session));
 
-  const data = await response.json();
+        window.location.href = 'login.html?registered=true';
 
-  if (!response.ok) {
-
-    document.getElementById("emailError").innerHTML =
-    `<i class="bi bi-exclamation-circle-fill error-icon"></i> ${
-      data.message || "Registration failed"
-    }`;
-
-    document.getElementById("email").classList.add("input-error");
-
-    return;
-  }
-
-  localStorage.setItem("token", data.token);
-
-  localStorage.setItem("user", JSON.stringify({
-    name: data.name,
-    email: data.email
-  }));
-
-  window.location.href = "login.html?registered=true";
-
-} catch (error) {
-
-  console.error(error);
-
-  alert("Server error. Please try again.");
-}
+      } catch (err) {
+        if (err.message?.toLowerCase().includes('email')) {
+          showFieldError('emailError', 'email', 'This email is already registered. Try logging in.', true);
+        } else {
+          showToastLocal(err.message || 'Registration failed. Please try again.');
+        }
+      }
     });
   }
 
-  // Success message
-  if (window.location.pathname.includes("login.html")) {
-    const params = new URLSearchParams(window.location.search);
 
-    if (params.get("registered") === "true") {
-        showToast("Account created successfully!");  
-    }
-};
-
-  // Login
-  const loginForm = document.getElementById("login-form");
+  // ── LOGIN ────────────────────────────────────────────────
+  const loginForm = document.getElementById('login-form');
 
   if (loginForm) {
-    loginForm.addEventListener("submit", async function (e) {
+
+    // Show success toast if coming from registration
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('registered') === 'true') {
+      showToastLocal('Account created successfully!');
+    }
+
+    loginForm.addEventListener('submit', async function (e) {
       e.preventDefault();
-S
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
+
+      const email    = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
 
       // Clear previous errors
-      document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
-      document.querySelectorAll(".form-input").forEach(i => i.classList.remove("input-error"));
+      document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+      document.querySelectorAll('.form-input').forEach(i => i.classList.remove('input-error'));
 
       let valid = true;
 
       if (!email) {
-        document.getElementById("loginEmailError").textContent = "Email is required";
-        document.getElementById("loginEmail").classList.add("input-error");
+        showFieldError('loginEmailError', 'loginEmail', 'Email is required');
         valid = false;
-      }
-
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (email && !emailPattern.test(email)) {
-        document.getElementById("loginEmailError").innerHTML =
-        `<i class="bi bi-exclamation-circle-fill error-icon"></i> Enter a valid email address (example: email@email.com).`;
-
-        document.getElementById("loginEmail").classList.add("input-error");
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError('loginEmailError', 'loginEmail', 'Enter a valid email address (example: email@email.com).', true);
         valid = false;
       }
 
       if (!password) {
-        document.getElementById("loginPasswordError").textContent = "Password is required";
-        document.getElementById("loginPassword").classList.add("input-error");
+        showFieldError('loginPasswordError', 'loginPassword', 'Password is required');
         valid = false;
       }
 
       if (!valid) return;
 
+      // ── Call API ────────────────────────────────────────
       try {
+        const data = await api.post('api/auth/login', { email, password });
 
-  const response = await fetch("http://localhost:5123/api/auth/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email,
-      password
-    })
-  });
+        // Save session with JWT token
+        const session = {
+          token:    data.token,
+          name:     data.name,
+          email:    data.email,
+          loggedIn: true
+        };
+        sessionStorage.setItem('session', JSON.stringify(session));
 
-  const data = await response.json();
+        window.location.href = '/index.html';
 
-  if (!response.ok) {
-
-    document.getElementById("loginPasswordError").innerHTML =
-    `<i class="bi bi-exclamation-circle-fill error-icon"></i> ${
-      data.message || "Invalid credentials"
-    }`;
-
-    document.getElementById("loginPassword").classList.add("input-error");
-
-    return;
-  }
-
-  localStorage.setItem("token", data.token);
-
-  localStorage.setItem("user", JSON.stringify({
-    name: data.name,
-    email: data.email
-  }));
-
-  window.location.href = "/index.html";
-
-} catch (error) {
-
-  console.error(error);
-
-  alert("Server error. Please try again.");
-}
+      } catch (err) {
+        showFieldError('loginPasswordError', 'loginPassword', 'Invalid email or password', true);
+      }
     });
   }
 
-  // Success message
-  if (window.location.pathname.includes("login.html")) {
-    const params = new URLSearchParams(window.location.search);
 
-    if (params.get("registered") === "true") {
-        showToast("Account created successfully!");  
-    }
-  };
+  // ── PASSWORD TOGGLES ─────────────────────────────────────
+  setupPasswordToggle('loginPassword',   'toggleLoginPassword');
+  setupPasswordToggle('password',        'togglePassword');
+  setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
 
-  function showToast(message) {
-    const toast = document.getElementById("toast");
-    toast.textContent = message;
-    toast.classList.add("show");
-
-    setTimeout(() => {
-      toast.classList.remove("show");
-    }, 3000);
-  } 
-
-// Password Toggle
-
-// Login Page
-const loginPassword = document.getElementById("loginPassword");
-const toggleLogin = document.getElementById("toggleLoginPassword");
-
-if (loginPassword && toggleLogin) {
-  toggleLogin.addEventListener("click", () => {
-    const isHidden = loginPassword.type === "password";
-    loginPassword.type = isHidden ? "text" : "password";
-
-    toggleLogin.classList.toggle("bi-eye");
-    toggleLogin.classList.toggle("bi-eye-slash");
-  });
-}
-
-// Register Page
-const password = document.getElementById("password");
-const togglePassword = document.getElementById("togglePassword");
-
-if (password && togglePassword) {
-  togglePassword.addEventListener("click", () => {
-    const isHidden = password.type === "password";
-    password.type = isHidden ? "text" : "password";
-
-    togglePassword.classList.toggle("bi-eye");
-    togglePassword.classList.toggle("bi-eye-slash");
-  });
-}
-
-// Register Page (confirm password)
-const confirmPassword = document.getElementById("confirmPassword");
-const toggleConfirm = document.getElementById("toggleConfirmPassword");
-
-if (confirmPassword && toggleConfirm) {
-  toggleConfirm.addEventListener("click", () => {
-    const isHidden = confirmPassword.type === "password";
-    confirmPassword.type = isHidden ? "text" : "password";
-
-    toggleConfirm.classList.toggle("bi-eye");
-    toggleConfirm.classList.toggle("bi-eye-slash");
-  });
-
-}
-
-// Join Date Patch
-let users = JSON.parse(localStorage.getItem("users")) || [];
-
-let updated = false;
-
-users = users.map(user => {
-  if (!user.joinDate) {
-    updated = true;
-    return {
-      ...user,
-      joinDate: new Date().toISOString().split("T")[0]
-    };
-  }
-  return user;
 });
 
-if (updated) {
-  localStorage.setItem("users", JSON.stringify(users));
-}
-})
 
-// Profile Link Guard
-const profileLink = document.getElementById("profile-link");
-
+// ── Profile link guard ────────────────────────────────────
+const profileLink = document.getElementById('profile-link');
 if (profileLink) {
-  profileLink.addEventListener("click", function (e) {
-  const session = JSON.parse(localStorage.getItem("user"));
+  profileLink.addEventListener('click', function (e) {
+    const session = JSON.parse(sessionStorage.getItem('session') || 'null');
     if (!session || !session.loggedIn) {
-      e.preventDefault(); // stop going to profile
-      window.location.href = "/pages/login.html";
+      e.preventDefault();
+      window.location.href = '/pages/login.html';
     }
-    // else → allow default (go to profile)
   });
+}
+
+
+// ── Helpers ───────────────────────────────────────────────
+function showFieldError(errorId, inputId, message, withIcon = false) {
+  const errorEl = document.getElementById(errorId);
+  const inputEl = document.getElementById(inputId);
+
+  if (errorEl) {
+    errorEl.innerHTML = withIcon
+      ? `<i class="bi bi-exclamation-circle-fill error-icon"></i> ${message}`
+      : message;
+  }
+  if (inputEl) inputEl.classList.add('input-error');
+}
+
+function setupPasswordToggle(inputId, toggleId) {
+  const input  = document.getElementById(inputId);
+  const toggle = document.getElementById(toggleId);
+  if (!input || !toggle) return;
+
+  toggle.addEventListener('click', () => {
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    toggle.classList.toggle('bi-eye',       !isHidden);
+    toggle.classList.toggle('bi-eye-slash', isHidden);
+  });
+}
+
+function showToastLocal(message) {
+  const toast = document.getElementById('toast');
+  if (toast) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  } else if (typeof showToast === 'function') {
+    showToast(message, 'success');
+  }
 }

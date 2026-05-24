@@ -1,7 +1,19 @@
+// ============================================================
+// js/cart.js — Cart Utilities + Navbar/Footer Loader
+// SCENTÉ · Updated Week 2
+//
+// Changes from Week 1:
+//   • updateCartBadge() now fetches count from GET /api/cart/count
+//     when a JWT session exists; falls back to localStorage for guests
+//   • Everything else (addToCart, removeFromCart, etc.) unchanged
+//     until the cart page itself is connected to the API
+// ============================================================
+
 const CART_KEY = 'scente_cart';
 const FREE_SHIPPING_AT = 50;
 const SHIPPING_COST = 5.99;
 
+// ── localStorage helpers (used by guest cart & cart page) ──
 function getCart() {
   return JSON.parse(localStorage.getItem(CART_KEY) || '[]');
 }
@@ -29,10 +41,10 @@ function addToCart(product, size = null) {
     existing.qty += 1;
   } else {
     cart.push({
-      name: product.name,
+      name:  product.name,
       brand: product.brand,
       price: Number(product.price),
-      qty: 1,
+      qty:   1,
       image: product.image || null,
       size
     });
@@ -78,14 +90,37 @@ function getItemCount() {
   return getCart().reduce((sum, item) => sum + item.qty, 0);
 }
 
-function updateCartBadge() {
-  const count = getItemCount();
-  document.querySelectorAll('#cart-count, .scente-badge').forEach(el => {
+// ── Cart badge — API-first, localStorage fallback ──────────
+// Tries GET /api/cart/count if the user is logged in.
+// Falls back to localStorage count for guests.
+async function updateCartBadge() {
+  let count = 0;
+
+  const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+  const isLoggedIn = session && session.loggedIn && session.token;
+
+  if (isLoggedIn && window.api) {
+    try {
+      const data = await api.get('api/cart/count');
+      // API returns { count: N }
+      count = typeof data?.count === 'number' ? data.count : 0;
+    } catch (_) {
+      // API unavailable or error — fall back to localStorage
+      count = getItemCount();
+    }
+  } else {
+    // Guest: use localStorage
+    count = getItemCount();
+  }
+
+  // Update all badge elements in the navbar
+  document.querySelectorAll('#cart-count, #cart-count-mobile, .scente-badge').forEach(el => {
     el.textContent = count;
     el.style.display = count > 0 ? 'flex' : 'none';
   });
 }
 
+// ── Toast ──────────────────────────────────────────────────
 function showCartToast(message) {
   if (typeof showToast === 'function') {
     showToast(message, 'success');
@@ -120,11 +155,10 @@ function showCartToast(message) {
 
   toast.textContent = message;
   toast.style.opacity = '1';
-  setTimeout(() => {
-    toast.style.opacity = '0';
-  }, 2200);
+  setTimeout(() => { toast.style.opacity = '0'; }, 2200);
 }
 
+// ── Search ─────────────────────────────────────────────────
 function toggleSearch() {
   const bar = document.getElementById('scente-search-bar');
   if (!bar) return;
@@ -132,9 +166,7 @@ function toggleSearch() {
   bar.classList.toggle('open');
   if (bar.classList.contains('open')) {
     const input = document.getElementById('scente-search-input');
-    if (input) {
-      setTimeout(() => input.focus(), 100);
-    }
+    if (input) setTimeout(() => input.focus(), 100);
   }
 }
 
@@ -154,8 +186,9 @@ function performSearch() {
   window.location.href = `/pages/shop.html?search=${encodeURIComponent(query)}`;
 }
 
+// ── Navbar session state ───────────────────────────────────
 function updateNavbarSession() {
-  const session = JSON.parse(sessionStorage.getItem('session'));
+  const session = JSON.parse(sessionStorage.getItem('session') || 'null');
   const isLoggedIn = session && session.loggedIn;
 
   const profileLink = document.getElementById('profile-link');
@@ -190,6 +223,7 @@ function restoreAnnouncementBar() {
   }
 }
 
+// ── Component loader ───────────────────────────────────────
 function loadLayoutComponent(primaryId, fallbackId, componentPath, afterLoad) {
   const host = document.getElementById(primaryId) || document.getElementById(fallbackId);
   if (!host) return;
@@ -202,6 +236,7 @@ function loadLayoutComponent(primaryId, fallbackId, componentPath, afterLoad) {
     });
 }
 
+// ── Init ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadLayoutComponent('navbar-placeholder', 'navbar', '/components/navbar.html', () => {
     restoreAnnouncementBar();
