@@ -22,10 +22,9 @@
 
   <div id="navbar-placeholder"></div>
 
-
   <main>
 
-  <!-- HERO Carusel -->
+  <!-- HERO Carousel -->
     <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel">
 
       <div class="carousel-indicators">
@@ -82,15 +81,14 @@
         <h2 class="featured-section__title">Featured Perfumes</h2>
       </div>
 
-     
       <!--
-        homepage.js renders real products here if localStorage has data.
-        If localStorage is empty ,
-        these 4 fallback cards are shown instead.
+        index.js tries the API first: GET /api/products?pageSize=4
+        If the API is unreachable it falls back to localStorage.
+        If both are empty, these 4 fallback cards are shown.
       -->
       <div class="product-grid" id="featured-grid">
 
-       
+        <!-- Fallback Card 1 -->
         <div class="product-card" data-fallback>
           <div class="product-card__image-wrap">
             <span class="product-card__badge product-card__badge--new">New</span>
@@ -212,10 +210,7 @@
 
 
     <section class="editorial-banner">
-      <img
-        src="/images/perfume3.jpeg"
-        alt="Fragrance editorial"
-      >
+      <img src="/images/perfume3.jpeg" alt="Fragrance editorial">
       <div class="editorial-banner__overlay">
         <p class="editorial-banner__eyebrow">Feel the essence</p>
         <h2 class="editorial-banner__title">The Art of Lasting Scent</h2>
@@ -225,45 +220,28 @@
     </section>
 
 
-    <!-- ══════════════════════════════════════
-         AESTHETIC QUOTE GRID
-    ══════════════════════════════════════ -->
     <div class="aesthetic-grid">
-
       <div class="aesthetic-card">
-        <img
-          src="images/perfume1hp.jpg"
-          alt="Love Don't Be Shy"
-        >
+        <img src="images/perfume1hp.jpg" alt="Love Don't Be Shy">
         <div class="aesthetic-card__quote">
           <p>"Wear the night like a second skin."</p>
         </div>
       </div>
-
       <div class="aesthetic-card">
-        <img
-          src="images/perfume2hp.jpeg"
-          alt="Delina"
-        >
+        <img src="images/perfume2hp.jpeg" alt="Delina">
         <div class="aesthetic-card__quote">
           <p>"A rose that never fades."</p>
         </div>
       </div>
-
       <div class="aesthetic-card">
-        <img
-          src="images/perfume4hp.jpeg"
-          alt="Oud for Greatness"
-        >
+        <img src="images/perfume4hp.jpeg" alt="Oud for Greatness">
         <div class="aesthetic-card__quote">
           <p>"Mystery in every drop."</p>
         </div>
       </div>
+    </div>
 
-    </div><!-- /aesthetic-grid -->
 
-
-    
     <section class="newsletter-section">
       <p class="newsletter-section__eyebrow">Stay in the scent</p>
       <h2 class="newsletter-section__title">Join the Scenté Circle</h2>
@@ -272,50 +250,25 @@
       </p>
     </section>
 
-  <!-- <button onclick="resetAllData()" style="position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 20px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">
-  RESET ALL DATA
-</button>
-
-<script>
-function resetAllData() {
-  if (confirm('Are you sure you want to delete ALL data? This cannot be undone.')) {
-    // Clear everything
-    localStorage.clear("users");
-    // Remove all order keys (they start with 'scente_order_')
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('scente_order_')) {
-        localStorage.removeItem(key);
-        i--; // Adjust index since we removed an item
-      }
-    }
-    sessionStorage.clear();
-    
-    alert('All data cleared! Refreshing page...');
-    location.reload();
-  }
-}
-</script>  -->
-
   </main>
-
-
 
   <div id="footer-placeholder"></div>
 
-
-
-  <!-- Bootstrap JS (required for carousel + offcanvas) -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Shared utilities — must come before homepage.js -->
-  <script src="/js/cart.js"></script>
+  <!--
+    LOAD ORDER IS CRITICAL:
+    1. api.js      — shared fetch wrapper, JWT headers, error handling
+    2. toast.js    — needed by api.js error callbacks
+    3. cart.js     — navbar/footer loader, cart badge (uses api.js)
+    4. index.js    — featured products from API (uses api.js)
+    5. auth.js     — session/navbar state
+  -->
+  <script src="/js/api.js"></script>
   <script src="/js/toast.js"></script>
- <script src="/js/wishlist.js"></script>
-
-  <!-- Homepage logic -->
+  <script src="/js/cart.js"></script>
   <script src="/js/index.js"></script>
-
   <script src="/js/auth.js"></script>
 
 </body>
