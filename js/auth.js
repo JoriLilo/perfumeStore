@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const registerForm = document.getElementById("register-form");
 
   if (registerForm) {
-    registerForm.addEventListener("submit", function (e) {
+    registerForm.addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const firstName = document.getElementById("firstName").value.trim();
@@ -88,30 +88,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!valid) return;
 
-      let users = JSON.parse(localStorage.getItem("users")) || [];
+      try {
 
-      const exists = users.find(user => user.email === email);
+  const response = await fetch("http://localhost:5123/api/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      firstName,
+      lastName,
+      email,
+      password
+    })
+  });
 
-      if (exists) {
-        document.getElementById("emailError").innerHTML =
-        `<i class="bi bi-exclamation-circle-fill error-icon"></i> This email is already registered. Try logging in.`;
+  const data = await response.json();
 
-        document.getElementById("email").classList.add("input-error");
-        return;
-      }
+  if (!response.ok) {
 
-      const newUser = {
-        firstName,
-        lastName,
-        email,
-        password,
-        joinDate: new Date().toISOString().split("T")[0]
-      };
+    document.getElementById("emailError").innerHTML =
+    `<i class="bi bi-exclamation-circle-fill error-icon"></i> ${
+      data.message || "Registration failed"
+    }`;
 
-      users.push(newUser);
-      localStorage.setItem("users", JSON.stringify(users));
+    document.getElementById("email").classList.add("input-error");
 
-      window.location.href = "login.html?registered=true";
+    return;
+  }
+
+  localStorage.setItem("token", data.token);
+
+  localStorage.setItem("user", JSON.stringify({
+    name: data.name,
+    email: data.email
+  }));
+
+  window.location.href = "login.html?registered=true";
+
+} catch (error) {
+
+  console.error(error);
+
+  alert("Server error. Please try again.");
+}
     });
   }
 
@@ -128,9 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById("login-form");
 
   if (loginForm) {
-    loginForm.addEventListener("submit", function (e) {
+    loginForm.addEventListener("submit", async function (e) {
       e.preventDefault();
-
+S
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value;
 
@@ -164,27 +184,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!valid) return;
 
-      let users = JSON.parse(localStorage.getItem("users")) || [];
+      try {
 
-      const user = users.find(u => u.email === email && u.password === password);
+  const response = await fetch("http://localhost:5123/api/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email,
+      password
+    })
+  });
 
-      if (!user) {
-        document.getElementById("loginPasswordError").innerHTML =
-        `<i class="bi bi-exclamation-circle-fill error-icon"></i> Invalid email or password`;
+  const data = await response.json();
 
-        document.getElementById("loginPassword").classList.add("input-error");
-        return;
-      } 
+  if (!response.ok) {
 
-      const session = {
-        name: user.firstName,
-        email: user.email,
-        loggedIn: true
-      };
+    document.getElementById("loginPasswordError").innerHTML =
+    `<i class="bi bi-exclamation-circle-fill error-icon"></i> ${
+      data.message || "Invalid credentials"
+    }`;
 
-      sessionStorage.setItem("session", JSON.stringify(session));
+    document.getElementById("loginPassword").classList.add("input-error");
 
-      window.location.href = "/index.html";
+    return;
+  }
+
+  localStorage.setItem("token", data.token);
+
+  localStorage.setItem("user", JSON.stringify({
+    name: data.name,
+    email: data.email
+  }));
+
+  window.location.href = "/index.html";
+
+} catch (error) {
+
+  console.error(error);
+
+  alert("Server error. Please try again.");
+}
     });
   }
 
@@ -278,8 +319,7 @@ const profileLink = document.getElementById("profile-link");
 
 if (profileLink) {
   profileLink.addEventListener("click", function (e) {
-    const session = JSON.parse(sessionStorage.getItem("session"));
-
+  const session = JSON.parse(localStorage.getItem("user"));
     if (!session || !session.loggedIn) {
       e.preventDefault(); // stop going to profile
       window.location.href = "/pages/login.html";

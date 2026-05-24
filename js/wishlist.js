@@ -18,11 +18,11 @@
 //   6. Shows an empty state message when the wishlist is empty
 //   7. Keeps the cart badge in the navbar up to date
 // ============================================================
+const API_BASE = "http://localhost:5123/api";
 
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderWishlist();
-  updateCartBadge(); // from cart.js
+document.addEventListener("DOMContentLoaded", async () => {
+  await renderWishlist();
+  updateCartBadge();
 });
 
 
@@ -31,22 +31,39 @@ document.addEventListener("DOMContentLoaded", () => {
 // then builds and injects the cards into #wishlist-grid.
 // If wishlist is empty, shows the empty state instead.
 
-function renderWishlist() {
-  const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-  const products = JSON.parse(localStorage.getItem("products")) || [];
+async function renderWishlist() {
 
-  const grid      = document.getElementById("wishlist-grid");
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.log("User not logged in");
+    return;
+  }
+
+  const response = await fetch(`${API_BASE}/wishlist`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    console.error("Failed to fetch wishlist");
+    return;
+  }
+
+  const wishlist = await response.json();
+
+  const grid = document.getElementById("wishlist-grid");
   const emptyState = document.getElementById("wishlist-empty");
-  const countEl   = document.getElementById("wishlist-count");
+  const countEl = document.getElementById("wishlist-count");
 
   if (!grid) return;
 
-  // Update item count label e.g. "3 items"
   if (countEl) {
-    countEl.textContent = `${wishlist.length} ${wishlist.length === 1 ? "item" : "items"}`;
+    countEl.textContent =
+      `${wishlist.length} ${wishlist.length === 1 ? "item" : "items"}`;
   }
 
-  // Empty state
   if (wishlist.length === 0) {
     grid.innerHTML = "";
     if (emptyState) emptyState.style.display = "block";
@@ -55,64 +72,69 @@ function renderWishlist() {
 
   if (emptyState) emptyState.style.display = "none";
 
-  // Build a card for each wishlisted product ID
   grid.innerHTML = "";
 
-  // wishlistProducts is a fallback store keyed by id —
-  // saved at the moment the heart was clicked on any page
-  const wishlistProducts = JSON.parse(localStorage.getItem("wishlistProducts")) || {};
-
-  wishlist.forEach(id => {
-    // 1. Try localStorage["products"] first (real seeded products)
-    // 2. Fall back to localStorage["wishlistProducts"] (saved at click time)
-    const product = products.find(p => String(p.id) === String(id))
-                 || wishlistProducts[id];
-
-    if (!product) return; // genuinely gone — skip
+  wishlist.forEach(product => {
 
     const card = document.createElement("div");
-    card.className = "product-card";
-    card.dataset.productId = id;
 
-    // Default volume — use first in volumes array, or "50ml"
-    const defaultVolume = (product.volumes && product.volumes[0]) || "50ml";
+    card.className = "product-card";
+
+    card.dataset.productId = product.id;
 
     card.innerHTML = `
       <div class="product-card__image-wrap">
+
         <img
           class="product-card__img"
-          src="${product.image || 'https://via.placeholder.com/375x500?text=No+Image'}"
+          src="${product.image}"
           alt="${product.name}"
-          onerror="this.src='https://via.placeholder.com/375x500?text=No+Image'"
         >
+
         <button
           class="product-card__wishlist active"
-          aria-label="Remove from wishlist"
-          onclick="removeFromWishlist('${id}', this)"
+          onclick="removeFromWishlist('${product.id}')"
         >
-          <i class="bi bi-heart-fill" style="color: var(--color-accent);"></i>
+          <i class="bi bi-heart-fill"></i>
         </button>
+
         <button
           class="product-card__quick-add"
-          onclick="handleAddToCart('${id}')"
-        >Add to Cart</button>
+          onclick="handleAddToCart('${product.id}')"
+        >
+          Add to Cart
+        </button>
+
       </div>
 
-      <p class="product-card__brand">${product.brand || ""}</p>
+      <p class="product-card__brand">${product.brand}</p>
+
       <h3 class="product-card__name">
-        <a href="details.html?id=${id}">${product.name}</a>
+        <a href="details.html?id=${product.id}">
+          ${product.name}
+        </a>
       </h3>
-      <p class="product-card__price">$${Number(product.price).toFixed(2)}</p>
+
+      <p class="product-card__price">
+        $${Number(product.price).toFixed(2)}
+      </p>
 
       <div class="wishlist-card-actions">
+
         <button
           class="btn btn--primary btn--full btn--sm"
-          onclick="handleAddToCart('${id}')"
-        >Add to Cart</button>
+          onclick="handleAddToCart('${product.id}')"
+        >
+          Add to Cart
+        </button>
+
         <button
           class="btn btn--secondary btn--full btn--sm"
-          onclick="removeFromWishlist('${id}', this)"
-        >Remove</button>
+          onclick="removeFromWishlist('${product.id}')"
+        >
+          Remove
+        </button>
+
       </div>
     `;
 
@@ -147,32 +169,29 @@ function handleAddToCart(productId) {
 // @param {string} productId  — the ID to remove
 // @param {Element} triggerEl — the button that was clicked (used to find the card)
 
-function removeFromWishlist(productId, triggerEl) {
-  // Update localStorage
-  let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-  wishlist = wishlist.filter(id => String(id) !== String(productId));
-  localStorage.setItem("wishlist", JSON.stringify(wishlist));
+async function removeFromWishlist(productId) {
 
-  // Remove the card from the DOM
-  const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-  if (card) {
-    // Fade out then remove
-    card.style.transition = "opacity 0.3s ease";
-    card.style.opacity = "0";
-    setTimeout(() => {
-      card.remove();
-      // After removing, check if wishlist is now empty
-      checkIfEmpty();
-    }, 300);
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${API_BASE}/wishlist/${productId}`,
+    {
+      method: "DELETE",
+
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+    showToast("Failed to remove item", "error");
+    return;
   }
 
   showToast("Removed from wishlist", "info");
 
-  // Update count label
-  const countEl = document.getElementById("wishlist-count");
-  if (countEl) {
-    countEl.textContent = `${wishlist.length} ${wishlist.length === 1 ? "item" : "items"}`;
-  }
+  await renderWishlist();
 }
 
 
