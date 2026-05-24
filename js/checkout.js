@@ -1,161 +1,153 @@
+// ============================================================
+// js/checkout.js — Checkout Page Logic
+// SCENTÉ · Week 1: orders now go to the real API (no localStorage)
+//
+// Requires: /js/api.js loaded first (provides window.api + auth helpers)
+// ============================================================
+
+// Inject the footer (unchanged from before)
 fetch('/components/footer.html')
     .then(res => res.text())
     .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
+        const ph = document.getElementById('footer-placeholder');
+        if (ph) ph.innerHTML = html;
     });
 
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    const session = JSON.parse(sessionStorage.getItem('session'));
-    if (!session || !session.loggedIn) {
+    // --- AUTH GUARD ---
+    // Must be logged in to check out. api.js exposes isLoggedIn().
+    if (!isLoggedIn()) {
         window.location.href = '/pages/login.html';
         return;
     }
 
-    // --- 1. DYNAMIC CART RENDERING ---
-    const cartContainer = document.getElementById('cartItemsContainer');
-    const subtotalDisplay = document.getElementById('subtotalDisplay');
+    // ────────────────────────────────────────────────────────
+    // 1. DYNAMIC CART RENDERING
+    //    (Still reads the localStorage cart for display in Week 1.
+    //     Ari is moving the cart into the DB this week — once that
+    //     lands, this render can switch to `await api.get('/cart')`.)
+    // ────────────────────────────────────────────────────────
+    const cartContainer   = document.getElementById('cartItemsContainer');
+    const subtotalDisplay  = document.getElementById('subtotalDisplay');
+    const shippingDisplay  = document.getElementById('shippingDisplay');
     const grandTotalDisplay = document.getElementById('grandTotalDisplay');
-    const shippingCost = 15.00;
+
+    // Display-only shipping rule. The REAL shipping + total are
+    // calculated on the server when the order is placed (Week 2).
+    const FREE_SHIPPING_AT = 50;
+    const FLAT_SHIPPING    = 15.00;
 
     function loadCartItems() {
-        // Read from local storage (parse string to array)
         const cartData = JSON.parse(localStorage.getItem('scente_cart')) || [];
-        
-        // Handle empty cart
+
         if (cartData.length === 0) {
-            cartContainer.innerHTML = '<p class="empty-cart-msg">Your shopping bag is empty.</p>';
-            subtotalDisplay.textContent = '$0.00';
+            cartContainer.innerHTML =
+                '<p class="empty-cart-msg">Your shopping bag is empty.</p>';
+            subtotalDisplay.textContent  = '$0.00';
+            shippingDisplay.textContent  = '$0.00';
             grandTotalDisplay.textContent = '$0.00';
             return;
         }
 
-        cartContainer.innerHTML = ''; 
+        cartContainer.innerHTML = '';
         let subtotal = 0;
 
-        // Loop through each product and create the HTML structure
         cartData.forEach(item => {
             const price = parseFloat(item.price) || 0;
-            const qty = parseInt(item.quantity) || 1;
+            // cart.js uses `qty`; tolerate `quantity` too just in case
+            const qty   = parseInt(item.qty ?? item.quantity) || 1;
             const itemTotal = price * qty;
             subtotal += itemTotal;
 
-            const itemHTML = `
+            cartContainer.insertAdjacentHTML('beforeend', `
                 <div class="cart-item">
                     <div class="item-image">
-                        <img src="${item.image}" alt="${item.name}">
+                        <img src="${item.image || ''}" alt="${item.name}">
                     </div>
                     <div class="item-details">
                         <h3 class="heading-md">${item.name}</h3>
-                        <p class="text-sm text-secondary">Size: ${item.size}</p>
+                        <p class="text-sm text-secondary">Size: ${item.size || '—'}</p>
                         <p class="text-sm text-secondary">Qty: ${qty}</p>
                     </div>
                     <div class="item-price text-lg font-medium">$${itemTotal.toFixed(2)}</div>
                 </div>
-            `;
-            cartContainer.insertAdjacentHTML('beforeend', itemHTML);
+            `);
         });
 
-        // Update Summary displays
-        subtotalDisplay.textContent = `$${subtotal.toFixed(2)}`;
-        grandTotalDisplay.textContent = `$${(subtotal + shippingCost).toFixed(2)}`;
+        const shipping = (subtotal === 0 || subtotal >= FREE_SHIPPING_AT)
+            ? 0
+            : FLAT_SHIPPING;
+
+        subtotalDisplay.textContent   = `$${subtotal.toFixed(2)}`;
+        shippingDisplay.textContent   = shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`;
+        grandTotalDisplay.textContent = `$${(subtotal + shipping).toFixed(2)}`;
     }
 
-    
     loadCartItems();
 
 
-    // --- 2. ORDER MODAL & DATA SAVING ---
-    const form = document.querySelector('form');
-    const modal = document.getElementById('orderModal');
-    const overlay = document.getElementById('orderOverlay');
+    // ────────────────────────────────────────────────────────
+    // 2. ORDER SUBMISSION → POST /api/orders
+    // ────────────────────────────────────────────────────────
+    const form         = document.querySelector('form');
+    const modal        = document.getElementById('orderModal');
+    const overlay      = document.getElementById('orderOverlay');
     const orderDisplay = document.getElementById('orderNumberDisplay');
+    const cardRadio    = document.getElementById('cardRadio'); // may be null
 
-    function generateOrderCode() {
-        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const randomLetter = letters.charAt(Math.floor(Math.random() * letters.length));
-        let randomDigits = "";
-        for (let i = 0; i < 14; i++) {
-            randomDigits += Math.floor(Math.random() * 10);
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // Don't let anyone check out with an empty bag.
+        const cartData = JSON.parse(localStorage.getItem('scente_cart')) || [];
+        if (cartData.length === 0) {
+            showToast?.('Your bag is empty.', 'error');
+            return;
         }
-        return randomLetter + randomDigits;
-    }
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); 
-        
-        // Generate random code
-        const newCode = generateOrderCode();
-        orderDisplay.textContent = `Order number ${newCode}`;
-        
-        // Package the order details for saving
+        // Disable the button so a double-click can't place two orders.
+        const submitBtn = form.querySelector('button[type="submit"], .btn-place-order');
+        if (submitBtn) submitBtn.disabled = true;
+
+        // Collect the shipping/payment details from the form.
         const formData = new FormData(form);
-        const orderCredentials = Object.fromEntries(formData.entries());
+        const f = Object.fromEntries(formData.entries());
 
-        // Get the current user's email from session
-        const userEmail = session.email;
+        // Card radio may not exist on the page yet — default to COD.
+        const paymentMethod = (cardRadio && cardRadio.checked) ? 'card' : 'cod';
 
-        const completedOrder = {
-            orderNumber: newCode,
-            date: new Date().toISOString(),
-            status: 'pending',
-            payment: cardRadio.checked ? 'Paid' : 'COD',
-            customerDetails: {
-                name: orderCredentials.fullName || session?.name || 'Customer',
-                email: userEmail,
-                address: orderCredentials.addressLine1,
-                city: orderCredentials.city,
-                country: orderCredentials.country,
-                phone: orderCredentials.phone
-            },
-            items: JSON.parse(localStorage.getItem('scente_cart') || '[]'),
-            totalPaid: document.getElementById('grandTotalDisplay').textContent
+        const payload = {
+            paymentMethod,
+            shippingAddress: f.addressLine1 || '',
+            city:            f.city || '',
+            postalCode:      f.postalCode || '',
+            country:         f.country || '',
+            phone:           f.phone || ''
         };
 
-        // Save to localStorage
-        localStorage.setItem(`scente_order_${newCode}`, JSON.stringify(completedOrder));
+        try {
+            // api.post attaches the JWT and handles 401 automatically.
+            const result = await api.post('/orders', payload);
 
-        console.log('Order saved:', completedOrder);
-        //Delete cart
-        localStorage.removeItem('scente_cart');
+            // Show the REAL order number the server generated.
+            const orderNumber = result.orderNumber;
+            orderDisplay.textContent = `Order number ${orderNumber}`;
 
-        // Show the modal and the dark overlay
-        modal.classList.add('active');
-        overlay.classList.add('active');
-    });
+            // Cart was cleared in the DB; clear the local copy too,
+            // and refresh the navbar badge.
+            localStorage.removeItem('scente_cart');
+            if (typeof updateCartBadge === 'function') updateCartBadge();
 
+            // Show the confirmation modal.
+            modal.classList.add('active');
+            overlay.classList.add('active');
 
-    // --- 3. PAYMENT TOGGLE LOGIC ---
-    const postRadio = document.getElementById('payPost');
-    const cardRadio = document.getElementById('payCard');
-    const labelPost = document.getElementById('labelPost');
-    const labelCard = document.getElementById('labelCard');
-    const cardFields = document.getElementById('cardDetailsForm');
-
-    function togglePayment() {
-        if (cardRadio.checked) {
-            // Show Card Fields
-            cardFields.classList.remove('d-none');
-            // Update Visuals
-            labelCard.classList.add('active');
-            labelPost.classList.remove('active');
-            
-            // Make card fields required if showing
-            cardFields.querySelectorAll('input').forEach(input => input.required = true);
-        } else {
-            // Hide Card Fields
-            cardFields.classList.add('d-none');
-            // Update Visuals
-            labelPost.classList.add('active');
-            labelCard.classList.remove('active');
-            
-            // Remove required if hidden
-            cardFields.querySelectorAll('input').forEach(input => input.required = false);
+        } catch (err) {
+            // api.js already showed a toast for 401/500/validation.
+            console.error('Order failed:', err);
+            if (submitBtn) submitBtn.disabled = false;
         }
-    }
-
-    // Listen for changes
-    postRadio.addEventListener('change', togglePayment);
-    cardRadio.addEventListener('change', togglePayment);
+    });
 });
