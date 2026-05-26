@@ -17,8 +17,13 @@ fetch('/components/footer.html')
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- AUTH GUARD ---
-    // Must be logged in to check out. api.js exposes isLoggedIn().
-    if (!isLoggedIn()) {
+    // Accept EITHER a real JWT token (once auth.js is wired to the API)
+    // OR the current sessionStorage "session" flag that auth.js sets today.
+    // This keeps checkout working now and won't break when Jasi connects login.
+    const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+    const hasToken = (typeof isLoggedIn === 'function') && isLoggedIn();
+
+    if (!hasToken && !(session && session.loggedIn)) {
         window.location.href = '/pages/login.html';
         return;
     }
@@ -95,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal        = document.getElementById('orderModal');
     const overlay      = document.getElementById('orderOverlay');
     const orderDisplay = document.getElementById('orderNumberDisplay');
-    const cardRadio    = document.getElementById('cardRadio'); // may be null
+    const cardRadio    = document.getElementById('payCard'); // matches checkout.html
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
