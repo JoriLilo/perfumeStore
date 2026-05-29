@@ -105,23 +105,30 @@
       render();
       showCartToast('Item removed from cart');
     }
-
-    function applyPromo() {
+    
+    async function applyPromo() {
       const code = document.getElementById('promo-input').value.trim().toUpperCase();
-      const msg = document.getElementById('promo-msg');
+      const msg  = document.getElementById('promo-msg');
 
-      if (PROMO_CODES[code]) {
-        appliedDiscount = PROMO_CODES[code];
-        msg.style.color = 'var(--color-success)';
-        msg.textContent = (appliedDiscount * 100) + '% discount applied!';
-        showCartToast('Promo code applied!');
-      } else {
-        appliedDiscount = 0;
+      if (!code) {
         msg.style.color = 'var(--color-error)';
-        msg.textContent = 'Invalid promo code.';
+        msg.textContent = 'Please enter a promo code.';
+        return;
       }
 
-      updateSummary();
+      try {
+        const result = await api.post('api/cart/promo', { code });
+        appliedDiscount = Number(result.discountRate);
+        msg.style.color = 'var(--color-success)';
+        msg.textContent = result.message;
+        showCartToast('Promo code applied!');
+        updateSummary();
+      } catch (err) {
+        appliedDiscount = 0;
+        msg.style.color = 'var(--color-error)';
+        msg.textContent = err.message || 'Invalid promo code.';
+        updateSummary();
+      }
     }
 
     // ── Init ──────────────────────────────────────────────────

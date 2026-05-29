@@ -33,11 +33,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function renderWishlist() {
 
-  const token = localStorage.getItem("token");
+const session = JSON.parse(sessionStorage.getItem("session") || "null");
+const token = session?.token || null;
 
   if (!token) {
-    console.log("User not logged in");
-    return;
+  window.location.href = '/pages/login.html';
+  return;
   }
 
   const response = await fetch(`${API_BASE}/wishlist`, {
@@ -171,7 +172,8 @@ function handleAddToCart(productId) {
 
 async function removeFromWishlist(productId) {
 
-  const token = localStorage.getItem("token");
+  const session = JSON.parse(sessionStorage.getItem("session") || "null");
+  const token = session?.token || null;
 
   const response = await fetch(
     `${API_BASE}/wishlist/${productId}`,

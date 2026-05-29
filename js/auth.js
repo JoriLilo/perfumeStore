@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Save session with JWT token
-        const session = {
+       const session = {
           token:    data.token,
           name:     data.name,
           email:    data.email,
@@ -91,7 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         sessionStorage.setItem('session', JSON.stringify(session));
 
-        window.location.href = 'login.html?registered=true';
+        // Merge guest cart into DB cart before redirecting
+        await mergeGuestCart();
+
+        window.location.href = '/index.html';
 
       } catch (err) {
         if (err.message?.toLowerCase().includes('email')) {
@@ -219,5 +222,32 @@ function showToastLocal(message) {
     setTimeout(() => toast.classList.remove('show'), 3000);
   } else if (typeof showToast === 'function') {
     showToast(message, 'success');
+  }
+}
+
+async function mergeGuestCart() {
+  try {
+    const cart = JSON.parse(localStorage.getItem('scente_cart') || '[]');
+    if (cart.length === 0) return;
+
+    // Map localStorage cart items to the shape the API expects
+    const guestItems = cart
+      .filter(item => item.name && item.price)
+      .map(item => ({
+        productId: item.id || item.productId,
+        size:      item.size || '50ml',
+        quantity:  item.qty  || item.quantity || 1
+      }))
+      .filter(item => item.productId);
+
+    if (guestItems.length === 0) return;
+
+    await api.post('api/cart/merge', guestItems);
+
+    // Clear localStorage cart after successful merge
+    localStorage.removeItem('scente_cart');
+  } catch (err) {
+    console.warn('Cart merge failed:', err);
+    // Non-critical — user can still shop, just don't block login
   }
 }
