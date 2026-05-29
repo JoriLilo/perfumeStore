@@ -94,30 +94,19 @@ function getItemCount() {
 // Tries GET /api/cart/count if the user is logged in.
 // Falls back to localStorage count for guests.
 async function updateCartBadge() {
-  let count = 0;
+  const count = getItemCount();
 
-  const session = JSON.parse(sessionStorage.getItem('session') || 'null');
-  const isLoggedIn = session && session.loggedIn && session.token;
-
-  if (isLoggedIn && window.api) {
-    try {
-      const data = await api.get('api/cart/count');
-      // API returns { count: N }
-      count = typeof data?.count === 'number' ? data.count : 0;
-    } catch (_) {
-      // API unavailable or error — fall back to localStorage
-      count = getItemCount();
-    }
-  } else {
-    // Guest: use localStorage
-    count = getItemCount();
+  const badge1 = document.querySelector('#cart-count');
+  const badge2 = document.querySelector('#cart-count-mobile');
+  
+  if (badge1) {
+    badge1.textContent = count;
+    badge1.style.display = count > 0 ? 'flex' : 'none';
   }
-
-  // Update all badge elements in the navbar
-  document.querySelectorAll('#cart-count, #cart-count-mobile, .scente-badge').forEach(el => {
-    el.textContent = count;
-    el.style.display = count > 0 ? 'flex' : 'none';
-  });
+  if (badge2) {
+    badge2.textContent = count;
+    badge2.style.display = count > 0 ? 'flex' : 'none';
+  }
 }
 
 // ── Toast ──────────────────────────────────────────────────

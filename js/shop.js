@@ -144,10 +144,14 @@ function buildQueryString() {
     if (searchQuery) params.set('search', searchQuery);
 
     // Category
-    const categories = [...document.querySelectorAll('.sidebar input[type="checkbox"][value="perfume"], .sidebar input[type="checkbox"][value="cologne"]')]
-        .filter(cb => cb.checked)
-        .map(cb => cb.value.trim());
-    if (categories.length === 1) params.set('category', categories[0]);
+    const perfumeChecked = document.querySelector('.sidebar input[value="perfume"]')?.checked;
+    const cologneChecked = document.querySelector('.sidebar input[value="cologne"]')?.checked;
+    
+    if (perfumeChecked && !cologneChecked) {
+        params.set('category', 'perfume');
+    } else if (cologneChecked && !perfumeChecked) {
+        params.set('category', 'cologne');
+    }
 
     // Brand
     const brands = [...document.querySelectorAll('#brand-list input[type="checkbox"]:checked')]
@@ -209,7 +213,8 @@ function updateURL() {
     window.history.replaceState({}, '', newURL);
 }
 
-// ── Read URL params and pre-select filters on page load ───
+// ── Fetch wishlist from API and render ───────────────────
+
 function readURLParams() {
     const params = new URLSearchParams(window.location.search);
 
@@ -241,9 +246,43 @@ function readURLParams() {
 // ── Load brands from API into sidebar ────────────────────
 async function loadBrands() {
     try {
-        const brands = await api.get('/brands');
+        const response = await api.get('/api/brands');
+        console.log('Brands API raw response:', response); // Debug line
+        
         const container = document.getElementById('brand-list');
-
+        if (!container) {
+            console.error('Brand list container not found');
+            return;
+        }
+        
+        // Handle null/undefined response
+        if (!response) {
+            console.warn('Brands API returned null/undefined');
+            container.innerHTML = '<p style="font-size:12px; color:var(--color-text-secondary);">No brands available</p>';
+            return;
+        }
+        
+        // Check if response is wrapped (e.g., { data: [...], total: N })
+        let brands;
+        if (Array.isArray(response)) {
+            brands = response;
+        } else if (response.data && Array.isArray(response.data)) {
+            brands = response.data;
+        } else if (response.brands && Array.isArray(response.brands)) {
+            brands = response.brands;
+        } else {
+            console.warn('Unexpected brands response format:', response);
+            container.innerHTML = '<p style="font-size:12px; color:var(--color-text-secondary);">Invalid brands data</p>';
+            return;
+        }
+        
+        // Convert to string array if they're objects
+        if (brands.length > 0 && typeof brands[0] === 'object') {
+            brands = brands.map(b => b.name || b.brandName || String(b));
+        }
+        
+        console.log('Processed brands:', brands); // Debug line
+        
         // Check if a brand is already selected from URL
         const params = new URLSearchParams(window.location.search);
         const selectedBrand = params.get('brand');
@@ -262,9 +301,12 @@ async function loadBrands() {
 
     } catch (err) {
         console.warn('Could not load brands:', err);
+        const container = document.getElementById('brand-list');
+        if (container) {
+            container.innerHTML = '<p style="font-size:12px; color:var(--color-text-secondary);">Failed to load brands</p>';
+        }
     }
 }
-
 // ── Main fetch — all filtering done server-side ───────────
 async function fetchProducts() {
     const grid = document.getElementById('products-grid');
@@ -274,8 +316,10 @@ async function fetchProducts() {
         </p>`;
 
     try {
+        const allProducts = await api.get('/api/products');
         const queryString = buildQueryString();
-        const response = await api.get(`/products?${queryString}`);
+        const response = await api.get(`/api/products?${queryString}`);
+    
 
         let products, total;
 
@@ -330,7 +374,7 @@ function toggleWishlist(id, btn) {
 // ── Add to cart ───────────────────────────────────────────
 async function addProductToCart(id) {
     try {
-        const product = await api.get(`/products/${id}`);
+        const product = await api.get(`/api/products/${id}`);
         if (typeof addToCart === 'function') {
             addToCart({ ...product, quantity: 1 });
         }
