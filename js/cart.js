@@ -28,9 +28,9 @@ function clearCart() {
   updateCartBadge();
 }
 
-function addToCart(product, size = null) {
+async function addToCart(product, size = null) {
+  // 1) localStorage (instant UX + guest cart)
   const cart = getCart();
-
   const existing = cart.find(item =>
     item.name === product.name &&
     item.brand === product.brand &&
@@ -41,6 +41,7 @@ function addToCart(product, size = null) {
     existing.qty += 1;
   } else {
     cart.push({
+      productId: product.id || product.productId,
       name:  product.name,
       brand: product.brand,
       price: Number(product.price),
@@ -49,8 +50,24 @@ function addToCart(product, size = null) {
       size
     });
   }
-
   saveCart(cart);
+
+  // 2) If logged in, persist to DB so checkout can see it
+  const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+  if (session && session.loggedIn && typeof api !== 'undefined') {
+    const productId = product.id || product.productId;
+    if (productId && typeof productId === 'number') {
+      try {
+        await api.post('api/cart/items', {
+          productId: productId,
+          size: size || '50ml'
+        });
+      } catch (err) {
+        console.warn('Could not sync cart to server:', err);
+      }
+    }
+  }
+
   showCartToast(`${product.name} added to cart`);
 }
 
