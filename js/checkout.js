@@ -115,8 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------------------------------
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
+        console.log('[checkout] submit fired');
+        console.log('[checkout] currentItems =', currentItems);
 
         if (currentItems.length === 0) {
+            console.warn('[checkout] cart is empty, aborting');
             if (typeof showToast === 'function') showToast('Your bag is empty.', 'error');
             return;
         }

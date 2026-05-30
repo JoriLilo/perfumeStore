@@ -1,17 +1,74 @@
 // ============================================================
 // js/auth.js — Authentication Logic
-// SCENTÉ · Updated Week 2
+// SCENTÉ · Updated Week 2 (fixed)
 //
 // Changes from Week 1:
 //   • Register & Login now call real API endpoints via api.js
 //   • JWT token from API response is stored in sessionStorage
-//   • session object now includes { token, name, email, loggedIn }
+//   • session object now includes { token, userId, name, email, loggedIn }
 //   • Kept same validation UX (inline errors, password toggles)
 // ============================================================
 
+// ── Helpers (top-level so they're always available) ─────────
+
+// Show an inline error under a field and red-border the input.
+function showFieldError(errorId, inputId, message, persistent = false) {
+  const errEl = document.getElementById(errorId);
+  const inEl  = document.getElementById(inputId);
+  if (errEl) errEl.textContent = message;
+  if (inEl)  inEl.classList.add('input-error');
+}
+
+// Lightweight toast that falls back to alert() if no toast() helper exists.
+function showToastLocal(message) {
+  if (typeof showToast === 'function') {
+    showToast(message, 'error');
+    return;
+  }
+  const t = document.getElementById('toast');
+  if (t) {
+    t.textContent = message;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  } else {
+    alert(message);
+  }
+}
+
+// Merge guest localStorage cart into the user's DB cart after login/register.
+// Safe no-op if there's no guest cart, no merge endpoint, or it fails.
+async function mergeGuestCart() {
+  try {
+    const cart = JSON.parse(localStorage.getItem('scente_cart') || '[]');
+    if (!Array.isArray(cart) || cart.length === 0) return;
+
+    await api.post('api/cart/merge', { items: cart });
+    localStorage.removeItem('scente_cart');
+  } catch (err) {
+    // Endpoint may not exist yet — don't block login/register flow.
+    console.warn('Guest cart merge skipped:', err.message);
+  }
+}
+
+// ── Page wiring ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── REGISTER ─────────────────────────────────────────────
+  // ── Password show/hide toggles ────────────────────────────
+  function wireToggle(toggleId, inputId) {
+    const toggle = document.getElementById(toggleId);
+    const input  = document.getElementById(inputId);
+    if (!toggle || !input) return;
+    toggle.addEventListener('click', () => {
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      toggle.className = showing ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
+  }
+  wireToggle('togglePassword',        'password');
+  wireToggle('toggleConfirmPassword', 'confirmPassword');
+  wireToggle('toggleLoginPassword',   'loginPassword');
+
+  // ── REGISTER ──────────────────────────────────────────────
   const registerForm = document.getElementById('register-form');
 
   if (registerForm) {
@@ -73,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!valid) return;
 
-      // ── Call API ────────────────────────────────────────
+      // ── Call API ───────────────────────────────────────────
       try {
         const data = await api.post('api/auth/register', {
           firstName,
@@ -82,16 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
           password
         });
 
-        // Save session with JWT token
-       const session = {
+        const session = {
           token:    data.token,
+          userId:   data.userId,
           name:     data.name,
           email:    data.email,
           loggedIn: true
         };
         sessionStorage.setItem('session', JSON.stringify(session));
 
-        // Merge guest cart into DB cart before redirecting
         await mergeGuestCart();
 
         window.location.href = '/index.html';
@@ -106,132 +162,56 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ── LOGIN ─────────────────────────────────────────────────
+  const loginForm = document.getElementById('login-form');
 
-  // ── LOGIN ────────────────────────────────────────────────
-  // ── LOGIN ────────────────────────────────────────────────
-const loginForm = document.getElementById('login-form');
+  if (loginForm) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('registered') === 'true') {
+      showToastLocal('Account created successfully!');
+    }
 
-if (loginForm) {
+    loginForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
 
-  console.log("Login form found");
+      const email    = document.getElementById('loginEmail')?.value.trim();
+      const password = document.getElementById('loginPassword')?.value;
 
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('registered') === 'true') {
-    showToastLocal('Account created successfully!');
+      document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+      document.querySelectorAll('.form-input').forEach(i => i.classList.remove('input-error'));
+
+      let valid = true;
+      if (!email) {
+        showFieldError('loginEmailError', 'loginEmail', 'Email is required');
+        valid = false;
+      }
+      if (!password) {
+        showFieldError('loginPasswordError', 'loginPassword', 'Password is required');
+        valid = false;
+      }
+      if (!valid) return;
+
+      try {
+        const data = await api.post('api/auth/login', { email, password });
+
+        const session = {
+          token:    data.token,
+          userId:   data.userId,
+          name:     data.name,
+          email:    data.email,
+          loggedIn: true
+        };
+        sessionStorage.setItem('session', JSON.stringify(session));
+
+        await mergeGuestCart();
+
+        window.location.href = '/index.html';
+
+      } catch (err) {
+        console.error('LOGIN FAILED', err);
+        showFieldError('loginPasswordError', 'loginPassword', 'Invalid email or password', true);
+      }
+    });
   }
-
-  loginForm.addEventListener('submit', async function (e) {
-
-    e.preventDefault();
-
-    console.log("LOGIN SUBMIT TRIGGERED");
-
-    const email = document.getElementById('loginEmail')?.value.trim();
-    const password = document.getElementById('loginPassword')?.value;
-
-    console.log("Email:", email);
-    console.log("Password length:", password?.length);
-
-    document.querySelectorAll('.error-message')
-      .forEach(el => el.textContent = '');
-
-    document.querySelectorAll('.form-input')
-      .forEach(i => i.classList.remove('input-error'));
-
-    let valid = true;
-
-    if (!email) {
-      console.log("Email missing");
-      showFieldError('loginEmailError', 'loginEmail', 'Email is required');
-      valid = false;
-    }
-
-    if (!password) {
-      console.log("Password missing");
-      showFieldError('loginPasswordError', 'loginPassword', 'Password is required');
-      valid = false;
-    }
-
-    if (!valid) {
-      console.log("Validation failed");
-      return;
-    }
-
-    try {
-
-      console.log("Sending login request...");
-
-      const data = await api.post('api/auth/login', {
-        email,
-        password
-      });
-
-      console.log("LOGIN SUCCESS");
-      console.log(data);
-
-      const session = {
-        token: data.token,
-        name: data.name,
-        email: data.email,
-        loggedIn: true
-      };
-
-      sessionStorage.setItem(
-        'session',
-        JSON.stringify(session)
-      );
-
-      console.log("Session saved");
-
-      window.location.href = '/index.html';
-
-    } catch (err) {
-
-      console.error("LOGIN FAILED");
-      console.error(err);
-
-      showFieldError(
-        'loginPasswordError',
-        'loginPassword',
-        'Invalid email or password',
-        true
-      );
-    }
-  });
-}
-loginForm.addEventListener('submit', async function (e) {
-
-    console.log("STEP 1 - submit fired");
-
-    e.preventDefault();
-
-    const email = document.getElementById('loginEmail')?.value.trim();
-    const password = document.getElementById('loginPassword')?.value;
-
-    console.log("STEP 2 - values read");
-    console.log(email);
-    console.log(password);
-
-    try {
-
-        console.log("STEP 3 - before api call");
-
-        const data = await api.post('api/auth/login', {
-            email,
-            password
-        });
-
-        console.log("STEP 4 - login success");
-        console.log(data);
-
-    } catch (err) {
-
-        console.log("STEP 5 - login failed");
-        console.error(err);
-
-    }
-});
-
-
 
 });

@@ -50,6 +50,7 @@ function render() {
   const empty = document.getElementById('cart-empty');
   const label = document.getElementById('cart-count-label');
 
+  if (!tbody) return;
   tbody.innerHTML = '';
 
   // Use API cart if available, otherwise localStorage
@@ -168,32 +169,49 @@ async function handleRemove(itemId, localIndex) {
     } catch (_) {
       showCartToast('Could not remove item');
     }
-    
-    async function applyPromo() {
-      const code = document.getElementById('promo-input').value.trim().toUpperCase();
-      const msg  = document.getElementById('promo-msg');
-
-      if (!code) {
-        msg.style.color = 'var(--color-error)';
-        msg.textContent = 'Please enter a promo code.';
-        return;
-      }
-
-      try {
-        const result = await api.post('api/cart/promo', { code });
-        appliedDiscount = Number(result.discountRate);
-        msg.style.color = 'var(--color-success)';
-        msg.textContent = result.message;
-        showCartToast('Promo code applied!');
-        updateSummary();
-      } catch (err) {
-        appliedDiscount = 0;
-        msg.style.color = 'var(--color-error)';
-        msg.textContent = err.message || 'Invalid promo code.';
-        updateSummary();
-      }
-    }
-
-    // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    seedDemoProducts();
+  } else {
+    removeFromCart(localIndex);
     render();
+    showCartToast('Item removed from cart');
+  }
+}
+
+// -- Promo code --------------------------------------------
+async function applyPromo() {
+  const code = document.getElementById('promo-input').value.trim().toUpperCase();
+  const msg  = document.getElementById('promo-msg');
+
+  if (!code) {
+    msg.style.color = 'var(--color-error)';
+    msg.textContent = 'Please enter a promo code.';
+    return;
+  }
+
+  try {
+    const result = await api.post('api/cart/promo', { code });
+    appliedDiscount = Number(result.discountRate);
+    msg.style.color = 'var(--color-success)';
+    msg.textContent = result.message;
+    showCartToast('Promo code applied!');
+    updateSummary();
+  } catch (err) {
+    appliedDiscount = 0;
+    msg.style.color = 'var(--color-error)';
+    msg.textContent = err.message || 'Invalid promo code.';
+    updateSummary();
+  }
+}
+
+// -- Toast helper (fallback if showToast not loaded) -------
+function showCartToast(message) {
+  if (typeof showToast === 'function') {
+    showToast(message);
+  } else {
+    console.log(message);
+  }
+}
+
+// -- Init --------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  loadCart();
+});
