@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Save session with JWT token
-        const session = {
+       const session = {
           token:    data.token,
           name:     data.name,
           email:    data.email,
@@ -91,7 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         sessionStorage.setItem('session', JSON.stringify(session));
 
-        window.location.href = 'login.html?registered=true';
+        // Merge guest cart into DB cart before redirecting
+        await mergeGuestCart();
+
+        window.location.href = '/index.html';
 
       } catch (err) {
         if (err.message?.toLowerCase().includes('email')) {
@@ -105,119 +108,130 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // ── LOGIN ────────────────────────────────────────────────
-  const loginForm = document.getElementById('login-form');
+  // ── LOGIN ────────────────────────────────────────────────
+const loginForm = document.getElementById('login-form');
 
-  if (loginForm) {
+if (loginForm) {
 
-    // Show success toast if coming from registration
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('registered') === 'true') {
-      showToastLocal('Account created successfully!');
-    }
+  console.log("Login form found");
 
-    loginForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const email    = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-
-      // Clear previous errors
-      document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-      document.querySelectorAll('.form-input').forEach(i => i.classList.remove('input-error'));
-
-      let valid = true;
-
-      if (!email) {
-        showFieldError('loginEmailError', 'loginEmail', 'Email is required');
-        valid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showFieldError('loginEmailError', 'loginEmail', 'Enter a valid email address (example: email@email.com).', true);
-        valid = false;
-      }
-
-      if (!password) {
-        showFieldError('loginPasswordError', 'loginPassword', 'Password is required');
-        valid = false;
-      }
-
-      if (!valid) return;
-
-      // ── Call API ────────────────────────────────────────
-      try {
-        const data = await api.post('api/auth/login', { email, password });
-
-        // Save session with JWT token
-        const session = {
-          token:    data.token,
-          name:     data.name,
-          email:    data.email,
-          loggedIn: true
-        };
-        sessionStorage.setItem('session', JSON.stringify(session));
-
-        window.location.href = '/index.html';
-
-      } catch (err) {
-        showFieldError('loginPasswordError', 'loginPassword', 'Invalid email or password', true);
-      }
-    });
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('registered') === 'true') {
+    showToastLocal('Account created successfully!');
   }
 
+  loginForm.addEventListener('submit', async function (e) {
 
-  // ── PASSWORD TOGGLES ─────────────────────────────────────
-  setupPasswordToggle('loginPassword',   'toggleLoginPassword');
-  setupPasswordToggle('password',        'togglePassword');
-  setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+    e.preventDefault();
 
+    console.log("LOGIN SUBMIT TRIGGERED");
+
+    const email = document.getElementById('loginEmail')?.value.trim();
+    const password = document.getElementById('loginPassword')?.value;
+
+    console.log("Email:", email);
+    console.log("Password length:", password?.length);
+
+    document.querySelectorAll('.error-message')
+      .forEach(el => el.textContent = '');
+
+    document.querySelectorAll('.form-input')
+      .forEach(i => i.classList.remove('input-error'));
+
+    let valid = true;
+
+    if (!email) {
+      console.log("Email missing");
+      showFieldError('loginEmailError', 'loginEmail', 'Email is required');
+      valid = false;
+    }
+
+    if (!password) {
+      console.log("Password missing");
+      showFieldError('loginPasswordError', 'loginPassword', 'Password is required');
+      valid = false;
+    }
+
+    if (!valid) {
+      console.log("Validation failed");
+      return;
+    }
+
+    try {
+
+      console.log("Sending login request...");
+
+      const data = await api.post('api/auth/login', {
+        email,
+        password
+      });
+
+      console.log("LOGIN SUCCESS");
+      console.log(data);
+
+      const session = {
+        token: data.token,
+        name: data.name,
+        email: data.email,
+        loggedIn: true
+      };
+
+      sessionStorage.setItem(
+        'session',
+        JSON.stringify(session)
+      );
+
+      console.log("Session saved");
+
+      window.location.href = '/index.html';
+
+    } catch (err) {
+
+      console.error("LOGIN FAILED");
+      console.error(err);
+
+      showFieldError(
+        'loginPasswordError',
+        'loginPassword',
+        'Invalid email or password',
+        true
+      );
+    }
+  });
+}
+loginForm.addEventListener('submit', async function (e) {
+
+    console.log("STEP 1 - submit fired");
+
+    e.preventDefault();
+
+    const email = document.getElementById('loginEmail')?.value.trim();
+    const password = document.getElementById('loginPassword')?.value;
+
+    console.log("STEP 2 - values read");
+    console.log(email);
+    console.log(password);
+
+    try {
+
+        console.log("STEP 3 - before api call");
+
+        const data = await api.post('api/auth/login', {
+            email,
+            password
+        });
+
+        console.log("STEP 4 - login success");
+        console.log(data);
+
+    } catch (err) {
+
+        console.log("STEP 5 - login failed");
+        console.error(err);
+
+    }
 });
 
 
-// ── Profile link guard ────────────────────────────────────
-const profileLink = document.getElementById('profile-link');
-if (profileLink) {
-  profileLink.addEventListener('click', function (e) {
-    const session = JSON.parse(sessionStorage.getItem('session') || 'null');
-    if (!session || !session.loggedIn) {
-      e.preventDefault();
-      window.location.href = '/pages/login.html';
-    }
-  });
-}
 
-
-// ── Helpers ───────────────────────────────────────────────
-function showFieldError(errorId, inputId, message, withIcon = false) {
-  const errorEl = document.getElementById(errorId);
-  const inputEl = document.getElementById(inputId);
-
-  if (errorEl) {
-    errorEl.innerHTML = withIcon
-      ? `<i class="bi bi-exclamation-circle-fill error-icon"></i> ${message}`
-      : message;
-  }
-  if (inputEl) inputEl.classList.add('input-error');
-}
-
-function setupPasswordToggle(inputId, toggleId) {
-  const input  = document.getElementById(inputId);
-  const toggle = document.getElementById(toggleId);
-  if (!input || !toggle) return;
-
-  toggle.addEventListener('click', () => {
-    const isHidden = input.type === 'password';
-    input.type = isHidden ? 'text' : 'password';
-    toggle.classList.toggle('bi-eye',       !isHidden);
-    toggle.classList.toggle('bi-eye-slash', isHidden);
-  });
-}
-
-function showToastLocal(message) {
-  const toast = document.getElementById('toast');
-  if (toast) {
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  } else if (typeof showToast === 'function') {
-    showToast(message, 'success');
-  }
-}
+});

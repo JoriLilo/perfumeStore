@@ -264,93 +264,85 @@ function buildOrderMetrics() {
   return { totalOrders, totalRevenue, orderCounts };
 }
 
-function renderOrders() {
-  const allOrders = [];
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key?.startsWith("scente_order_")) {
-      allOrders.push(JSON.parse(localStorage.getItem(key)));
-    }
-  }
-
+async function renderOrders() {
   const tableBody = document.getElementById("orders-table-body");
   tableBody.innerHTML = "";
 
-  const filtered = allOrders.filter(order => {
-    const customer = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
-    return (
-      order.orderNumber.toLowerCase().includes(orderSearchQuery) ||
-      customer.toLowerCase().includes(orderSearchQuery)
-    );
-  });
+  try {
+    const result = await api.get(`/admin/orders${orderSearchQuery ? '?search=' + encodeURIComponent(orderSearchQuery) : ''}`);
+    const orders = result.data || [];
 
-  if (filtered.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
-    return;
+    if (orders.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
+      return;
+    }
+
+    orders.forEach(order => {
+      const date   = new Date(order.date).toLocaleDateString("en-US");
+      const status = order.status || "pending";
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>#${order.orderNumber}</td>
+        <td>${order.customer}</td>
+        <td>${date}</td>
+        <td>$${Number(order.totalPaid).toFixed(2)}</td>
+        <td><span class="status-badge ${status}">${status.toUpperCase()}</span></td>
+        <td><a href="#" class="action-link edit" onclick="viewOrder('${order.orderNumber}')">View</a></td>
+      `;
+      tableBody.appendChild(row);
+    });
+  } catch (err) {
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">Could not load orders</td></tr>`;
   }
-
-  filtered.forEach(order => {
-    const customer = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
-    const status   = order.status || "pending";
-    const date     = new Date(order.date).toLocaleDateString("en-US");
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>#${order.orderNumber}</td>
-      <td>${customer}</td>
-      <td>${date}</td>
-      <td>${order.totalPaid}</td>
-      <td><span class="status-badge ${status}">${status.toUpperCase()}</span></td>
-      <td><a href="#" class="action-link edit" onclick="viewOrder('${order.orderNumber}')">View</a></td>
-    `;
-    tableBody.appendChild(row);
-  });
 }
 
-function viewOrder(orderNumber) {
-  const order = JSON.parse(localStorage.getItem(`scente_order_${orderNumber}`));
-  if (!order) return;
+async function viewOrder(orderNumber) {
+  try {
+    const orders = await api.get(`/admin/orders?search=${encodeURIComponent(orderNumber)}`);
+    const order  = orders.data?.find(o => o.orderNumber === orderNumber);
+    if (!order) return;
 
-  currentOrderKey = order.orderNumber;
-  const customer  = order.customerDetails?.name || order.customerDetails?.fullName || "Guest";
-  const status    = order.status || "pending";
+    const full = await api.get(`/admin/orders/${order.id}`);
+    currentOrderKey = full.orderNumber;
 
-  document.getElementById("order-id").textContent       = "#" + order.orderNumber;
-  document.getElementById("order-customer").textContent = customer;
-  document.getElementById("order-date").textContent     = new Date(order.date).toLocaleDateString("en-US");
-  document.getElementById("order-total").textContent    = order.totalPaid;
+    document.getElementById("order-id").textContent       = "#" + full.orderNumber;
+    document.getElementById("order-customer").textContent = full.customer;
+    document.getElementById("order-date").textContent     = new Date(full.date).toLocaleDateString("en-US");
+    document.getElementById("order-total").textContent    = `$${Number(full.totalPaid).toFixed(2)}`;
 
-  const statusEl = document.getElementById("order-status");
-  statusEl.className = `status-badge ${status}`;
-  statusEl.innerHTML = `
-    <select id="order-status-select" onchange="updateOrderStatus(this.value)">
-      <option value="pending"   ${status === "pending"   ? "selected" : ""}>Pending</option>
-      <option value="shipped"   ${status === "shipped"   ? "selected" : ""}>Shipped</option>
-      <option value="delivered" ${status === "delivered" ? "selected" : ""}>Delivered</option>
-    </select>
-  `;
+    const statusEl = document.getElementById("order-status");
+    const status   = full.status || "pending";
+    statusEl.className = `status-badge ${status}`;
+    statusEl.innerHTML = `
+      <select id="order-status-select" onchange="updateOrderStatus(${full.id}, this.value)">
+        <option value="pending"   ${status === "pending"   ? "selected" : ""}>Pending</option>
+        <option value="shipped"   ${status === "shipped"   ? "selected" : ""}>Shipped</option>
+        <option value="delivered" ${status === "delivered" ? "selected" : ""}>Delivered</option>
+      </select>`;
 
-  const itemsList = document.getElementById("order-items");
-  if (order.items && order.items.length > 0) {
-    itemsList.innerHTML = order.items.map(item =>
-      `<li>${item.name} — ${item.qty || item.quantity} × $${item.price}</li>`
-    ).join("");
-  } else {
-    itemsList.innerHTML = "<li>No items</li>";
+    const itemsList = document.getElementById("order-items");
+    if (full.items && full.items.length > 0) {
+      itemsList.innerHTML = full.items.map(item =>
+        `<li>${item.productName} — ${item.quantity} × $${Number(item.price).toFixed(2)}</li>`
+      ).join("");
+    } else {
+      itemsList.innerHTML = "<li>No items</li>";
+    }
+
+    document.getElementById("viewOrderModal").classList.add("active");
+  } catch (err) {
+    console.warn("Could not load order:", err);
   }
-
-  document.getElementById("viewOrderModal").classList.add("active");
 }
 
-function updateOrderStatus(newStatus) {
-  const key   = `scente_order_${currentOrderKey}`;
-  const order = JSON.parse(localStorage.getItem(key));
-  if (!order) return;
-
-  order.status = newStatus;
-  localStorage.setItem(key, JSON.stringify(order));
-  renderOrders();
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
+    renderOrders();
+  } catch (err) {
+    console.warn("Could not update status:", err);
+  }
 }
 
 function closeOrderModal() {
@@ -358,34 +350,33 @@ function closeOrderModal() {
 }
 
 
-// ─────────────────────────────────────────────
-//  USERS — kept as localStorage for now (Kristi's job)
-// ─────────────────────────────────────────────
-function renderUsers() {
-  const users     = JSON.parse(localStorage.getItem("users")) || [];
+
+async function renderUsers() {
   const tableBody = document.getElementById("users-table-body");
 
   tableBody.innerHTML = "";
 
-  const filtered = users.filter(user => {
-    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    return fullName.includes(userSearchQuery) || user.email.toLowerCase().includes(userSearchQuery);
-  });
+  try {
+    const result = await api.get(`/admin/users${userSearchQuery ? '?search=' + encodeURIComponent(userSearchQuery) : ''}`);
+    const users  = result.data || [];
 
-  if (filtered.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
-    return;
+    if (users.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
+      return;
+    }
+
+    users.forEach((user, i) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${user.id}</td>
+        <td>${user.firstName} ${user.lastName}</td>
+        <td>${user.email}</td>
+        <td>${user.joinDate ? new Date(user.joinDate).toLocaleDateString("en-US") : "—"}</td>
+        <td>${user.role}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  } catch (err) {
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">Could not load users</td></tr>`;
   }
-
-  filtered.forEach((user, i) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${user.firstName} ${user.lastName}</td>
-      <td>${user.email}</td>
-      <td>${user.joinDate || "—"}</td>
-      <td>—</td>
-    `;
-    tableBody.appendChild(row);
-  });
 }

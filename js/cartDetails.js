@@ -1,12 +1,12 @@
 // ============================================================
-// js/cartDetails.js � Cart Page Logic
-// SCENT� � Updated Week 3
+// js/cartDetails.js — Cart Page Logic
+// SCENTÉ · Updated Week 3
 //
 // Changes from Week 2:
-//   � Loads cart from GET /api/cart?userId={id} when logged in
-//   � Remove item calls DELETE /api/cart/items/{id}
-//   � Update qty calls PATCH /api/cart/items/{id}
-//   � Falls back to localStorage for guests
+//   • Loads cart from GET /api/cart?userId={id} when logged in
+//   • Remove item calls DELETE /api/cart/items/{id}
+//   • Update qty calls PATCH /api/cart/items/{id}
+//   • Falls back to localStorage for guests
 // ============================================================
 
 let appliedDiscount = 0;
@@ -134,7 +134,7 @@ function updateSummary() {
   }
 
   document.getElementById('summary-discount').textContent =
-    discountAmt > 0 ? '-' + fmt(discountAmt) : '�';
+    discountAmt > 0 ? '-' + fmt(discountAmt) : '—';
   document.getElementById('summary-total').textContent = fmt(total);
 }
 
@@ -168,31 +168,32 @@ async function handleRemove(itemId, localIndex) {
     } catch (_) {
       showCartToast('Could not remove item');
     }
-  } else {
-    removeFromCart(localIndex);
+    
+    async function applyPromo() {
+      const code = document.getElementById('promo-input').value.trim().toUpperCase();
+      const msg  = document.getElementById('promo-msg');
+
+      if (!code) {
+        msg.style.color = 'var(--color-error)';
+        msg.textContent = 'Please enter a promo code.';
+        return;
+      }
+
+      try {
+        const result = await api.post('api/cart/promo', { code });
+        appliedDiscount = Number(result.discountRate);
+        msg.style.color = 'var(--color-success)';
+        msg.textContent = result.message;
+        showCartToast('Promo code applied!');
+        updateSummary();
+      } catch (err) {
+        appliedDiscount = 0;
+        msg.style.color = 'var(--color-error)';
+        msg.textContent = err.message || 'Invalid promo code.';
+        updateSummary();
+      }
+    }
+
+    // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    seedDemoProducts();
     render();
-    showCartToast('Item removed from cart');
-  }
-}
-
-function applyPromo() {
-  const code = document.getElementById('promo-input').value.trim().toUpperCase();
-  const msg = document.getElementById('promo-msg');
-  const PROMO_CODES = { SCENTE10: 0.10, SUMMER20: 0.20, VIP30: 0.30 };
-
-  if (PROMO_CODES[code]) {
-    appliedDiscount = PROMO_CODES[code];
-    msg.style.color = 'var(--color-success)';
-    msg.textContent = (appliedDiscount * 100) + '% discount applied!';
-    showCartToast('Promo code applied!');
-  } else {
-    appliedDiscount = 0;
-    msg.style.color = 'var(--color-error)';
-    msg.textContent = 'Invalid promo code.';
-  }
-
-  updateSummary();
-}
-
-// -- Init --------------------------------------------------
-loadCart();

@@ -57,7 +57,7 @@
       <span class="star star--filled">★</span>
       <span class="star">★</span>
     </div>
-    <span class="product-info__rating-count">4.0 (3 reviews)</span>
+    <span class="product-info__rating-count" id="product-rating-count">Loading reviews…</span>
   </div>
 
   <div class="product-info__meta">
@@ -84,7 +84,10 @@
               <button onclick="changeQty(1)">+</button>
             </div>
           </div>
-
+          <div class="volume-selector">
+            <span class="volume-selector__label">Size</span>
+            <div class="volume-options" id="volume-picker"></div>
+          </div>
          <!-- CTA Buttons -->
           <div class="product-info__actions">
             <button class="btn btn--primary btn--full" id="btn-add-cart">Add to Cart</button>
@@ -124,14 +127,25 @@
       </div>
     </div>
 
+    <!-- RELATED PRODUCTS -->
+<section class="related-section" style="padding: var(--space-section) 0; border-top: 1px solid var(--color-border);">
+  <div class="container">
+    <div style="text-align:center; margin-bottom: var(--space-xl);">
+      <p class="label-caps">You may also like</p>
+      <h2 class="heading-md">Related Perfumes</h2>
+    </div>
+    <div class="product-grid" id="related-products-grid"
+         style="grid-template-columns: repeat(4, 1fr);">
+    </div>
+  </div>
+</section>
 
   </main>
 
   
 <!-- Footer -->
   <div id="footer-placeholder"></div>
-<!-- Footer -->
-  <div id="footer-placeholder"></div>
+
 
   <!-- Bootstrap JS -->
   <!-- Bootstrap JS -->
@@ -139,13 +153,14 @@
 
 <!-- Load navbar and footer -->
 <!-- Core Scripts - ORDER IS IMPORTANT! -->
+<script src="/js/api.js"></script>
 <script src="/js/cart.js"></script>
 <script src="/js/toast.js"></script>
 <script src="/js/wishlist.js"></script>
 <script src="/js/details.js"></script>
 
-</body>
-</html>
 
 </body>
 </html>
+
+
