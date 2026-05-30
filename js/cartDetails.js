@@ -1,109 +1,172 @@
- let appliedDiscount = 0;
+// ============================================================
+// js/cartDetails.js — Cart Page Logic
+// SCENTÉ · Updated Week 3
+//
+// Changes from Week 2:
+//   • Loads cart from GET /api/cart?userId={id} when logged in
+//   • Remove item calls DELETE /api/cart/items/{id}
+//   • Update qty calls PATCH /api/cart/items/{id}
+//   • Falls back to localStorage for guests
+// ============================================================
 
-    // ── Seed demo products if cart is empty ───────────────────
-    function seedDemoProducts() {
-      const existing = getCart();
-      if (existing.length === 0) {
-        const demo = [];
-        localStorage.setItem('scente_cart', JSON.stringify(demo));
-      }
+let appliedDiscount = 0;
+let apiCart = null; // holds the cart from API when logged in
+
+function fmt(n) {
+  return '$' + n.toFixed(2);
+}
+
+// -- Get session -------------------------------------------
+function getSession() {
+  return JSON.parse(sessionStorage.getItem('session') || 'null');
+}
+
+function isLoggedIn() {
+  const s = getSession();
+  return s && s.loggedIn && s.userId;
+}
+
+// -- Load cart (API or localStorage) ----------------------
+async function loadCart() {
+  const session = getSession();
+
+  if (session && session.loggedIn && session.userId) {
+    try {
+      apiCart = await api.get(`api/cart?userId=${session.userId}`);
+    } catch (_) {
+      apiCart = null;
     }
+  } else {
+    apiCart = null;
+  }
 
-    function fmt(n) {
-      return '$' + n.toFixed(2);
-    }
+  render();
+}
 
-    // ── Render cart ───────────────────────────────────────────
-    function render() {
-      const cart = getCart();
-      const tbody = document.getElementById('cart-tbody');
-      const content = document.getElementById('cart-content');
-      const empty = document.getElementById('cart-empty');
-      const label = document.getElementById('cart-count-label');
+// -- Render cart -------------------------------------------
+function render() {
+  const tbody = document.getElementById('cart-tbody');
+  const content = document.getElementById('cart-content');
+  const empty = document.getElementById('cart-empty');
+  const label = document.getElementById('cart-count-label');
 
-      tbody.innerHTML = '';
+  tbody.innerHTML = '';
 
-      if (cart.length === 0) {
-        content.classList.add('d-none');
-        empty.classList.remove('d-none');
-        label.textContent = '';
-        return;
-      }
+  // Use API cart if available, otherwise localStorage
+  const items = apiCart ? apiCart.items : getCart();
 
-      content.classList.remove('d-none');
-      empty.classList.add('d-none');
+  if (!items || items.length === 0) {
+    content.classList.add('d-none');
+    empty.classList.remove('d-none');
+    label.textContent = '';
+    return;
+  }
 
-      const totalItems = getItemCount();
-      label.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
+  content.classList.remove('d-none');
+  empty.classList.add('d-none');
 
-      cart.forEach((item, i) => {
-        const lineTotal = item.price * item.qty;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="width:100px; padding-right:16px;">
-            ${item.image
-              ? `<img src="${item.image}" alt="${item.name}" class="cart-img">`
-              : `<div class="cart-img-placeholder"><i class="bi bi-image"></i></div>`}
-          </td>
-          <td>
-            <div class="cart-brand">${item.brand || ''}</div>
-            <div class="cart-name">${item.name}</div>
-            ${item.size ? `<div class="cart-meta">${item.size}</div>` : ''}
-          </td>
-          <td class="cart-price">${fmt(item.price)}</td>
-          <td>
-            <div class="qty-wrap">
-              <button class="qty-btn" onclick="handleQty(${i}, -1)">−</button>
-              <span class="qty-num">${item.qty}</span>
-              <button class="qty-btn" onclick="handleQty(${i}, 1)">+</button>
-            </div>
-          </td>
-          <td class="cart-line-total">${fmt(lineTotal)}</td>
-          <td>
-            <button class="cart-remove" onclick="handleRemove(${i})" title="Remove">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+  const totalItems = items.reduce((sum, item) => sum + (item.quantity || item.qty || 1), 0);
+  label.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
 
-      updateSummary();
-    }
+  items.forEach((item, i) => {
+    const qty = item.quantity || item.qty || 1;
+    const price = item.price || 0;
+    const lineTotal = price * qty;
+    const name = item.product ? item.product.name : item.name;
+    const brand = item.product ? item.product.brand : item.brand;
+    const image = item.product ? item.product.image : item.image;
+    const size = item.size || null;
+    const itemId = item.id || i;
 
-    // ── Summary ───────────────────────────────────────────────
-    function updateSummary() {
-      const subtotal = getSubtotal();
-      const shipping = getShipping();
-      const discountAmt = subtotal * appliedDiscount;
-      const total = getTotal(appliedDiscount);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="width:100px; padding-right:16px;">
+        ${image
+          ? `<img src="${image}" alt="${name}" class="cart-img">`
+          : `<div class="cart-img-placeholder"><i class="bi bi-image"></i></div>`}
+      </td>
+      <td>
+        <div class="cart-brand">${brand || ''}</div>
+        <div class="cart-name">${name}</div>
+        ${size ? `<div class="cart-meta">${size}</div>` : ''}
+      </td>
+      <td class="cart-price">${fmt(price)}</td>
+      <td>
+        <div class="qty-wrap">
+          <button class="qty-btn" onclick="handleQty(${itemId}, ${qty}, -1)">-</button>
+          <span class="qty-num">${qty}</span>
+          <button class="qty-btn" onclick="handleQty(${itemId}, ${qty}, 1)">+</button>
+        </div>
+      </td>
+      <td class="cart-line-total">${fmt(lineTotal)}</td>
+      <td>
+        <button class="cart-remove" onclick="handleRemove(${itemId}, ${i})" title="Remove">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
 
-      document.getElementById('summary-subtotal').textContent = fmt(subtotal);
+  updateSummary();
+}
 
-      const shipEl = document.getElementById('summary-shipping');
-      if (shipping === 0) {
-        shipEl.textContent = 'Free';
-        shipEl.className = 'summary-free';
+// -- Summary -----------------------------------------------
+function updateSummary() {
+  const items = apiCart ? apiCart.items : getCart();
+  const subtotal = items
+    ? items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || item.qty || 1), 0)
+    : getSubtotal();
+
+  const shipping = subtotal === 0 || subtotal >= 50 ? 0 : 5.99;
+  const discountAmt = subtotal * appliedDiscount;
+  const total = subtotal - discountAmt + shipping;
+
+  document.getElementById('summary-subtotal').textContent = fmt(subtotal);
+
+  const shipEl = document.getElementById('summary-shipping');
+  if (shipping === 0) {
+    shipEl.textContent = 'Free';
+    shipEl.className = 'summary-free';
+  } else {
+    shipEl.textContent = fmt(shipping);
+    shipEl.className = '';
+  }
+
+  document.getElementById('summary-discount').textContent =
+    discountAmt > 0 ? '-' + fmt(discountAmt) : '—';
+  document.getElementById('summary-total').textContent = fmt(total);
+}
+
+// -- Actions -----------------------------------------------
+async function handleQty(itemId, currentQty, delta) {
+  const newQty = currentQty + delta;
+
+  if (apiCart) {
+    try {
+      if (newQty <= 0) {
+        await api.delete(`api/cart/items/${itemId}`);
       } else {
-        shipEl.textContent = fmt(shipping);
-        shipEl.className = '';
+        await api.patch(`api/cart/items/${itemId}`, { quantity: newQty });
       }
-
-      document.getElementById('summary-discount').textContent =
-        discountAmt > 0 ? '−' + fmt(discountAmt) : '—';
-      document.getElementById('summary-total').textContent = fmt(total);
+      await loadCart();
+    } catch (_) {
+      showCartToast('Could not update item');
     }
+  } else {
+    updateQty(itemId, delta);
+    render();
+  }
+}
 
-    // ── Actions ───────────────────────────────────────────────
-    function handleQty(index, delta) {
-      updateQty(index, delta);
-      render();
-    }
-
-    function handleRemove(index) {
-      removeFromCart(index);
-      render();
+async function handleRemove(itemId, localIndex) {
+  if (apiCart) {
+    try {
+      await api.delete(`api/cart/items/${itemId}`);
+      await loadCart();
       showCartToast('Item removed from cart');
+    } catch (_) {
+      showCartToast('Could not remove item');
     }
     
     async function applyPromo() {
@@ -131,6 +194,6 @@
       }
     }
 
-    // ── Init ──────────────────────────────────────────────────
+    // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     seedDemoProducts();
     render();

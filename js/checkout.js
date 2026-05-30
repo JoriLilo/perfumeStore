@@ -1,66 +1,85 @@
 // ============================================================
 // js/checkout.js — Checkout Page Logic
-// SCENTÉ · Week 1: orders now go to the real API (no localStorage)
+// SCENTÉ · Week 2
 //
-// Requires: /js/api.js loaded first (provides window.api + auth helpers)
+// Requires: /js/api.js loaded FIRST (provides window.api).
+//
+// Week 1: orders POST to the real API (no localStorage saving).
+// Week 2: cart DISPLAY + shipping + total all come from the API,
+//         and the thank-you modal is filled from the confirmation
+//         endpoint (server-calculated, never trusts the browser).
 // ============================================================
 
-// Inject the footer (unchanged from before)
+// Inject the footer (unchanged)
 fetch('/components/footer.html')
     .then(res => res.text())
     .then(html => {
         const ph = document.getElementById('footer-placeholder');
         if (ph) ph.innerHTML = html;
-    });
+    })
+    .catch(() => { /* footer is non-critical */ });
 
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- AUTH GUARD ---
-    // Must be logged in to check out. api.js exposes isLoggedIn().
-    if (!isLoggedIn()) {
+    // The team's api.js stores the JWT at session.token in sessionStorage.
+    const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+    if (!session || !session.loggedIn) {
         window.location.href = '/pages/login.html';
         return;
     }
 
-    // ────────────────────────────────────────────────────────
-    // 1. DYNAMIC CART RENDERING
-    //    (Still reads the localStorage cart for display in Week 1.
-    //     Ari is moving the cart into the DB this week — once that
-    //     lands, this render can switch to `await api.get('/cart')`.)
-    // ────────────────────────────────────────────────────────
-    const cartContainer   = document.getElementById('cartItemsContainer');
-    const subtotalDisplay  = document.getElementById('subtotalDisplay');
-    const shippingDisplay  = document.getElementById('shippingDisplay');
+    // -- DOM refs --
+    const cartContainer    = document.getElementById('cartItemsContainer');
+    const subtotalDisplay   = document.getElementById('subtotalDisplay');
+    const shippingDisplay   = document.getElementById('shippingDisplay');
     const grandTotalDisplay = document.getElementById('grandTotalDisplay');
 
-    // Display-only shipping rule. The REAL shipping + total are
-    // calculated on the server when the order is placed (Week 2).
+    const form         = document.querySelector('form');
+    const modal        = document.getElementById('orderModal');
+    const overlay      = document.getElementById('orderOverlay');
+    const orderDisplay = document.getElementById('orderNumberDisplay');
+    const cardRadio    = document.getElementById('payCard');
+
+    // ------------------------------------------------------------
+    // 1. CART DISPLAY -- load from the DB cart via the API.
+    //    Matches Ari's GET /api/cart shape:
+    //      { items: [{ name, brand, price, qty, image, size, productId }],
+    //        subtotal, warnings }
+    //    Shipping shown here is a PREVIEW; the order endpoint
+    //    recalculates it authoritatively on submit (Week 2).
+    // ------------------------------------------------------------
     const FREE_SHIPPING_AT = 50;
-    const FLAT_SHIPPING    = 15.00;
+    const FLAT_SHIPPING     = 15.00;
 
-    function loadCartItems() {
-        const cartData = JSON.parse(localStorage.getItem('scente_cart')) || [];
+    async function loadCart() {
+        let data;
+        try {
+            data = await api.get('api/cart');
+        } catch (err) {
+            cartContainer.innerHTML =
+                '<p class="empty-cart-msg">Could not load your bag. Please refresh.</p>';
+            return [];
+        }
 
-        if (cartData.length === 0) {
+        const items    = (data && data.items) || [];
+        const subtotal = (data && typeof data.subtotal === 'number')
+            ? data.subtotal
+            : items.reduce((s, i) => s + (i.price * i.qty), 0);
+
+        if (items.length === 0) {
             cartContainer.innerHTML =
                 '<p class="empty-cart-msg">Your shopping bag is empty.</p>';
-            subtotalDisplay.textContent  = '$0.00';
-            shippingDisplay.textContent  = '$0.00';
+            subtotalDisplay.textContent   = '$0.00';
+            shippingDisplay.textContent   = '$0.00';
             grandTotalDisplay.textContent = '$0.00';
-            return;
+            return [];
         }
 
         cartContainer.innerHTML = '';
-        let subtotal = 0;
-
-        cartData.forEach(item => {
-            const price = parseFloat(item.price) || 0;
-            // cart.js uses `qty`; tolerate `quantity` too just in case
-            const qty   = parseInt(item.qty ?? item.quantity) || 1;
-            const itemTotal = price * qty;
-            subtotal += itemTotal;
-
+        items.forEach(item => {
+            const itemTotal = item.price * item.qty;
             cartContainer.insertAdjacentHTML('beforeend', `
                 <div class="cart-item">
                     <div class="item-image">
@@ -68,54 +87,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="item-details">
                         <h3 class="heading-md">${item.name}</h3>
-                        <p class="text-sm text-secondary">Size: ${item.size || '—'}</p>
-                        <p class="text-sm text-secondary">Qty: ${qty}</p>
+                        <p class="text-sm text-secondary">Size: ${item.size || '-'}</p>
+                        <p class="text-sm text-secondary">Qty: ${item.qty}</p>
                     </div>
                     <div class="item-price text-lg font-medium">$${itemTotal.toFixed(2)}</div>
                 </div>
             `);
         });
 
-        const shipping = (subtotal === 0 || subtotal >= FREE_SHIPPING_AT)
-            ? 0
-            : FLAT_SHIPPING;
+        // Preview shipping (server is the source of truth on submit).
+        const shipping = subtotal >= FREE_SHIPPING_AT ? 0 : FLAT_SHIPPING;
 
         subtotalDisplay.textContent   = `$${subtotal.toFixed(2)}`;
         shippingDisplay.textContent   = shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`;
         grandTotalDisplay.textContent = `$${(subtotal + shipping).toFixed(2)}`;
+
+        return items;
     }
 
-    loadCartItems();
+    // Keep the latest known items so submit can guard an empty bag.
+    let currentItems = [];
+    loadCart().then(items => { currentItems = items; });
 
 
-    // ────────────────────────────────────────────────────────
-    // 2. ORDER SUBMISSION → POST /api/orders
-    // ────────────────────────────────────────────────────────
-    const form         = document.querySelector('form');
-    const modal        = document.getElementById('orderModal');
-    const overlay      = document.getElementById('orderOverlay');
-    const orderDisplay = document.getElementById('orderNumberDisplay');
-    const cardRadio    = document.getElementById('cardRadio'); // may be null
-
+    // ------------------------------------------------------------
+    // 2. ORDER SUBMISSION -> POST api/orders
+    // ------------------------------------------------------------
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // Don't let anyone check out with an empty bag.
-        const cartData = JSON.parse(localStorage.getItem('scente_cart')) || [];
-        if (cartData.length === 0) {
-            showToast?.('Your bag is empty.', 'error');
+        if (currentItems.length === 0) {
+            if (typeof showToast === 'function') showToast('Your bag is empty.', 'error');
             return;
         }
 
-        // Disable the button so a double-click can't place two orders.
         const submitBtn = form.querySelector('button[type="submit"], .btn-place-order');
         if (submitBtn) submitBtn.disabled = true;
 
-        // Collect the shipping/payment details from the form.
-        const formData = new FormData(form);
-        const f = Object.fromEntries(formData.entries());
-
-        // Card radio may not exist on the page yet — default to COD.
+        const f = Object.fromEntries(new FormData(form).entries());
         const paymentMethod = (cardRadio && cardRadio.checked) ? 'card' : 'cod';
 
         const payload = {
@@ -128,26 +137,49 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // api.post attaches the JWT and handles 401 automatically.
-            const result = await api.post('/orders', payload);
-
-            // Show the REAL order number the server generated.
+            // Create the order. Server clears the cart and returns the number.
+            const result = await api.post('api/orders', payload);
             const orderNumber = result.orderNumber;
-            orderDisplay.textContent = `Order number ${orderNumber}`;
 
-            // Cart was cleared in the DB; clear the local copy too,
-            // and refresh the navbar badge.
-            localStorage.removeItem('scente_cart');
+            // Week 2: pull the authoritative summary for the modal.
+            await showConfirmation(orderNumber);
+
+            // Refresh the navbar badge (cart is now empty in the DB).
             if (typeof updateCartBadge === 'function') updateCartBadge();
 
-            // Show the confirmation modal.
             modal.classList.add('active');
             overlay.classList.add('active');
 
         } catch (err) {
-            // api.js already showed a toast for 401/500/validation.
             console.error('Order failed:', err);
             if (submitBtn) submitBtn.disabled = false;
         }
     });
+
+    // ------------------------------------------------------------
+    // Fill the modal from GET api/orders/{orderNumber}/confirmation
+    // ------------------------------------------------------------
+    async function showConfirmation(orderNumber) {
+        // Always show the number even if the summary fetch fails.
+        orderDisplay.textContent = `Order number ${orderNumber}`;
+
+        try {
+            const summary = await api.get(`api/orders/${orderNumber}/confirmation`);
+
+            const totalEl    = document.getElementById('modalTotal');
+            const shipEl     = document.getElementById('modalShipping');
+            const deliveryEl = document.getElementById('modalDelivery');
+
+            if (totalEl && typeof summary.totalPaid === 'number')
+                totalEl.textContent = `Total paid $${summary.totalPaid.toFixed(2)}`;
+            if (shipEl && typeof summary.shippingCost === 'number')
+                shipEl.textContent = summary.shippingCost === 0
+                    ? 'Shipping Free'
+                    : `Shipping $${summary.shippingCost.toFixed(2)}`;
+            if (deliveryEl && summary.estimatedDelivery)
+                deliveryEl.textContent = `Estimated delivery ${summary.estimatedDelivery}`;
+        } catch (err) {
+            console.warn('Could not load confirmation summary:', err);
+        }
+    }
 });
