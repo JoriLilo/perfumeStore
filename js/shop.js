@@ -356,19 +356,28 @@ function applyFilters(resetPage = true) {
 }
 
 // ── Wishlist toggle ───────────────────────────────────────
-function toggleWishlist(id, btn) {
-    let wishlist = getWishlist();
+async function toggleWishlist(id, btn) {
+  const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+  if (!session?.loggedIn) {
+    window.location.href = '/pages/login.html';
+    return;
+  }
 
-    if (wishlist.includes(id)) {
-        wishlist = wishlist.filter(item => item !== id);
-        btn.querySelector('i').className = 'bi bi-heart';
+  try {
+    const wishlist = await api.get('api/wishlist');
+    const wished = wishlist.some(p => String(p.id) === String(id));
+    const icon = btn.querySelector('i');
+
+    if (wished) {
+      await api.delete(`api/wishlist/${id}`);
+      icon.className = 'bi bi-heart';
     } else {
-        wishlist.push(id);
-        btn.querySelector('i').className = 'bi bi-heart-fill';
+      await api.post(`api/wishlist/${id}`, {});
+      icon.className = 'bi bi-heart-fill';
     }
-
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    // When Jasi's wishlist API is ready: POST/DELETE /api/wishlist/{id}
+  } catch (err) {
+    showToast?.(err.message || 'Could not update wishlist.', 'error');
+  }
 }
 
 // ── Add to cart ───────────────────────────────────────────

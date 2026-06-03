@@ -149,10 +149,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td><span class="stat ${getStatusClass(order.status)}">${statusCap}</span></td>
           <td class="c-total">${total}</td>
           <td class="c-inv">
-            <a href="http://localhost:5123/api/orders/${order.id}/invoice"
-               class="inv-btn" title="Download Invoice" target="_blank">
+            <button class="inv-btn" title="Download Invoice" onclick="downloadInvoice(${order.id})">
               <i class="bi bi-download"></i>
-            </a>
+            </button>
           </td>
         </tr>`;
     }).join('');
@@ -180,10 +179,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div class="mc__foot">
               <span class="pay ${getPaymentClass(order.paymentMethod)}">${order.paymentMethod || 'COD'}</span>
               <span class="mc__total">${total}</span>
-              <a href="http://localhost:5123/api/orders/${order.id}/invoice"
-                 class="inv-btn" target="_blank">
+              <button class="inv-btn" title="Download Invoice" onclick="downloadInvoice(${order.id})">
                 <i class="bi bi-download"></i>
-              </a>
+              </button>
             </div>
           </div>`;
       }).join('');
@@ -231,3 +229,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (tab) tab.click();
   }
 });
+
+
+async function downloadInvoice(orderId) {
+  const session = JSON.parse(sessionStorage.getItem("session"));
+  try {
+    const response = await fetch(`http://localhost:5123/api/orders/${orderId}/invoice`, {
+      headers: { "Authorization": `Bearer ${session.token}` }
+    });
+
+    if (!response.ok) {
+      showToast("Could not load invoice.", "error");
+      return;
+    }
+
+    const blob = await response.blob();
+    const url  = URL.createObjectURL(blob);
+
+    // Open in a popup modal
+    const modal = document.getElementById("invoice-modal");
+    const frame = document.getElementById("invoice-frame");
+    frame.src = url;
+    modal.classList.add("active");
+
+  } catch (err) {
+    showToast("Could not load invoice.", "error");
+    console.warn("Invoice error:", err);
+  }
+}
+
+function closeInvoiceModal() {
+  const modal = document.getElementById("invoice-modal");
+  const frame = document.getElementById("invoice-frame");
+  modal.classList.remove("active");
+  frame.src = "";
+}
