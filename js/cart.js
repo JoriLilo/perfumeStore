@@ -126,6 +126,23 @@ async function updateCartBadge() {
   }
 }
 
+async function updateWishlistBadge() {
+  const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+  if (!session || !session.loggedIn) return;
+
+  try {
+    const wishlist = await api.get('api/wishlist');
+    const badge1 = document.getElementById('wishlist-count');
+    const count = wishlist.length || 0;
+    if (badge1) {
+      badge1.textContent = count;
+      badge1.style.display = count > 0 ? 'flex' : 'none';
+    }
+  } catch (err) {
+    console.warn('Could not update wishlist badge:', err);
+  }
+}
+
 // ── Toast ──────────────────────────────────────────────────
 function showCartToast(message) {
   if (typeof showToast === 'function') {
@@ -247,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadLayoutComponent('navbar-placeholder', 'navbar', '/components/navbar.html', () => {
     restoreAnnouncementBar();
     updateCartBadge();
+     updateWishlistBadge();
     updateNavbarSession();
   });
 

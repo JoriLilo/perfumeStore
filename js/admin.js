@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────────
-let editingId       = null;  // id of product being edited (null = adding new)
-let deleteId        = null;  // id of product pending deletion
+let editingId       = null;
+let deleteId        = null;
 let currentOrderKey = null;
 
 let searchQuery      = "";
@@ -14,6 +14,14 @@ let userSearchQuery  = "";
 //  INIT
 // ─────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+
+  // ── Auth guard — must be logged in AND admin ──
+  const session = JSON.parse(sessionStorage.getItem("session") || "null");
+  if (!session || !session.loggedIn) {
+    window.location.href = "/pages/login.html";
+    return;
+  }
+
   await renderProducts();
   await updateDashboard();
   renderOrders();
@@ -59,12 +67,16 @@ document.getElementById("user-search-input")
 //  DASHBOARD
 // ─────────────────────────────────────────────
 async function updateDashboard() {
-  const stats = await api.get('/admin/stats');
+  try {
+    const stats = await api.get("api/admin/stats");
 
-  document.getElementById("total-products").textContent = stats.products;
-  document.getElementById("total-users").textContent    = stats.users;
-  document.getElementById("total-orders").textContent   = stats.orders;
-  document.getElementById("total-revenue").textContent  = "$" + stats.revenue.toFixed(2);
+    document.getElementById("total-products").textContent = stats.products  ?? 0;
+    document.getElementById("total-users").textContent    = stats.users     ?? 0;
+    document.getElementById("total-orders").textContent   = stats.orders    ?? 0;
+    document.getElementById("total-revenue").textContent  = "$" + (stats.revenue ?? 0).toFixed(2);
+  } catch (err) {
+    console.warn("Could not load dashboard stats:", err);
+  }
 }
 
 
@@ -72,43 +84,50 @@ async function updateDashboard() {
 //  PRODUCTS
 // ─────────────────────────────────────────────
 async function renderProducts() {
-  const result    = await api.get('/admin/products');
-  const products  = result.data;
   const tableBody = document.getElementById("products-table-body");
-  tableBody.innerHTML = "";
+  tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">Loading…</td></tr>`;
 
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(searchQuery)  ||
-    p.brand.toLowerCase().includes(searchQuery) ||
-    String(p.id).includes(searchQuery)
-  );
+  try {
+    const result = await api.get("api/admin/products?pageSize=100");
+    const products = result.data ?? [];
 
-  if (filtered.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
-    return;
+    const filtered = products.filter(p =>
+      p.name.toLowerCase().includes(searchQuery)  ||
+      p.brand.toLowerCase().includes(searchQuery) ||
+      String(p.id).includes(searchQuery)
+    );
+
+    if (filtered.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
+      return;
+    }
+
+    tableBody.innerHTML = "";
+    filtered.forEach(product => {
+      const stockClass = product.stock < 5 ? "stock-danger" : product.stock < 10 ? "stock-warning" : "stock-good";
+      const status     = product.status || "active";
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${product.id}</td>
+        <td>${product.name}</td>
+        <td>${product.brand}</td>
+        <td>${product.category}</td>
+        <td>${product.gender || "—"}</td>
+        <td>$${product.price}</td>
+        <td class="${stockClass}">${product.stock}</td>
+        <td>
+          <a href="#" class="action-link edit"   onclick="editProduct(${product.id}); return false;">Edit</a>
+          <a href="#" class="action-link delete" onclick="deleteProduct(${product.id}); return false;">Delete</a>
+        </td>
+        <td><span class="status-badge ${status}">${status}</span></td>
+      `;
+      tableBody.appendChild(row);
+    });
+  } catch (err) {
+    tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">Could not load products. Make sure you are logged in as Admin.</td></tr>`;
+    console.warn("renderProducts error:", err);
   }
-
-  filtered.forEach(product => {
-    const stockClass = product.stock < 5 ? "stock-danger" : product.stock < 10 ? "stock-warning" : "stock-good";
-    const status     = product.status || "active";
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${product.id}</td>
-      <td>${product.name}</td>
-      <td>${product.brand}</td>
-      <td>${product.category}</td>
-      <td>${product.gender || "—"}</td>
-      <td>$${product.price}</td>
-      <td class="${stockClass}">${product.stock}</td>
-      <td>
-        <a href="#" class="action-link edit"   onclick="editProduct(${product.id})">Edit</a>
-        <a href="#" class="action-link delete" onclick="deleteProduct(${product.id})">Delete</a>
-      </td>
-      <td><span class="status-badge ${status}">${status}</span></td>
-    `;
-    tableBody.appendChild(row);
-  });
 }
 
 
@@ -167,37 +186,46 @@ async function handleSubmit(e) {
     baseNotes:   form.elements["baseNotes"]?.value   || "",
   };
 
-  if (editingId !== null) {
-    await api.put(`/admin/products/${editingId}`, productData);
-  } else {
-    await api.post('/admin/products', productData);
-  }
+  try {
+    if (editingId !== null) {
+      await api.put(`api/admin/products/${editingId}`, productData);
+    } else {
+      await api.post("api/admin/products", productData);
+    }
 
-  await renderProducts();
-  await updateDashboard();
-  closeModal();
+    await renderProducts();
+    await updateDashboard();
+    closeModal();
+  } catch (err) {
+    console.warn("handleSubmit error:", err);
+  }
 }
 
 
 // ── Edit ──────────────────────────────────────
 async function editProduct(id) {
-  const product = await api.get(`/admin/products/${id}`);
-  editingId     = id;
+  try {
+    // Fetch from the public products endpoint since admin GET single isn't separate
+    const product = await api.get(`api/products/${id}`);
+    editingId = id;
 
-  const form = document.getElementById("add-product-form");
-  form.elements["name"].value        = product.name;
-  form.elements["brand"].value       = product.brand;
-  form.elements["price"].value       = product.price;
-  form.elements["stock"].value       = product.stock;
-  form.elements["category"].value    = product.category;
-  form.elements["gender"].value      = product.gender      || "";
-  form.elements["status"].value      = product.status      || "active";
-  form.elements["image"].value       = product.image       || "";
-  form.elements["description"].value = product.description || "";
+    const form = document.getElementById("add-product-form");
+    form.elements["name"].value        = product.name;
+    form.elements["brand"].value       = product.brand;
+    form.elements["price"].value       = product.price;
+    form.elements["stock"].value       = product.stock;
+    form.elements["category"].value    = product.category;
+    form.elements["gender"].value      = product.gender      || "";
+    form.elements["status"].value      = product.status      || "active";
+    form.elements["image"].value       = product.image       || "";
+    form.elements["description"].value = product.description || "";
 
-  document.getElementById("modal-title").textContent = "Edit Product";
-  document.querySelector(".btn-submit").textContent  = "Update Product";
-  document.getElementById("addProductModal").classList.add("active");
+    document.getElementById("modal-title").textContent = "Edit Product";
+    document.querySelector(".btn-submit").textContent  = "Update Product";
+    document.getElementById("addProductModal").classList.add("active");
+  } catch (err) {
+    console.warn("editProduct error:", err);
+  }
 }
 
 
@@ -205,27 +233,35 @@ async function editProduct(id) {
 const deleteModal = document.getElementById("deleteConfirmModal");
 
 async function deleteProduct(id) {
-  const product = await api.get(`/admin/products/${id}`);
-  deleteId      = id;
+  try {
+    const product = await api.get(`api/products/${id}`);
+    deleteId = id;
 
-  document.getElementById("delete-product-id").textContent          = product.id;
-  document.getElementById("delete-product-name").textContent        = product.name;
-  document.getElementById("delete-product-brand").textContent       = product.brand;
-  document.getElementById("delete-product-category").textContent    = product.category;
-  document.getElementById("delete-product-stock").textContent       = product.stock;
-  document.getElementById("delete-product-price").textContent       = `$${product.price}`;
-  document.getElementById("delete-product-description").textContent = product.description || "—";
-  document.getElementById("delete-product-image").textContent       = product.image       || "No image";
-  document.getElementById("delete-product-status").textContent      = product.status      || "active";
+    document.getElementById("delete-product-id").textContent          = product.id;
+    document.getElementById("delete-product-name").textContent        = product.name;
+    document.getElementById("delete-product-brand").textContent       = product.brand;
+    document.getElementById("delete-product-category").textContent    = product.category;
+    document.getElementById("delete-product-stock").textContent       = product.stock;
+    document.getElementById("delete-product-price").textContent       = `$${product.price}`;
+    document.getElementById("delete-product-description").textContent = product.description || "—";
+    document.getElementById("delete-product-image").textContent       = product.image       || "No image";
+    document.getElementById("delete-product-status").textContent      = product.status      || "active";
 
-  deleteModal.classList.add("active");
+    deleteModal.classList.add("active");
+  } catch (err) {
+    console.warn("deleteProduct error:", err);
+  }
 }
 
 async function confirmDeletion() {
-  await api.delete(`/admin/products/${deleteId}`);
-  await renderProducts();
-  await updateDashboard();
-  deleteModal.classList.remove("active");
+  try {
+    await api.delete(`api/admin/products/${deleteId}`);
+    await renderProducts();
+    await updateDashboard();
+    deleteModal.classList.remove("active");
+  } catch (err) {
+    console.warn("confirmDeletion error:", err);
+  }
 }
 
 function cancelDeletion() {
@@ -236,47 +272,24 @@ deleteModal?.addEventListener("click", e => { if (e.target === deleteModal) canc
 
 
 // ─────────────────────────────────────────────
-//  ORDERS — kept as localStorage for now (Kristi's job)
+//  ORDERS
 // ─────────────────────────────────────────────
-function buildOrderMetrics() {
-  const orderCounts = {};
-  let totalOrders   = 0;
-  let totalRevenue  = 0;
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (!key?.startsWith("scente_order_")) continue;
-
-    try {
-      const order = JSON.parse(localStorage.getItem(key));
-      if (!order) continue;
-
-      totalOrders++;
-      totalRevenue += parseFloat(String(order.totalPaid || "").replace("$", "")) || 0;
-
-      const email = (order.customerDetails?.email || "").toLowerCase().trim();
-      if (email) orderCounts[email] = (orderCounts[email] || 0) + 1;
-    } catch {
-      console.warn("Could not parse order:", key);
-    }
-  }
-
-  return { totalOrders, totalRevenue, orderCounts };
-}
-
 async function renderOrders() {
   const tableBody = document.getElementById("orders-table-body");
-  tableBody.innerHTML = "";
+  tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">Loading…</td></tr>`;
 
   try {
-    const result = await api.get(`/admin/orders${orderSearchQuery ? '?search=' + encodeURIComponent(orderSearchQuery) : ''}`);
-    const orders = result.data || [];
+    const result = await api.get(
+      `api/admin/orders${orderSearchQuery ? "?search=" + encodeURIComponent(orderSearchQuery) : ""}`
+    );
+    const orders = result.data ?? [];
 
     if (orders.length === 0) {
       tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
       return;
     }
 
+    tableBody.innerHTML = "";
     orders.forEach(order => {
       const date   = new Date(order.date).toLocaleDateString("en-US");
       const status = order.status || "pending";
@@ -288,22 +301,25 @@ async function renderOrders() {
         <td>${date}</td>
         <td>$${Number(order.totalPaid).toFixed(2)}</td>
         <td><span class="status-badge ${status}">${status.toUpperCase()}</span></td>
-        <td><a href="#" class="action-link edit" onclick="viewOrder('${order.orderNumber}')">View</a></td>
+        <td><a href="#" class="action-link edit" onclick="viewOrder('${order.orderNumber}'); return false;">View</a></td>
       `;
       tableBody.appendChild(row);
     });
   } catch (err) {
-    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">Could not load orders</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">Could not load orders.</td></tr>`;
+    console.warn("renderOrders error:", err);
   }
 }
 
 async function viewOrder(orderNumber) {
   try {
-    const orders = await api.get(`/admin/orders?search=${encodeURIComponent(orderNumber)}`);
-    const order  = orders.data?.find(o => o.orderNumber === orderNumber);
+    const result = await api.get(
+      `api/admin/orders?search=${encodeURIComponent(orderNumber)}`
+    );
+    const order = (result.data ?? []).find(o => o.orderNumber === orderNumber);
     if (!order) return;
 
-    const full = await api.get(`/admin/orders/${order.id}`);
+    const full = await api.get(`api/admin/orders/${order.id}`);
     currentOrderKey = full.orderNumber;
 
     document.getElementById("order-id").textContent       = "#" + full.orderNumber;
@@ -338,7 +354,7 @@ async function viewOrder(orderNumber) {
 
 async function updateOrderStatus(orderId, newStatus) {
   try {
-    await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
+    await api.put(`api/admin/orders/${orderId}/status`, { status: newStatus });
     renderOrders();
   } catch (err) {
     console.warn("Could not update status:", err);
@@ -350,22 +366,26 @@ function closeOrderModal() {
 }
 
 
-
+// ─────────────────────────────────────────────
+//  USERS
+// ─────────────────────────────────────────────
 async function renderUsers() {
   const tableBody = document.getElementById("users-table-body");
-
-  tableBody.innerHTML = "";
+  tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">Loading…</td></tr>`;
 
   try {
-    const result = await api.get(`/admin/users${userSearchQuery ? '?search=' + encodeURIComponent(userSearchQuery) : ''}`);
-    const users  = result.data || [];
+    const result = await api.get(
+      `api/admin/users${userSearchQuery ? "?search=" + encodeURIComponent(userSearchQuery) : ""}`
+    );
+    const users = result.data ?? [];
 
     if (users.length === 0) {
       tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">No results found</td></tr>`;
       return;
     }
 
-    users.forEach((user, i) => {
+    tableBody.innerHTML = "";
+    users.forEach(user => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${user.id}</td>
@@ -377,6 +397,7 @@ async function renderUsers() {
       tableBody.appendChild(row);
     });
   } catch (err) {
-    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">Could not load users</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">Could not load users.</td></tr>`;
+    console.warn("renderUsers error:", err);
   }
 }

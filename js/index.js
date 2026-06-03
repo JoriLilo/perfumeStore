@@ -139,26 +139,34 @@ function addFallbackToCart(name, brand, price, image) {
 }
 
 // ── 6. Wishlist toggle ────────────────────────────────────
-function toggleWishlistBtn(btn, productId) {
-  const id = String(productId);
-  let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-  const icon = btn.querySelector('i');
-  const inList = wishlist.includes(id);
-
-  if (inList) {
-    wishlist = wishlist.filter(w => w !== id);
-    icon.className = 'bi bi-heart';
-    btn.classList.remove('wished');
-    if (typeof showToast === 'function') showToast('Removed from wishlist', 'info');
-  } else {
-    wishlist.push(id);
-    icon.className = 'bi bi-heart-fill';
-    btn.classList.add('wished');
-    if (typeof showToast === 'function') showToast('Added to wishlist', 'info');
-    saveWishlistProduct(id, btn);
+async function toggleWishlistBtn(btn, productId) {
+  const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+  if (!session?.loggedIn) {
+    window.location.href = '/pages/login.html';
+    return;
   }
 
-  localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  const id = Number(productId) || productId;
+  const icon = btn.querySelector('i');
+
+  try {
+    const wishlist = await api.get('api/wishlist');
+    const wished = wishlist.some(p => p.id === id);
+
+    if (wished) {
+      await api.delete(`api/wishlist/${id}`);
+      icon.className = 'bi bi-heart';
+      btn.classList.remove('wished');
+      showToast?.('Removed from wishlist', 'info');
+    } else {
+      await api.post(`api/wishlist/${id}`, {});
+      icon.className = 'bi bi-heart-fill';
+      btn.classList.add('wished');
+      showToast?.('Added to wishlist', 'success');
+    }
+  } catch (err) {
+    showToast?.(err.message || 'Could not update wishlist.', 'error');
+  }
 }
 
 function saveWishlistProduct(id, btn) {

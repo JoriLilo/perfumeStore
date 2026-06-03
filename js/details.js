@@ -156,33 +156,49 @@ function setupWishlistButton(product) {
   const btn = document.getElementById('btn-wishlist');
   if (!btn) return;
 
-  const productId = String(product.id);
+  const productId = product.id;
 
-  // Check if this product is already wishlisted
-  const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-  btn.textContent = wishlist.includes(productId) ? 'Remove from Wishlist' : 'Add to Wishlist';
+  // Check current wishlist state from API
+  async function refreshState() {
+    try {
+      const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+      if (!session?.token) {
+        btn.textContent = 'Add to Wishlist';
+        return;
+      }
+      const wishlist = await api.get('api/wishlist');
+      const wished = wishlist.some(p => p.id === productId);
+      btn.textContent = wished ? 'Remove from Wishlist' : 'Add to Wishlist';
+    } catch (_) {}
+  }
 
-  btn.addEventListener('click', () => {
-    let wl = JSON.parse(localStorage.getItem('wishlist') || '[]');
+  refreshState();
 
-    if (wl.includes(productId)) {
-      // Remove it
-      wl = wl.filter(id => id !== productId);
-      btn.textContent = 'Add to Wishlist';
-      showToast?.('Removed from wishlist', 'info');
-    } else {
-      // Add it
-      wl.push(productId);
-      btn.textContent = 'Remove from Wishlist';
-      showToast?.('Added to wishlist', 'success');
-
-      // Also save full product data so the wishlist page can display it
-      const savedProducts = JSON.parse(localStorage.getItem('wishlistProducts') || '{}');
-      savedProducts[productId] = product;
-      localStorage.setItem('wishlistProducts', JSON.stringify(savedProducts));
+  btn.addEventListener('click', async () => {
+    const session = JSON.parse(sessionStorage.getItem('session') || 'null');
+    if (!session?.loggedIn) {
+      window.location.href = '/pages/login.html';
+      return;
     }
 
-    localStorage.setItem('wishlist', JSON.stringify(wl));
+    try {
+      const wishlist = await api.get('api/wishlist');
+      const wished = wishlist.some(p => p.id === productId);
+
+      if (wished) {
+        await api.delete(`api/wishlist/${productId}`);
+        btn.textContent = 'Add to Wishlist';
+        showToast?.('Removed from wishlist', 'info');
+      } else {
+        await api.post(`api/wishlist/${productId}`, {});
+        btn.textContent = 'Remove from Wishlist';
+        showToast?.('Added to wishlist', 'success');
+      }
+    } catch (err) {
+      showToast?.(err.message || 'Could not update wishlist.', 'error');
+    }
+
+
   });
 }
 
